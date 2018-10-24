@@ -2,6 +2,7 @@
 
 source "${BASH_SOURCE%/*}/../modules/os/environment"
 source "${BASH_SOURCE%/*}/../modules/docker/docker"
+source "${BASH_SOURCE%/*}/../modules/network/connectivity"
 
 
 # Verify Client
