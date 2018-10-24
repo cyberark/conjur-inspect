@@ -1,0 +1,26 @@
+#!/bin/bash -e
+
+# Verify Client
+
+# - Environment Variables
+./modules/verify_variables
+
+ensure_environment_var("CONJUR_VERSION")
+
+# - Docker installed, Version, and Availability
+#     - Registry Configured (either be secure, or add to insecure registries)
+# - Conjur Appliance Image Exists and Version
+# - Registry Network Access
+ensure_network_access($(OPENSHIFT_MASTER_HOST))
+# - Openshift Client Installed and Version
+ensure_program("oc")
+# - Can connect to cluster
+
+
+# Verify Cluster
+# - Cluster/openshift version
+# - Infrastructure (Disk, Memory, CPU)
+# - Ports Open
+#     - 80 & 443 for Conjur API and UI
+#     - 22 for SSH
+#     - 8443 for Openshift UI
