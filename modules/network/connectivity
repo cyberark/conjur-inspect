@@ -1,7 +1,13 @@
 #!/bin/bash -e
 
-# Connectivity module
 is_url_reachable()
 {
-	
+
+}
+
+# $1-SERVER; $2-PORT
+ensure_port()
+{
+	#nc -z -w 5 $1 $2
+	nc -v -w 1 -G 1 $1 $2
 }
