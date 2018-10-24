@@ -3,18 +3,13 @@
 source ../../utils/PrintMessage.sh
 
 
-isOpenShiftInstalled=`docker --version | grep -c ^"Docker version"`
+isOpenShiftInstalled=`oc version | grep -c ^"oc"`
 if [ "$isOpenShiftInstalled" -eq 1 ];
 then 
-	dockerIsRunnung=`docker ps | grep -c "CONTAINER ID"`
-	if [ "$isOpenShiftInstalled" -eq 1 ];
-	then 
-		success_message "Docker is up and running"
-		dockerVersion=`docker --version | awk '/Docker version/ {print $1}'`
-		info_message "Docker version is" $dockerVersion
-	else
-		fail_message "Docker is not running"
-	fi
+	k8sVersion=`oc version | grep "kubernetes" | cut -d ' ' -f2`
+	info_message "Kubernetes version is $k8sVersion"
+	ocVersion=`oc version | grep "oc" | cut -d ' ' -f2`
+	info_message "OpenShift version is $ocVersion"
 else
-	fail_message "Docker is not installed"
+	fail_message "OpenShift is not installed"
 fi
