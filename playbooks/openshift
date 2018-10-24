@@ -1,10 +1,15 @@
 #!/bin/bash -e
 
-source "${BASH_SOURCE%/*}./modules/os/environment"
+source "${BASH_SOURCE%/*}/../modules/os/environment"
+source "${BASH_SOURCE%/*}/../modules/docker/docker"
+
 
 # Verify Client
 
 # - Client Environment Variables
+echo "----------------------------------"
+echo "Checking environment configuration"
+echo "----------------------------------"
 ensure_environment "OSHIFT_CLUSTER_ADMIN_USERNAME" "cadmin"
 ensure_environment "OSHIFT_CONJUR_ADMIN_USERNAME" "cadmin"
 ensure_environment "CONJUR_NAMESPACE_NAME" "conjur-cluster-5-1-2" # can be set to anything
@@ -19,6 +24,14 @@ ensure_environment "AUTHENTICATOR_ID" "conjur-authn"
 # - Docker installed, Version, and Availability
 #     - Registry Configured (either be secure, or add to insecure registries)
 # - Conjur Appliance Image Exists and Version
+echo
+echo "-----------------------------"
+echo "Checking docker configuration"
+echo "-----------------------------"
+docker_image_exists "haproxy:1.8"
+docker_image_exists "${CONJUR_APPLIANCE_IMAGE}"
+docker_image_exists "cyberark/conjur-cli:5"
+
 # - Registry Network Access
 
 #ensure_network_access($(OPENSHIFT_MASTER_HOST))
