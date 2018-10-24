@@ -5,20 +5,33 @@ script_logging_level="INFO"
 
 
 
+source "${BASH_SOURCE%/*}./modules/os/environment"
+
 # Verify Client
 
-# - Environment Variables
-./modules/verify_variables
-
-ensure_environment_var("CONJUR_VERSION")
+# - Client Environment Variables
+ensure_environment "OSHIFT_CLUSTER_ADMIN_USERNAME" "cadmin"
+ensure_environment "OSHIFT_CONJUR_ADMIN_USERNAME" "cadmin"
+ensure_environment "CONJUR_NAMESPACE_NAME" "conjur-cluster-5-1-2" # can be set to anything
+ensure_environment "CONJUR_APPLIANCE_IMAGE" "registry2.itci.conjur.net/conjur-appliance:5.1.2"
+ensure_environment "CONJUR_ACCOUNT" "conjur-account"
+ensure_environment "CONJUR_ADMIN_PASSWORD" "SuperSecret"
+ensure_environment "CONJUR_VERSION" "5"
+ensure_environment "DOCKER_REGISTRY_PATH" "openshift-39.itci.conjur.net"
+ensure_environment "PLATFORM" "openshift"
+ensure_environment "AUTHENTICATOR_ID" "conjur-authn"
 
 # - Docker installed, Version, and Availability
 #     - Registry Configured (either be secure, or add to insecure registries)
 # - Conjur Appliance Image Exists and Version
 # - Registry Network Access
-ensure_network_access($(OPENSHIFT_MASTER_HOST))
+
+#ensure_network_access($(OPENSHIFT_MASTER_HOST))
+
 # - Openshift Client Installed and Version
-ensure_program("oc")
+
+#ensure_program("oc")
+
 # - Can connect to cluster
 
 
