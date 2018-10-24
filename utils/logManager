@@ -1,0 +1,19 @@
+#!/bin/bash -e
+declare levels=([DEBUG]=0 [INFO]=1 [WARN]=2 [ERROR]=3 [FATAL]=4)
+
+# e.g: logThis "This will log" "WARN" and script_logging_level="WARN"
+
+logThis()
+{
+    local log_message=$1
+    local log_priority=$2
+
+    #check if level exists
+    [[ ${levels[$log_priority]} ]] || return 1
+
+    #check if level is enough
+    (( ${levels[$log_priority]} < ${levels[$script_logging_level]} )) && return 2
+
+    #log here
+    echo "${log_priority} : ${log_message}"
+}

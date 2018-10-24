@@ -1,4 +1,9 @@
 #!/bin/bash -e
+### Start configuration ###
+script_logging_level="INFO"
+### End configuration ###
+
+
 
 # Verify Client
 

@@ -1,7 +1,19 @@
 #!/bin/bash -e
+source "../../utils/logManager"
 
 # Connectivity module
+
+
+# Check given URL status is valid or not
 is_url_reachable()
 {
-	
+	variable_name=$1
+	script_logging_level="DEBUG"
+
+	if [ -z ${variable_name} ]; then 
+		logThis "You did not secifiy a URL" "ERROR"
+	else
+		logThis "Check URL $1 reachable" "DEBUG"
+		echo curl -s --head $1 | head -n 1 | grep "HTTP/1.[01] [23].."
+	fi
 }
