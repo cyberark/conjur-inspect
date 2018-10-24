@@ -1,12 +1,14 @@
 #!/bin/bash -e
-source ../../utils/PrintMessage.sh
+source "${BASH_SOURCE%/*}/../../utils/logManager"
 
 
-amountOfCpu=`sysctl hw.ncpu | grep "hw.ncpu:" | cut -d ' ' -f2`
-minCpu="4"
-if [ "$amountOfCpu" -gt "$minCpu" ];
-then 
-	success_message "Amount of CPUs is good $amountOfCpu"
-else
-	fail_message "CPU count is less than 4"
-fi
+function checkCpu() {
+	amountOfCpu=`sysctl hw.ncpu | grep "hw.ncpu:" | cut -d ' ' -f2`
+	minCpu="4"
+	if [ "$amountOfCpu" -gt "$minCpu" ];
+	then 
+		logThis "Amount of CPUs is good $amountOfCpu" "SUCCESS"
+	else
+		logThis "CPU count is less than 4" "ERROR"
+	fi
+}

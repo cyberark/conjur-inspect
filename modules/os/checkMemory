@@ -1,12 +1,13 @@
 #!/bin/bash -e
-source ../../utils/PrintMessage.sh
+source "${BASH_SOURCE%/*}/../../utils/logManager"
 
-
-amountOfMem=`sysctl hw.memsize | grep "hw.memsize:" | cut -d ' ' -f2`
-MinMem="4046583"
-if [ "$amountOfMem" -gt "$MinMem" ];
-then 
-	success_message "Memory amount is good $amountOfMem"
-else
-	fail_message "Memory amount less than 4GB"
-fi
+function checkMemory() {
+	amountOfMem=`sysctl hw.memsize | grep "hw.memsize:" | cut -d ' ' -f2`
+	MinMem="4046583"
+	if [ "$amountOfMem" -gt "$MinMem" ];
+	then 
+		logThis "Memory amount is good $amountOfMem" "SUCCESS"
+	else
+		logThis "Memory amount less than 4GB" "ERROR"
+	fi
+}

@@ -4,16 +4,24 @@ script_logging_level="INFO"
 ### End configuration ###
 
 
-
+source "${BASH_SOURCE%/*}/../modules/os/checkCpu"
+source "${BASH_SOURCE%/*}/../modules/os/checkMemory"
 source "${BASH_SOURCE%/*}/../modules/os/environment"
 source "${BASH_SOURCE%/*}/../modules/docker/docker"
 source "${BASH_SOURCE%/*}/../modules/network/connectivity"
 source "${BASH_SOURCE%/*}/../modules/openshift/checkDockerVersion"
 
+# Verify machine resources
+echo "--------------------------"
+echo "Checking machine resources"
+echo "--------------------------"
+checkMemory
+checkCpu
 
 # Verify Client
 
 # - Client Environment Variables
+echo
 echo "----------------------------------"
 echo "Checking environment configuration"
 echo "----------------------------------"
