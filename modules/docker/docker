@@ -12,6 +12,11 @@ docker_exists() {
 docker_image_exists() {
   image_name=$1
 
+  if [[ "$image_name" == "" ]]; then
+    printf "${RED}Failed - Cannot verify image exists. Image name missing.${NORMAL}\n"
+    return
+  fi
+
   image_hash=$(docker images -q ${image_name} 2> /dev/null)
 
   if [[ "$image_hash" != "" ]]; then

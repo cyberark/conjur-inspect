@@ -3,6 +3,7 @@
 source "${BASH_SOURCE%/*}/../modules/os/environment"
 source "${BASH_SOURCE%/*}/../modules/docker/docker"
 source "${BASH_SOURCE%/*}/../modules/network/connectivity"
+source "${BASH_SOURCE%/*}/../modules/openshift/checkDockerVersion.sh"
 
 
 # Verify Client
@@ -29,6 +30,7 @@ echo
 echo "-----------------------------"
 echo "Checking docker configuration"
 echo "-----------------------------"
+ensure_docker
 docker_image_exists "haproxy:1.8"
 docker_image_exists "${CONJUR_APPLIANCE_IMAGE}"
 docker_image_exists "cyberark/conjur-cli:5"

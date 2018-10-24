@@ -1,18 +1,19 @@
 #!/bin/bash
 
-source ../../utils/PrintMessage.sh
+source "${BASH_SOURCE%/*}/../../utils/PrintMessage.sh"
 
-
-isOpenShiftInstalled=`docker --version | grep -c ^"Docker version"`
-if [ "$isOpenShiftInstalled" -eq 1 ];
-then 
-	dockerIsRunnung=`docker ps | grep -c "CONTAINER ID"`
-	if [ "$isOpenShiftInstalled" -eq 1 ];
+ensure_docker() {
+	isDockerInstalled=`docker --version | grep -c ^"Docker version"`
+	if [ "$isDockerInstalled" -eq 1 ];
 	then 
-		success_message "Docker is up and running"
+		dockerIsRunning=`docker ps | grep -c "CONTAINER ID"`
+		if [ "$dockerIsRunning" -eq 1 ];
+		then 
+			success_message "Docker is up and running"
+		else
+			fail_message "Docker is not running"
+		fi
 	else
-		fail_message "Docker is not running"
+		fail_message "Docker is not installed"
 	fi
-else
-	fail_message "Docker is not installed"
-fi
+}
