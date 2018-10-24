@@ -1,6 +1,5 @@
 #!/bin/bash -e
-source "../../utils/logManager"
-
+source "${BASH_SOURCE%/*}/../../utils/logManager"
 # Connectivity module
 
 
@@ -17,3 +16,5 @@ is_url_reachable()
 		echo curl -s --head $1 | head -n 1 | grep "HTTP/1.[01] [23].."
 	fi
 }
+
+is_url_reachable "test"

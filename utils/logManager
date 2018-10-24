@@ -1,6 +1,7 @@
 #!/bin/bash -e
 declare levels=([DEBUG]=0 [INFO]=1 [WARN]=2 [ERROR]=3 [FATAL]=4)
 
+source "/../../utils/formatting"
 # e.g: logThis "This will log" "WARN" and script_logging_level="WARN"
 
 logThis()
@@ -15,5 +16,9 @@ logThis()
     (( ${levels[$log_priority]} < ${levels[$script_logging_level]} )) && return 2
 
     #log here
-    echo "${log_priority} : ${log_message}"
+	if ( ${levels[$script_logging_level]} > 1 ); then
+	   printf "${BOLD}${RED}${log_priority} : ${log_message}"
+	else
+	   printf "${log_priority} : ${log_message}"
+	fi  
 }

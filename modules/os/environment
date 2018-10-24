@@ -8,6 +8,7 @@
 # the resolution suggestion.
 
 source "${BASH_SOURCE%/*}/../../utils/formatting"
+source "${BASH_SOURCE%/*}/../../utils/logManager"
 
 ensure_environment() {
   variable_name=$1
