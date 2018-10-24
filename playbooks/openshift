@@ -9,8 +9,6 @@ source "${BASH_SOURCE%/*}/../modules/os/environment"
 source "${BASH_SOURCE%/*}/../modules/docker/docker"
 source "${BASH_SOURCE%/*}/../modules/network/connectivity"
 source "${BASH_SOURCE%/*}/../modules/openshift/checkDockerVersion.sh"
-source "${BASH_SOURCE%/*}/../modules/openshift/checkOpenShiftVersion.sh"
-
 
 
 # Verify Client
@@ -44,16 +42,19 @@ docker_image_exists "cyberark/conjur-cli:5"
 
 # - Registry Network Access
 
+#ensure_network_access($(OPENSHIFT_MASTER_HOST))
 
 # - Openshift Client Installed and Version
-echo
-echo "---------------------------------------"
-echo "Checking OpenShift client configuration"
-echo "---------------------------------------"
-ensure_oc
 
+#ensure_program("oc")
 
 # - Can connect to cluster
+
+
+# Verify Cluster
+# - Cluster/openshift version
+# - Infrastructure (Disk, Memory, CPU)
+# - Ports Open
 echo
 echo "-------------------------------------"
 echo "Checking cluster network connectivity"
@@ -61,13 +62,6 @@ echo "-------------------------------------"
 ensure_port $DOCKER_REGISTRY_PATH 80
 ensure_port $DOCKER_REGISTRY_PATH 443
 ensure_port $DOCKER_REGISTRY_PATH 22
-
-
-# Verify Cluster
-# - Cluster/openshift version
-# - Infrastructure (Disk, Memory, CPU)
-# - Ports Open
-
 #     - 80 & 443 for Conjur API and UI
 #     - 22 for SSH
 #     - 8443 for Openshift UI

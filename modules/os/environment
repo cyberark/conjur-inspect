@@ -15,12 +15,12 @@ ensure_environment() {
   default_value=${2:-"<value>"}
 
   if [ -z ${!variable_name+x} ]; then 
-    printf " ${RED}Failed - ${BOLD}${variable_name}${NORMAL} ${RED}environment variable is not present${NORMAL}. To configure this, run the command:\n";
-    echo " ---------------------------------------------";
-    printf " ${CYAN}export ${variable_name}=${default_value}${NORMAL}\n";
-    echo " ---------------------------------------------";
+    printf "${BOLD}${RED}${variable_name}${NORMAL} ${RED}environment variable is not present${NORMAL}. To configure this, run the command:\n";
+    echo "---------------------------------------------";
+    printf "${CYAN}export ${variable_name}=${default_value}${NORMAL}\n";
+    echo "---------------------------------------------";
 
   else 
-    printf " ${GREEN}Success${NORMAL} - ${BOLD}${variable_name}${NORMAL} environment variable exists and is set to ${BOLD}${GREEN}${!variable_name}${NC}${NORMAL}\n"; 
+    printf "${BOLD}${variable_name}${NORMAL} environment variable exists and is set to ${BOLD}${GREEN}${!variable_name}${NC}${NORMAL}\n"; 
   fi
 }
