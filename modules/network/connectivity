@@ -1,0 +1,7 @@
+#!/bin/bash -e
+
+# Connectivity module
+is_url_reachable()
+{
+	
+}
