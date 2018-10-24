@@ -1,0 +1,25 @@
+# Environments module
+#
+# The OS environment module checks for the existence of environment
+# variables. If a variable exists, it will report its value. If the
+# variable is undefined, then it will print the command to define it.
+#
+# A second parameter "default_value" will show the given value in
+# the resolution suggestion.
+
+source "${BASH_SOURCE%/*}/../../utils/formatting"
+
+ensure_environment() {
+  variable_name=$1
+  default_value=${2:-"<value>"}
+
+  if [ -z ${!variable_name+x} ]; then 
+    printf "${BOLD}${RED}${variable_name}${NORMAL} ${RED}environment variable is not present${NORMAL}. To configure this, run the command:\n";
+    echo "---------------------------------------------";
+    printf "${CYAN}export ${variable_name}=${default_value}${NORMAL}\n";
+    echo "---------------------------------------------";
+
+  else 
+    printf "${BOLD}${variable_name}${NORMAL} environment variable exists and is set to ${BOLD}${GREEN}${!variable_name}${NC}${NORMAL}\n"; 
+  fi
+}
