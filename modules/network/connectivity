@@ -1,9 +1,9 @@
 #!/bin/bash -e
 
-is_url_reachable()
-{
+# is_url_reachable()
+# {
 
-}
+# }
 
 # $1-SERVER; $2-PORT
 ensure_port()
