@@ -1,0 +1,27 @@
+# Docker module
+#
+# The Docker modules provides check for the docker CLI version
+# and image presence.
+
+source "${BASH_SOURCE%/*}/../../utils/formatting"
+
+docker_exists() {
+  docker version
+}
+
+docker_image_exists() {
+  image_name=$1
+
+  if [[ "$image_name" == "" ]]; then
+    printf "${RED}Failed - Cannot verify image exists. Image name missing.${NORMAL}\n"
+    return
+  fi
+
+  image_hash=$(docker images -q ${image_name} 2> /dev/null)
+
+  if [[ "$image_hash" != "" ]]; then
+    printf "${BOLD}${image_name}${NORMAL} exists with hash ${BOLD}${GREEN}${image_hash}${NORMAL}.\n"
+  else
+    printf "${BOLD}${RED}${image_name}${NORMAL} ${RED}does not exist${NORMAL}. Use ${CYAN}docker pull${NORMAL} or ${CYAN}docker load${NORMAL} to create it.\n"
+  fi
+}

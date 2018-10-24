@@ -1,4 +1,5 @@
 #!/bin/bash -e
+<<<<<<< HEAD
 source "${BASH_SOURCE%/*}/../../utils/logManager"
 # Connectivity module
 
@@ -18,3 +19,17 @@ is_url_reachable()
 }
 
 is_url_reachable "test"
+=======
+
+# is_url_reachable()
+# {
+
+# }
+
+# $1-SERVER; $2-PORT
+ensure_port()
+{
+	#nc -z -w 5 $1 $2
+	nc -v -w 1 -G 1 $1 $2
+}
+>>>>>>> 213dea04c3d13804efbdac8e75e8eaedbdf705c1
