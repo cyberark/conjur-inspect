@@ -1,15 +1,16 @@
 #!/bin/bash
 
-source ../../utils/PrintMessage.sh
+source "${BASH_SOURCE%/*}/../../utils/logManager"
 
 
 isOpenShiftInstalled=`oc version | grep -c ^"oc"`
-if [ "$isOpenShiftInstalled" -eq 1 ];
+if [ "$isOpenShiftInstalled" -eq 1 ]; 
 then 
+	logThis "openShift is running" "SUCCESS"
 	k8sVersion=`oc version | grep "kubernetes" | cut -d ' ' -f2`
-	info_message "Kubernetes version is $k8sVersion"
+	logThis "Kubernetes version is $k8sVersion" "INFO"
 	ocVersion=`oc version | grep "oc" | cut -d ' ' -f2`
-	info_message "OpenShift version is $ocVersion"
+	logThis "OpenShift version is $ocVersion" "INFO"
 else
-	fail_message "OpenShift is not installed"
+	logThis "OpenShift is not installed" "ERROR"
 fi

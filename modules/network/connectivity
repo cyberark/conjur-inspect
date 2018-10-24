@@ -1,10 +1,10 @@
 #!/bin/bash -e
-<<<<<<< HEAD
 source "${BASH_SOURCE%/*}/../../utils/logManager"
+
 # Connectivity module
 
-
 # Check given URL status is valid or not
+# $1 - URL
 is_url_reachable()
 {
 	variable_name=$1
@@ -18,18 +18,9 @@ is_url_reachable()
 	fi
 }
 
-is_url_reachable "test"
-=======
-
-# is_url_reachable()
-# {
-
-# }
-
-# $1-SERVER; $2-PORT
+# $1 - Server IP
+# $2 - Port
 ensure_port()
 {
-	#nc -z -w 5 $1 $2
 	nc -v -w 1 -G 1 $1 $2
 }
->>>>>>> 213dea04c3d13804efbdac8e75e8eaedbdf705c1

@@ -8,7 +8,7 @@ script_logging_level="INFO"
 source "${BASH_SOURCE%/*}/../modules/os/environment"
 source "${BASH_SOURCE%/*}/../modules/docker/docker"
 source "${BASH_SOURCE%/*}/../modules/network/connectivity"
-source "${BASH_SOURCE%/*}/../modules/openshift/checkDockerVersion.sh"
+source "${BASH_SOURCE%/*}/../modules/openshift/checkDockerVersion"
 
 
 # Verify Client
@@ -26,7 +26,7 @@ ensure_environment "CONJUR_ADMIN_PASSWORD" "SuperSecret"
 ensure_environment "CONJUR_VERSION" "5"
 ensure_environment "DOCKER_REGISTRY_PATH" "openshift-39.itci.conjur.net"
 ensure_environment "PLATFORM" "openshift"
-ensure_environment "AUTHENTICATOR_ID" "conjur-authn"
+ensure_environment "AUTHENTICATOR_ID" "conjur-authn" # should be set to unique string
 
 # - Docker installed, Version, and Availability
 #     - Registry Configured (either be secure, or add to insecure registries)

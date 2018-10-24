@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "${BASH_SOURCE%/*}/../../utils/PrintMessage.sh"
+source "${BASH_SOURCE%/*}/../../utils/logManager"
 
 ensure_docker() {
 	isDockerInstalled=`docker --version | grep -c ^"Docker version"`
@@ -9,11 +9,11 @@ ensure_docker() {
 		dockerIsRunning=`docker ps | grep -c "CONTAINER ID"`
 		if [ "$dockerIsRunning" -eq 1 ];
 		then 
-			success_message "Docker is up and running"
+			logThis "Docker is up and running" "SUCCESS"
 		else
-			fail_message "Docker is not running"
+			logThis "Docker is not running" "ERROR"
 		fi
 	else
-		fail_message "Docker is not installed"
+		logThis "Docker is not installed" "ERROR"
 	fi
 }
