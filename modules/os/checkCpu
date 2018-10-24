@@ -1,0 +1,12 @@
+#!/bin/bash -e
+source ../../utils/PrintMessage.sh
+
+
+amountOfCpu=`sysctl hw.ncpu | grep "hw.ncpu:" | cut -d ' ' -f2`
+minCpu="4"
+if [ "$amountOfCpu" -gt "$minCpu" ];
+then 
+	success_message "Amount of CPUs is good $amountOfCpu"
+else
+	fail_message "CPU count is less than 4"
+fi
