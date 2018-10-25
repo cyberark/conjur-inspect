@@ -8,6 +8,7 @@ Preflight check playbook for each CyberArk product that you can run before insta
 Key future features:
 - Postflight functionallity
 - Snapin integration to installers
+- Support autocorrect
 
 
 Follow our waffle: https://waffle.io/conjurinc/conjur-preflight
