@@ -11,4 +11,5 @@ Key future features:
 
 
 Follow our waffle: https://waffle.io/conjurinc/conjur-preflight
+
 Slack (private) group: https://conjurhq.slack.com/messages/GDMLFJ0TX
