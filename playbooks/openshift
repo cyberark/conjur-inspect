@@ -67,9 +67,9 @@ echo
 echo "-------------------------------------"
 echo "Checking cluster network connectivity"
 echo "-------------------------------------"
-ensure_port $DOCKER_REGISTRY_PATH 80
-ensure_port $DOCKER_REGISTRY_PATH 443
-ensure_port $DOCKER_REGISTRY_PATH 22
+ensure_port "$DOCKER_REGISTRY_PATH" 80
+ensure_port "$DOCKER_REGISTRY_PATH" 443
+ensure_port "$DOCKER_REGISTRY_PATH" 22
 #     - 80 & 443 for Conjur API and UI
 #     - 22 for SSH
 #     - 8443 for Openshift UI

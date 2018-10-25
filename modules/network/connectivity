@@ -25,6 +25,11 @@ ensure_port()
 	local result=$(nc -v -w 1 -G 1 $1 $2 2>&1)
 	local success=$(echo $result | grep 'succeeded')
 
+	if [[ -z $1 ]]; then 
+		logThis "You did not secifiy a host name or IP address" "ERROR"
+		return
+	fi
+
 	if [[ -z ${success} ]]; then 
 		logThis "Could not access '$1' on port $2" "ERROR"
 	else
