@@ -49,15 +49,12 @@ docker_image_exists "${CONJUR_APPLIANCE_IMAGE}"
 docker_image_exists "cyberark/conjur-cli:5"
 
 # - Registry Network Access
-
-#ensure_network_access($(OPENSHIFT_MASTER_HOST))
+# is_url_reachable "${DOCKER_REGISTRY_PATH}"
 
 # - Openshift Client Installed and Version
-
 #ensure_program("oc")
 
 # - Can connect to cluster
-
 
 # Verify Cluster
 # - Cluster/openshift version

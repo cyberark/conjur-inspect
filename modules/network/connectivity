@@ -1,23 +1,30 @@
 #!/bin/bash -e
-source "${BASH_SOURCE%/*}/../../utils/logManager"
-
 # Connectivity module
+#
+# The Connectivity modules provides check for network connectivity issues
+# focus on URL and ports
+
+source "${BASH_SOURCE%/*}/../../utils/logManager"
 
 # Check given URL status is valid or not
 # $1 - URL
 is_url_reachable()
 {
-	variable_name=$1
+	supplied_url=$1
 	script_logging_level="DEBUG"
-
-	if [ -z ${variable_name} ]; then 
+	if [ -z ${supplied_url} ]; then 
 		logThis "You did not secifiy a URL" "ERROR"
 	else
-		logThis "Check URL $1 reachable" "DEBUG"
-		echo curl -s --head $1 | head -n 1 | grep "HTTP/1.[01] [23].."
+		if curl --output /dev/null --silent --head --fail "${supplied_url}";
+		then
+			logThis "Supplied URL '$supplied_url' reachable" "SUCCESS"
+		else
+			logThis "Supplied URL '$supplied_url' is not reachable" "ERROR"
+		fi
 	fi
 }
 
+# Check given server and port are open for communication
 # $1 - Server IP
 # $2 - Port
 ensure_port()

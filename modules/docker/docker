@@ -22,6 +22,6 @@ docker_image_exists() {
   if [[ "$image_hash" != "" ]]; then
     logThis "${image_name} exists with hash ${image_hash}." "SUCCESS"
   else
-    logThis "${image_name} does not exist. Use ${CYAN}docker pull ${image_name} ${NORMAL} or ${CYAN}docker load -i [tar_path] ${NORMAL} to create it." "ERROR"
+    logThis "${image_name} does not exist.${NORMAL}  Use ${CYAN}docker pull ${image_name} ${NORMAL} or ${CYAN}docker load -i [tar_path] ${NORMAL} to create it." "ERROR"
   fi
 }
