@@ -11,6 +11,6 @@ Key future features:
 - Support autocorrect
 
 
-Follow our waffle: https://waffle.io/conjurinc/conjur-preflight
+Check out our open issues: https://github.com/conjurinc/conjur-preflight/issues
 
 Slack (private) group: https://conjurhq.slack.com/messages/GDMLFJ0TX
