@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   result archive. The name and location of this archived are managed with the
   new `--report-id` and `--raw-data-dir` command arguments.
   [conjurinc/conjur-preflight#26](https://github.com/conjurinc/conjur-preflight/pull/26)
+- Added container runtime checks to report on the available Docker and/or
+  Podman version and configuration.
+  [cyberark/conjur-inspect#15](https://github.com/cyberark/conjur-inspect/pull/15)
 
 ### Fixed
 - Previously, if the user running `conjur-preflight` has insufficient permission
