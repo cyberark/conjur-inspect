@@ -1,16 +1,50 @@
-# conjur-preflight
-You will never get hit with "something went wrong" error message again.
+# Conjur Preflight
 
-Preflight check playbook for each CyberArk product that you can run before installation to verify that customer environment is configured correctly to work with our products.
+Conjur Preflight is a CLI qualification tool for environments running Conjur
+Enterprise.
 
-![alt text](https://www.totalmerchantconcepts.com/images/stories/pre-flight-check.jpg)
+For the historic hackathon preflight project, see the report as the prior
+commit [here](https://github.com/conjurinc/conjur-preflight/tree/451c9378f7df89659c2e9d05da1ea0e2da3c5269).
 
-Key future features:
-- Postflight functionallity
-- Snapin integration to installers
-- Support autocorrect
+## Getting Started
 
+To run the Conjur Preflight tool, download the latest version for your system
+architecture from Releases to your target host machine. This is the machine
+or VM where the Conjur Enterprise container will run.
 
-Check out our open issues: https://github.com/conjurinc/conjur-preflight/issues
+Extract the tool, enable it to execute, and run it with:
+```sh-session
+$ tar -xvf conjur-preflight-1.0.0_amd64.tgz
+$ chmod +x conjur-preflight-1.0.0_amd65
+$ ./conjur-preflight-1.0.0_amd65
+...
+PASS / WARN / FAIL / ERROR
+```
 
-Slack (private) group: https://conjurhq.slack.com/messages/GDMLFJ0TX
+## Development
+
+### Running
+
+```
+make run
+```
+
+### Building
+
+```
+make build
+```
+
+### Running unit tests
+
+```
+make test
+```
+
+### Adding new checks
+
+==TODO==
+
+## Contributing
+
+For information on how to contribute to this project, see [CONTRIBUTING.md](./CONTRIBUTING.md).

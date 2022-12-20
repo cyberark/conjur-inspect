@@ -1,7 +1,0 @@
-CYAN=$(tput setaf 6)
-GREEN=$(tput setaf 2)
-RED=$(tput setaf 1)
-NC=$(tput setaf 6)
-
-BOLD=$(tput bold)
-NORMAL=$(tput sgr0)
