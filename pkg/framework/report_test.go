@@ -63,7 +63,7 @@ func TestReport(t *testing.T) {
 	assert.Equal(
 		t,
 		"\033[1m========================================\n"+
-			"Conjur Enteprise Preflight Qualification\n"+
+			"Conjur Enterprise Preflight Qualification\n"+
 			"Version: 0.1.0\n"+
 			"========================================\n\033[0m"+
 			"\033[1m\nTest section\n"+
