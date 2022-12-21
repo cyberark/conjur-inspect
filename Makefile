@@ -2,7 +2,8 @@ build:
 	go build -o ./dev/tmp/ ./cmd/conjur-preflight
 
 test:
-	go test -count=1 -coverprofile=c.out -v ./...
+	go test -count=1 -coverpkg=./... -coverprofile=c.out -v ./...
+	go tool cover -func c.out
 
 install:
 	go install ./cmd/conjur-preflight
