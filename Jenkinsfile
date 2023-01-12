@@ -111,6 +111,8 @@ pipeline {
           sh """go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --output "${billOfMaterialsDirectory}/go-mod-bom.json" """
 
           // Add goreleaser artifacts to release
+          sh "pwd"
+          sh "ls -la"
           sh """cp "dist/*.tar.gz" "${assetDirectory}" """
           sh """cp "dist/*.rpm" "${assetDirectory}" """
           sh """cp "dist/*.deb" "${assetDirectory}" """
