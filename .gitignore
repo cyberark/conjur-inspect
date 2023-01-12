@@ -15,3 +15,4 @@ conjur-preflight
 # Exclude binary entrypoint
 !cmd/conjur-preflight
 VERSION
+!pkg/version
