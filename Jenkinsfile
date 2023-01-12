@@ -113,9 +113,9 @@ pipeline {
           // Add goreleaser artifacts to release
           sh "pwd"
           sh "ls -la"
-          sh """cp "dist/*.tar.gz" "${assetDirectory}" """
-          sh """cp "dist/*.rpm" "${assetDirectory}" """
-          sh """cp "dist/*.deb" "${assetDirectory}" """
+          sh """cp dist/*.tar.gz "${assetDirectory}" """
+          sh """cp dist/*.rpm "${assetDirectory}" """
+          sh """cp dist/*.deb "${assetDirectory}" """
           sh """cp "dist/SHA256SUMS.txt" "${assetDirectory}" """
         }
       }
