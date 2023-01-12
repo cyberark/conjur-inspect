@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+set -e
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+VERSION=$(<"${REPO_ROOT}/VERSION")
+
+# Remove Jenkins build number from VERSION
+VERSION="${VERSION/-*/}"
+
+
+GORELEASER_IMAGE="goreleaser/goreleaser:latest"
+
+main() {
+  build_release
+}
+
+build_release() {
+  echo "Building release ${VERSION} (${BUILD_NUMBER})..."
+  docker run \
+    --rm \
+    --env VERSION="${VERSION}" \
+    --env BUILD_NUMBER="${BUILD_NUMBER}" \
+    --volume "${PWD}/:/conjur-preflight/" \
+    --workdir "/conjur-preflight" \
+    "${GORELEASER_IMAGE}" \
+      --skip-validate \
+      --snapshot \
+      --rm-dist
+  echo "Release built. Artifacts can be found in dist/"
+}
+
+main "$@"

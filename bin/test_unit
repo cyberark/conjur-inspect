@@ -24,6 +24,8 @@ function run_unit_tests() {
   docker run --rm -t \
              --volume "$PWD"/:/conjur-preflight/test/ \
              conjur-preflight-test-runner:latest \
+             -count=1 \
+             -coverpkg=./... \
              -coverprofile="./test/c.out" \
              ./... \
              | tee -a "$junit_output_file"

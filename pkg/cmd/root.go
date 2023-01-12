@@ -5,19 +5,21 @@ import (
 	"os"
 
 	"github.com/conjurinc/conjur-preflight/pkg/report"
+	"github.com/conjurinc/conjur-preflight/pkg/version"
 	"github.com/spf13/cobra"
 )
 
 func newRootCommand() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "conjur-preflight",
-		Short: "Qualification CLI for common Conjur Enteprise self-hosted issues",
+		Short: "Qualification CLI for common Conjur Enterprise self-hosted issues",
 		Run: func(cmd *cobra.Command, args []string) {
 			report := report.NewDefaultReport()
 			result := report.Run()
 
 			fmt.Println(result.ToText())
 		},
+		Version: version.FullVersionName,
 	}
 
 	// TODO: Add JSON output option

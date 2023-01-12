@@ -26,7 +26,7 @@ func TestDiskRun(t *testing.T) {
 		assert.Equal(t, framework.STATUS_INFO, result.Status)
 		assert.Regexp(
 			t,
-			regexp.MustCompile(`.+ Total, .+ Used \(\d+%\), .+ Free`),
+			regexp.MustCompile(`.+ Total, .+ Used \( ?\d+%\), .+ Free`),
 			result.Value,
 			"Disk space is in the expected format",
 		)
