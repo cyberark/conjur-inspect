@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+set -e
+
+main() {
+  build_release
+}
+
+build_release() {
+  echo "Building release..."
+  docker run \
+    --rm \
+    --volume "$PWD/:/conjur-preflight/" \
+    --workdir "/conjur-preflight" \
+    --env "GORELEASER_CURRENT_TAG=v$(<VERSION)" \
+    goreleaser/goreleaser \
+      release --skip-validate --rm-dist
+}
+
+main "$@"
