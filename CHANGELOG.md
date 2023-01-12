@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
-## [0.1.0] - 2022-12-09
+## [0.1.0] - 2022-12-12
+
+### Added
+- Initial reports for CPU, memory, disk space, and OS version.
+  [conjurinc/conjur-preflight#14](https://github.com/conjurinc/conjur-preflight/pull/14)
 
 [Unreleased]: https://github.com/cyberark/conjur/compare/v0.0.0...HEAD
