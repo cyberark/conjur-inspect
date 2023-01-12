@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/TwiN/go-color"
+	"github.com/conjurinc/conjur-preflight/pkg/version"
 )
 
 type Report struct {
@@ -60,11 +61,11 @@ func (result *ReportResult) ToText() string {
 	fmt.Fprintf(
 		buf,
 		color.InBold(
-			"%s\n%s\n%s\n%s\n",
+			"%s\n%s\n%s %s\n%s\n",
 		),
 		"========================================",
 		"Conjur Enterprise Preflight Qualification",
-		"Version: 0.1.0",
+		"Version:", version.FullVersionName,
 		"========================================",
 	)
 

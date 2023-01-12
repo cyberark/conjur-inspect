@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/conjurinc/conjur-preflight/pkg/report"
+	"github.com/conjurinc/conjur-preflight/pkg/version"
 	"github.com/spf13/cobra"
 )
 
@@ -18,6 +19,7 @@ func newRootCommand() *cobra.Command {
 
 			fmt.Println(result.ToText())
 		},
+		Version: version.FullVersionName,
 	}
 
 	// TODO: Add JSON output option
