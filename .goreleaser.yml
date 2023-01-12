@@ -7,6 +7,7 @@ before:
     - go mod tidy
     # you may remove this if you don't need go generate
     - go generate ./...
+
 builds:
   - main: ./cmd/conjur-preflight
     binary: conjur-preflight
@@ -28,6 +29,8 @@ builds:
     ldflags:
       - -w
       - -X "github.com/cyberark/conjur-preflight/pkg/version.Tag={{ .ShortCommit }}"
+      - -X "github.com/cyberark/conjur-preflight/pkg/version.Version={{ .Env.VERSION }}"
+      - -X "github.com/cyberark/conjur-preflight/pkg/version.BuildNumber={{ .Env.BUILD_NUMBER }}"
     hooks:
       post:
         # Copy the binary out into the <dist> path, and give the copy the name we
@@ -41,7 +44,7 @@ archives:
       - CHANGELOG.md
       - LICENSE
       - README.md
-    name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}_{{.Arch}}"
+    name_template: "{{.ProjectName}}_{{.Env.VERSION}}_{{.Os}}_{{.Arch}}"
     wrap_in_directory: true
 
 checksum:
@@ -50,7 +53,7 @@ checksum:
 nfpms:
   - bindir: /usr/bin
     description: CyberArk Conjur Enterprise Preflight Qualification Tool
-    file_name_template: "{{.ProjectName}}_{{.Version}}_{{.Arch}}"
+    file_name_template: "{{.ProjectName}}_{{.Env.VERSION}}_{{.Arch}}"
     formats:
       - deb
       - rpm
@@ -66,7 +69,12 @@ release:
   disable: true
   draft: true
   extra_files:
+    - glob: NOTICES.txt
     - glob: CHANGELOG.md
     - glob: LICENSE
-    - glob: README.md
     - glob: dist/binaries
+
+# Changelog management and publishing is handled by Jenkins-based release
+# automation
+changelog:
+  skip: true

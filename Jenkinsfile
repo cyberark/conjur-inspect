@@ -98,6 +98,9 @@ pipeline {
       }
 
       steps {
+        // Build release artifacts
+        sh "bin/build_release"
+
         release { billOfMaterialsDirectory, assetDirectory, toolsDirectory ->
           // Publish release artifacts to all the appropriate locations
           // Copy any artifacts to assetDirectory to attach them to the Github release
@@ -106,6 +109,12 @@ pipeline {
           sh """go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --main "cmd/conjur-preflight/" --output "${billOfMaterialsDirectory}/go-app-bom.json" """
           // Create Go module SBOM
           sh """go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --output "${billOfMaterialsDirectory}/go-mod-bom.json" """
+
+          // Add goreleaser artifacts to release
+          sh """cp dist/*.tar.gz "${assetDirectory}" """
+          sh """cp dist/*.rpm "${assetDirectory}" """
+          sh """cp dist/*.deb "${assetDirectory}" """
+          sh """cp "dist/SHA256SUMS.txt" "${assetDirectory}" """
         }
       }
     }
