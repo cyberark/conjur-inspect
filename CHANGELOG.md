@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
+## [0.3.0] - 2023-01-26
+
+### Added
+- `conjur-preflight` now has a follower port connectivity report where it checks
+  if the required ports that the follower needs to be deployed are open.
+  [conjurinc/conjur-preflight#18](https://github.com/conjurinc/conjur-preflight/pull/18)
+
 ## [0.2.0] - 2023-01-20
 
 ### Added

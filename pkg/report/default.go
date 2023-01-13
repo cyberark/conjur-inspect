@@ -42,6 +42,12 @@ func NewDefaultReport() framework.Report {
 					&checks.Host{},
 				},
 			},
+			{
+				Title: "Follower",
+				Checks: []framework.Check{
+					&checks.Follower{},
+				},
+			},
 			// TODO:
 			// - Podman version
 			// - Docker version
