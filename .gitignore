@@ -16,3 +16,5 @@ conjur-preflight
 !cmd/conjur-preflight
 VERSION
 !pkg/version
+
+.DS_Store
