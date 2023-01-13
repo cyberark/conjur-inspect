@@ -68,23 +68,27 @@ pipeline {
 
     stage('Run Unit Tests') {
       steps {
-        sh './bin/test_unit'
+        sh './bin/test-unit'
+      }
 
-        junit 'junit.xml'
+      post {
+        always {
+          junit 'junit.xml'
 
-        cobertura autoUpdateHealth: false,
-          autoUpdateStability: false,
-          coberturaReportFile: 'coverage.xml',
-          conditionalCoverageTargets: '70, 0, 0',
-          failUnhealthy: false,
-          failUnstable: false,
-          maxNumberOfBuilds: 0,
-          lineCoverageTargets: '70, 0, 0',
-          methodCoverageTargets: '70, 0, 0',
-          onlyStable: false,
-          sourceEncoding: 'ASCII',
-          zoomCoverageChart: false
-          ccCoverage("gocov", "--prefix github.com/conjurinc/conjur-preflight")
+          cobertura autoUpdateHealth: false,
+            autoUpdateStability: false,
+            coberturaReportFile: 'coverage.xml',
+            conditionalCoverageTargets: '70, 0, 0',
+            failUnhealthy: false,
+            failUnstable: false,
+            maxNumberOfBuilds: 0,
+            lineCoverageTargets: '70, 0, 0',
+            methodCoverageTargets: '70, 0, 0',
+            onlyStable: false,
+            sourceEncoding: 'ASCII',
+            zoomCoverageChart: false
+            ccCoverage("gocov", "--prefix github.com/conjurinc/conjur-preflight")
+        }
       }
     }
 
