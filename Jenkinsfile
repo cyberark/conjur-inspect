@@ -101,7 +101,7 @@ pipeline {
 
       steps {
         // Build release artifacts
-        sh "bin/build_release"
+        sh "bin/build-release"
 
         release { billOfMaterialsDirectory, assetDirectory, toolsDirectory ->
           // Publish release artifacts to all the appropriate locations

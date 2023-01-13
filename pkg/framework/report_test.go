@@ -64,7 +64,7 @@ func TestReport(t *testing.T) {
 		t,
 		"\033[1m========================================\n"+
 			"Conjur Enterprise Preflight Qualification\n"+
-			"Version: unset-unset-unset\n"+
+			"Version: unset-unset (Build unset)\n"+
 			"========================================\n\033[0m"+
 			"\033[1m\nTest section\n"+
 			"------------\n\033[0m"+

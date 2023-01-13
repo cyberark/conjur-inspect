@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
+## [0.2.0] - 2023-01-20
+
+### Fixed
+- Previously, the application version was not properly embedded in the final
+  executable. Now the application and the reports it produces reflect the
+  correct version number.
+  [conjurinc/conjur-preflight#19](https://github.com/conjurinc/conjur-preflight/pull/19)
+
 ## [0.1.0] - 2023-01-12
 
 ### Added
@@ -20,4 +28,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Reset repository from bash-based CLI to golang CLI.
 
-[Unreleased]: https://github.com/cyberark/conjur/compare/v0.0.0...HEAD
+[Unreleased]: https://github.com/conjurinc/conjur-preflight/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/conjurinc/conjur-preflight/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/conjurinc/conjur-preflight/compare/v0.0.0...v0.1.0

@@ -4,11 +4,18 @@ set -e
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
-VERSION=$(<"${REPO_ROOT}/VERSION")
+# If the VERSION file exist, use that, otherwise default to 0.0.0
+# for local development purposes.
+VERSION="0.0.0"
+if [[ -f "${REPO_ROOT}/VERSION" ]]; then
+  VERSION="$(<"${REPO_ROOT}/VERSION")"
+fi
 
 # Remove Jenkins build number from VERSION
 VERSION="${VERSION/-*/}"
 
+# BUILD_NUMBER is provided by Jenkins, we use '0' for local builds.
+BUILD_NUMBER="${BUILD_NUMBER:-0}"
 
 GORELEASER_IMAGE="goreleaser/goreleaser:latest"
 
@@ -17,7 +24,7 @@ main() {
 }
 
 build_release() {
-  echo "Building release ${VERSION} (${BUILD_NUMBER})..."
+  echo "Building release ${VERSION} (Build number ${BUILD_NUMBER})..."
   docker run \
     --rm \
     --env VERSION="${VERSION}" \
