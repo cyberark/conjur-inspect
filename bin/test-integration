@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -eu
+
+main() {
+  pushd "ci/integration" > /dev/null 2>&1
+
+  ./test
+
+  popd > /dev/null 2>&1
+}
+
+main "$@"

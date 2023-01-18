@@ -92,6 +92,28 @@ pipeline {
       }
     }
 
+    // This produces the conjur-preflight binaries for integration tests and
+    // pushing a release when this is a RELEASE build.
+    stage('Create Release Assets') {
+      steps {
+        sh "bin/build-release"
+      }
+    }
+
+    // Currently the integration tests don't pass or fail the build based on
+    // any conditions. Rather, that provide an easy way to inspect the result
+    // from a few various environments without running the tool manually.
+    stage('Run Integration Tests') {
+      steps {
+        sh 'bin/test-integration'
+      }
+      post {
+        always {
+           archiveArtifacts artifacts: 'ci/integration/results/**', allowEmptyArchive: true, fingerprint: false
+        }
+      }
+    }
+
     stage('Release') {
       when {
         expression {
@@ -100,9 +122,6 @@ pipeline {
       }
 
       steps {
-        // Build release artifacts
-        sh "bin/build-release"
-
         release { billOfMaterialsDirectory, assetDirectory, toolsDirectory ->
           // Publish release artifacts to all the appropriate locations
           // Copy any artifacts to assetDirectory to attach them to the Github release

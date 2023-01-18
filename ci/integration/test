@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+main() {
+  ensure_results_directory
+
+  build_full_dependency_images
+
+  run_tests
+}
+
+ensure_results_directory() {
+  mkdir -p ./results
+  rm -rf ./results/*
+}
+
+build_full_dependency_images() {
+  echo "Building full dependency test images..."
+  echo "...RHEL based..."
+  docker build \
+    --file=Dockerfile.rhel.all-dependencies \
+    --tag="redhat/ubi8:all-dependencies" \
+    .
+
+  echo "...Ubuntu based..."
+  docker build \
+    --file Dockerfile.ubuntu.all-dependencies \
+    --tag="ubuntu:all-dependencies" \
+    .
+
+  echo "...integration test images built."
+}
+
+run_tests() {
+  echo "Running integration tests..."
+
+  echo "Testing Ubuntu with no dependencies installed..."
+  run_integration_test \
+    "ubuntu-bare" \
+    "ubuntu"
+
+  echo "Testing Ubuntu with all dependencies installed..."
+  run_integration_test \
+    "ubuntu-all-dependencies" \
+    "ubuntu:all-dependencies" \
+    --privileged
+
+  echo "Testing RHEL with no dependencies installed..."
+  run_integration_test \
+    "rhel-bare-unprivileged" \
+    "redhat/ubi8"
+
+  echo "Testing rootless RHEL with all dependencies installed..."
+  run_integration_test \
+    "rhel-all-dependencies-unprivileged" \
+    "redhat/ubi8:all-dependencies"
+
+  echo "Testing privileged RHEL with all dependencies installed..."
+  run_integration_test \
+    "rhel-all-dependencies-root" \
+    "redhat/ubi8:all-dependencies" \
+    --privileged \
+    --user="root"
+
+  echo "Integration tests finished. Results can be found in directory: ci/integration/results/"
+}
+
+run_integration_test() {
+  local name="$1"; shift
+  local image="$1"; shift
+
+  docker run \
+    --rm \
+    --name="$name" \
+    --volume="${REPO_ROOT}:/conjur-preflight" \
+    "$@" \
+    "${image}" \
+      /conjur-preflight/dist/conjur-preflight_linux_amd64_v1/conjur-preflight \
+      | tee "./results/${name}.txt"
+}
+
+main "$@"
+
