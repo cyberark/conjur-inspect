@@ -54,7 +54,7 @@ pipeline {
     // Generates a VERSION file based on the current build number and latest version in CHANGELOG.md
     stage('Validate Changelog and set version') {
       steps {
-        sh './bin/parse_changelog'
+        sh './bin/parse-changelog'
         updateVersion("CHANGELOG.md", "${BUILD_NUMBER}")
       }
     }
