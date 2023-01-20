@@ -78,6 +78,12 @@ plugins:
       - "!./internal/"
       - "!./pkg/"
       - "!./test/"
+      # Exclude code using generics, since golint doesn't support that version
+      # of the language. Golint is deprecated and will not receive an update
+      # to support generics.
+      - "./pkg/framework/maybe_buffer.go"
+      - "./pkg/maybe/maybe.go"
+      - "./pkg/maybe/maybe_test.go"
   govet:
     enabled: true
 

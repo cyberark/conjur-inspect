@@ -1,7 +1,6 @@
 package framework
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 
@@ -55,60 +54,82 @@ func (report *Report) Run() ReportResult {
 	return result
 }
 
-func (result *ReportResult) ToText() string {
-	buf := new(bytes.Buffer)
+// ToText outputs the text for a given report result applying
+// the designated format strategy.
+func (result *ReportResult) ToText(format FormatStrategy) (string, error) {
+	// Write the string parts to a buffer with maybe monads for streamlined
+	// error handling.
+	maybeBuffer := NewMaybeBuffer()
 
-	fmt.Fprintf(
-		buf,
-		color.InBold(
-			"%s\n%s\n%s %s\n%s\n",
-		),
-		"========================================",
-		"Conjur Enterprise Preflight Qualification",
-		"Version:", version.FullVersionName,
-		"========================================",
-	)
+	// Write report header
+	formattedHeader := format.FormatBold(reportHeader())
+	maybeBuffer.WriteString(formattedHeader)
+	maybeBuffer.WriteString("\n\n")
 
-	for _, section := range result.Sections {
-		fmt.Fprintf(
-			buf,
-			color.InBold(
-				"\n%s\n%s\n",
-			),
-			section.Title,
-			strings.Repeat("-", len(section.Title)),
-		)
+	// Write each report section
+	for sectionIndex, section := range result.Sections {
+		formattedTitle := format.FormatBold(titleHeader(section.Title))
+		maybeBuffer.WriteString(formattedTitle)
+		maybeBuffer.WriteString("\n")
 
 		for _, result := range section.Results {
+			formattedResultLine := format.FormatColor(
+				resultLine(result),
+				statusColor(result.Status),
+			)
+			maybeBuffer.WriteString(formattedResultLine)
+			maybeBuffer.WriteString("\n")
+		}
 
-			if result.Message == "" {
-				fmt.Fprintf(
-					buf,
-					color.With(
-						statusColor(result.Status),
-						"%s - %s: %s\n",
-					),
-					result.Status,
-					result.Title,
-					result.Value,
-				)
-			} else {
-				fmt.Fprintf(
-					buf,
-					color.With(
-						statusColor(result.Status),
-						"%s - %s: %s (%s)\n",
-					),
-					result.Status,
-					result.Title,
-					result.Value,
-					result.Message,
-				)
-			}
+		// Extra space between sections (but not extra space at the end)
+		if sectionIndex < len(result.Sections)-1 {
+			maybeBuffer.WriteString("\n")
 		}
 	}
 
-	return buf.String()
+	return maybeBuffer.String()
+}
+
+func reportHeader() string {
+	return strings.Join(
+		[]string{
+			"========================================",
+			"Conjur Enterprise Preflight Qualification",
+			fmt.Sprintf("Version: %s", version.FullVersionName),
+			"========================================",
+		},
+		"\n",
+	)
+}
+
+func titleHeader(title string) string {
+	return strings.Join(
+		[]string{
+			title,
+			strings.Repeat("-", len(title)),
+		},
+		"\n",
+	)
+}
+
+func resultLine(result CheckResult) string {
+	switch {
+	case result.Message == "":
+		return fmt.Sprintf(
+			"%s - %s: %s",
+			result.Status,
+			result.Title,
+			result.Value,
+		)
+	default:
+		return fmt.Sprintf(
+			"%s - %s: %s (%s)",
+			result.Status,
+			result.Title,
+			result.Value,
+			result.Message,
+		)
+	}
 }
 
 func statusColor(status string) string {

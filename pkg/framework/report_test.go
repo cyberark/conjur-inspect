@@ -58,17 +58,20 @@ func TestReport(t *testing.T) {
 		testCheckResult,
 	)
 
-	textOutput := testReportResult.ToText()
+	textOutput, err := testReportResult.ToText(
+		&framework.RichTextFormatStrategy{},
+	)
+	assert.Nil(t, err)
 
 	assert.Equal(
 		t,
 		"\033[1m========================================\n"+
 			"Conjur Enterprise Preflight Qualification\n"+
 			"Version: unset-unset (Build unset)\n"+
-			"========================================\n\033[0m"+
-			"\033[1m\nTest section\n"+
-			"------------\n\033[0m"+
-			"Test Status - Test Check: Test Value (Test Message)\n\033[0m",
+			"========================================\033[0m\n\n"+
+			"\033[1mTest section\n"+
+			"------------\033[0m\n"+
+			"Test Status - Test Check: Test Value (Test Message)\033[0m\n",
 		textOutput,
 	)
 }
