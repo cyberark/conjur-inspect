@@ -5,17 +5,26 @@ import (
 	"os"
 
 	"github.com/conjurinc/conjur-preflight/pkg/framework"
+	"github.com/conjurinc/conjur-preflight/pkg/log"
 	"github.com/conjurinc/conjur-preflight/pkg/report"
 	"github.com/conjurinc/conjur-preflight/pkg/version"
 	"github.com/spf13/cobra"
 )
 
 func newRootCommand() *cobra.Command {
+	var debug bool
+
 	rootCmd := &cobra.Command{
 		Use:   "conjur-preflight",
 		Short: "Qualification CLI for common Conjur Enterprise self-hosted issues",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if debug {
+				log.EnableDebugMode()
+			}
+
 			report := report.NewDefaultReport()
+
+			log.Debug("Running report...")
 			result := report.Run()
 
 			// Determine whether we want to use rich text or plain text based on
@@ -23,8 +32,10 @@ func newRootCommand() *cobra.Command {
 			o, _ := os.Stdout.Stat()
 			var formatStrategy framework.FormatStrategy
 			if (o.Mode() & os.ModeCharDevice) == os.ModeCharDevice { //Terminal
+				log.Debug("Using rich text report formatting")
 				formatStrategy = &framework.RichTextFormatStrategy{}
 			} else { //It is not the terminal
+				log.Debug("Using plain text report formatting")
 				formatStrategy = &framework.PlainTextFormatStrategy{}
 			}
 
@@ -34,11 +45,19 @@ func newRootCommand() *cobra.Command {
 			}
 
 			fmt.Println(reportText)
-
+			log.Debug("Preflight finished!")
 			return nil
 		},
 		Version: version.FullVersionName,
 	}
+
+	rootCmd.PersistentFlags().BoolVarP(
+		&debug,
+		"debug",
+		"",
+		false,
+		"debug logging output",
+	)
 
 	// TODO: Add JSON output option
 	// TODO: Verbose logging control
@@ -56,6 +75,7 @@ func Execute() {
 	err := rootCmd.Execute()
 
 	if err != nil {
+		log.Error("ERROR: %s\n", err)
 		os.Exit(1)
 	}
 }
