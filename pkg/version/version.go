@@ -2,21 +2,21 @@ package version
 
 import "fmt"
 
+// These variables are given values at build time with ldflags parameters
+// to the go compiler. See the goreleaser config (/.goreleaser.yml) for more
+// detail.
+
 // Version field is a SemVer that should indicate the baked-in version
 // of the CLI
 var Version = "unset"
 
-// Tag field denotes the specific build type for the CLI. It may
-// be replaced by compile-time variables if needed to provide the git
-// commit information in the final binary. See `Static long version tags`
-// in the `Building` section of `CONTRIBUTING.md` for more information on
-// this variable.
-var Tag = "unset"
+// Commit is the commit hash of the source version used to build this binary
+var Commit = "unset"
 
 // BuildNumber field is the particular CI build number for this particular
 // version.
 var BuildNumber = "unset"
 
 // FullVersionName is the user-visible aggregation of version and tag
-// of this codebase
-var FullVersionName = fmt.Sprintf("%s-%s-%s", Version, BuildNumber, Tag)
+// of this codebase and the build number that produced it.
+var FullVersionName = fmt.Sprintf("%s-%s (Build %s)", Version, Commit, BuildNumber)

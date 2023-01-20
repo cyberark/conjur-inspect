@@ -28,9 +28,9 @@ builds:
     # of `CONTRIBUTING.md` for more information.
     ldflags:
       - -w
-      - -X "github.com/cyberark/conjur-preflight/pkg/version.Tag={{ .ShortCommit }}"
-      - -X "github.com/cyberark/conjur-preflight/pkg/version.Version={{ .Env.VERSION }}"
-      - -X "github.com/cyberark/conjur-preflight/pkg/version.BuildNumber={{ .Env.BUILD_NUMBER }}"
+      - -X github.com/conjurinc/conjur-preflight/pkg/version.Commit={{ .ShortCommit }}
+      - -X github.com/conjurinc/conjur-preflight/pkg/version.Version={{ .Env.VERSION }}
+      - -X github.com/conjurinc/conjur-preflight/pkg/version.BuildNumber={{ .Env.BUILD_NUMBER }}
     hooks:
       post:
         # Copy the binary out into the <dist> path, and give the copy the name we

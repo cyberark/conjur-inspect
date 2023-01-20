@@ -14,5 +14,14 @@ build_ca_certificate
 conjur-preflight
 # Exclude binary entrypoint
 !cmd/conjur-preflight
+
+# Don't include auto-generated version file
 VERSION
+
+# Do include the version golang module
 !pkg/version
+
+# Don't include the integration test results
+ci/integration/results/
+
+.DS_Store
