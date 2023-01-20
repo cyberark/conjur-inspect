@@ -2,10 +2,12 @@ package report
 
 import (
 	"github.com/conjurinc/conjur-preflight/pkg/checks"
+	"github.com/conjurinc/conjur-preflight/pkg/checks/disk"
 	"github.com/conjurinc/conjur-preflight/pkg/framework"
 )
 
-func NewDefaultReport() framework.Report {
+// NewDefaultReport returns a report containing the standard pre-flight checks
+func NewDefaultReport(debug bool) framework.Report {
 	return framework.Report{
 		Sections: []framework.ReportSection{
 			// TODO:
@@ -16,12 +18,12 @@ func NewDefaultReport() framework.Report {
 					&checks.Cpu{},
 				},
 			},
-			// TODO
-			// - IOPS
 			{
 				Title: "Disk",
 				Checks: []framework.Check{
-					&checks.DiskSpace{},
+					&disk.SpaceCheck{},
+					disk.NewIopsCheck(debug),
+					disk.NewLatencyCheck(debug),
 				},
 			},
 			{

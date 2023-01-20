@@ -23,7 +23,7 @@ func newRootCommand() *cobra.Command {
 				log.EnableDebugMode()
 			}
 
-			report := report.NewDefaultReport()
+			report := report.NewDefaultReport(debug)
 
 			log.Debug("Running report...")
 			result := report.Run()

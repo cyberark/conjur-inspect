@@ -1,4 +1,4 @@
-package checks
+package disk
 
 import (
 	"fmt"
@@ -8,10 +8,13 @@ import (
 	"github.com/shirou/gopsutil/v3/disk"
 )
 
-type DiskSpace struct {
+// SpaceCheck reports on the available partitions and devices on the current
+// machine, as well as their available disk space.
+type SpaceCheck struct {
 }
 
-func (diskSpace *DiskSpace) Run() <-chan []framework.CheckResult {
+// Run executes the disk checks and returns their results
+func (*SpaceCheck) Run() <-chan []framework.CheckResult {
 	future := make(chan []framework.CheckResult)
 
 	go func() {
