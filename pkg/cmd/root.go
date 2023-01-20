@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/conjurinc/conjur-preflight/pkg/framework"
@@ -44,7 +45,7 @@ func newRootCommand() *cobra.Command {
 				return err
 			}
 
-			fmt.Println(reportText)
+			fmt.Fprintln(cmd.OutOrStdout(), reportText)
 			log.Debug("Preflight finished!")
 			return nil
 		},
@@ -68,9 +69,9 @@ func newRootCommand() *cobra.Command {
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	rootCmd.SetOut(os.Stdout)
-	rootCmd.SetErr(os.Stderr)
+func Execute(stdout, stderr io.Writer) {
+	rootCmd.SetOut(stdout)
+	rootCmd.SetErr(stderr)
 
 	err := rootCmd.Execute()
 
