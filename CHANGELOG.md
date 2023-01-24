@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   correct version number.
   [conjurinc/conjur-preflight#19](https://github.com/conjurinc/conjur-preflight/pull/19)
 
+### Security
+- Added replace statements to go.mod to prune dependencies with known vulnerabilities from 
+  the dependency tree. 
+  [conjurinc/conjur-preflight#21](https://github.com/conjurinc/conjur-preflight/pull/21)
+
 ## [0.1.0] - 2023-01-12
 
 ### Added
