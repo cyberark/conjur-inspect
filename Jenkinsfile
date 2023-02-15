@@ -98,6 +98,13 @@ pipeline {
       steps {
         sh "bin/build-release"
       }
+      post {
+        always {
+           archiveArtifacts artifacts: 'dist/*.tar.gz', allowEmptyArchive: true, fingerprint: false
+           archiveArtifacts artifacts: 'dist/*.rpm', allowEmptyArchive: true, fingerprint: false
+           archiveArtifacts artifacts: 'dist/*.deb', allowEmptyArchive: true, fingerprint: false
+        }
+      }
     }
 
     // Currently the integration tests don't pass or fail the build based on
