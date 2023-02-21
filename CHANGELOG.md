@@ -22,6 +22,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `conjur-preflight` now detects whether it is writing standard output to a
   terminal or to a file/pipe and formats with rich or plain text accordingly.
   [conjurinc/conjur-preflight#19](https://github.com/conjurinc/conjur-preflight/pull/19)
+- A new CLI flag `--debug` causes `conjur-preflight` to log more verbose
+  information about the execution of the application and its checks.
+  [conjurinc/conjur-preflight#19](https://github.com/conjurinc/conjur-preflight/pull/19)
+- `conjur-preflight` now includes disk related checks for read, write, and sync
+  latency, as well as read and write operations per second (IOPs). These require
+  `fio` and `libaio` to be present as a prerequesite for these checks.
+  [conjurinc/conjur-preflight#19](https://github.com/conjurinc/conjur-preflight/pull/19)
 
 ### Fixed
 - Previously, the application version was not properly embedded in the final

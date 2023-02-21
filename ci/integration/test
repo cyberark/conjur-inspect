@@ -80,6 +80,7 @@ run_integration_test() {
     "$@" \
     "${image}" \
       /conjur-preflight/dist/conjur-preflight_linux_amd64_v1/conjur-preflight \
+        --debug \
       | tee "./results/${name}.txt"
 }
 
