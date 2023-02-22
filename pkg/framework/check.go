@@ -22,8 +22,8 @@ type Check interface {
 }
 
 type CheckResult struct {
-	Title   string
-	Value   string
-	Status  string
-	Message string
+	Title   string `json:"title"`
+	Value   string `json:"value"`
+	Status  string `json:"status"`
+	Message string `json:"message"`
 }

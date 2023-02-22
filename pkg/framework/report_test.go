@@ -75,3 +75,59 @@ func TestReport(t *testing.T) {
 		textOutput,
 	)
 }
+
+func TestJSONReport(t *testing.T) {
+	testReport := framework.Report{
+		Sections: []framework.ReportSection{
+			{
+				Title: "Test section",
+				Checks: []framework.Check{
+					&TestCheck{},
+				},
+			},
+		},
+	}
+
+	testReportResult := testReport.Run()
+
+	assert.NotEmpty(t, testReportResult.Sections)
+
+	testSection := testReportResult.Sections[0]
+	assert.Equal(t, "Test section", testSection.Title)
+	assert.NotEmpty(t, testSection.Results)
+
+	testCheckResult := testSection.Results[0]
+	assert.Equal(
+		t,
+		framework.CheckResult{
+			Title:   "Test Check",
+			Status:  "Test Status",
+			Value:   "Test Value",
+			Message: "Test Message",
+		},
+		testCheckResult,
+	)
+
+	textOutput, err := testReportResult.ToJSON()
+	assert.Nil(t, err)
+
+	assert.JSONEq(t,
+		`{
+            "version": "",
+            "sections": [
+            {
+                "title": "Test section",
+                "results": [
+                {
+                    "title": "Test Check",
+                    "value": "Test Value",
+                    "status": "Test Status",
+                    "message": "Test Message"
+                }
+               ]
+              }
+             ]
+            }`,
+		textOutput,
+	)
+}

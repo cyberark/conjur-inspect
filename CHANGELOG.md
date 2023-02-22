@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `conjur-preflight` now has a follower port connectivity report where it checks
   if the required ports that the follower needs to be deployed are open.
   [conjurinc/conjur-preflight#18](https://github.com/conjurinc/conjur-preflight/pull/18)
+- `conjur-preflight` now has a cli option flag that can be used to output
+  JSON formatted reports
+  [conjurinc/conjur-preflight#18](https://github.com/conjurinc/conjur-preflight/pull/23)
 
 ## [0.2.0] - 2023-01-20
 
@@ -37,8 +40,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [conjurinc/conjur-preflight#19](https://github.com/conjurinc/conjur-preflight/pull/19)
 
 ### Security
-- Added replace statements to go.mod to prune dependencies with known vulnerabilities from 
-  the dependency tree. 
+- Added replace statements to go.mod to prune dependencies with known vulnerabilities from
+  the dependency tree.
   [conjurinc/conjur-preflight#21](https://github.com/conjurinc/conjur-preflight/pull/21)
   [conjuring/conjur-preflight#22](https://github.com/conjurinc/conjur-preflight/pull/22)
 
