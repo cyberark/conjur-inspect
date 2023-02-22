@@ -1,6 +1,7 @@
 package framework
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -8,25 +9,30 @@ import (
 	"github.com/conjurinc/conjur-preflight/pkg/version"
 )
 
+// Report contains an array of all sections and their reports
 type Report struct {
-	Sections []ReportSection
+	Sections []ReportSection `json:"sections"`
 }
 
+// ReportSection is the catagory of check
 type ReportSection struct {
-	Title  string
-	Checks []Check
+	Title  string  `json:"title"`
+	Checks []Check `json:"checks"`
 }
 
+// ReportResult contains each sections check result
 type ReportResult struct {
-	Version  string
-	Sections []ResultSection
+	Version  string          `json:"version"`
+	Sections []ResultSection `json:"sections"`
 }
 
+// ResultSection is the individual check and its result
 type ResultSection struct {
-	Title   string
-	Results []CheckResult
+	Title   string        `json:"title"`
+	Results []CheckResult `json:"results"`
 }
 
+// Run starts each check and returns a report of the results
 func (report *Report) Run() ReportResult {
 
 	result := ReportResult{
@@ -52,6 +58,17 @@ func (report *Report) Run() ReportResult {
 	}
 
 	return result
+}
+
+// ToJSON outputs a JSON formated report.
+func (result *ReportResult) ToJSON() (string, error) {
+	//Generate the JSON representation of the report
+	out, err := json.MarshalIndent(result, "", " ")
+	if err != nil {
+		return "", err
+	}
+
+	return string(out), err
 }
 
 // ToText outputs the text for a given report result applying

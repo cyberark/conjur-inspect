@@ -12,6 +12,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func init() {
+	// Create json flag for the conjur-preflight command to output a report.
+	// Usage: conjur-preflight --json or -j
+	rootCmd.PersistentFlags().BoolP("json", "j", false, "Output report in JSON")
+}
+
 func newRootCommand() *cobra.Command {
 	var debug bool
 
@@ -27,6 +33,18 @@ func newRootCommand() *cobra.Command {
 
 			log.Debug("Running report...")
 			result := report.Run()
+
+			// Check if the json flag is set and output the JSON formatted output
+			jsonFlagValue, _ := cmd.Flags().GetBool("json")
+			if jsonFlagValue {
+				jsonReport, err := result.ToJSON()
+				if err != nil {
+					return err
+				}
+
+				fmt.Println(string(jsonReport))
+				return nil
+			}
 
 			// Determine whether we want to use rich text or plain text based on
 			// whether we're outputting directly to a terminal or not
@@ -82,3 +100,4 @@ func Execute(stdout, stderr io.Writer) {
 }
 
 var rootCmd = newRootCommand()
+var jsonFlag bool
