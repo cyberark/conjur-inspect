@@ -1,4 +1,4 @@
-package framework
+package report
 
 import (
 	"encoding/json"
@@ -6,62 +6,25 @@ import (
 	"strings"
 
 	"github.com/TwiN/go-color"
+	"github.com/conjurinc/conjur-preflight/pkg/framework"
+	"github.com/conjurinc/conjur-preflight/pkg/maybe"
 	"github.com/conjurinc/conjur-preflight/pkg/version"
 )
 
-// Report contains an array of all sections and their reports
-type Report struct {
-	Sections []ReportSection `json:"sections"`
-}
-
-// ReportSection is the catagory of check
-type ReportSection struct {
-	Title  string  `json:"title"`
-	Checks []Check `json:"checks"`
-}
-
-// ReportResult contains each sections check result
-type ReportResult struct {
+// Result contains each sections check result
+type Result struct {
 	Version  string          `json:"version"`
 	Sections []ResultSection `json:"sections"`
 }
 
 // ResultSection is the individual check and its result
 type ResultSection struct {
-	Title   string        `json:"title"`
-	Results []CheckResult `json:"results"`
-}
-
-// Run starts each check and returns a report of the results
-func (report *Report) Run() ReportResult {
-
-	result := ReportResult{
-		Sections: make([]ResultSection, len(report.Sections)),
-	}
-
-	for i, section := range report.Sections {
-
-		sectionResults := []CheckResult{}
-
-		for _, check := range section.Checks {
-			// Start check, this happens asynchronously
-			checkResults := <-check.Run()
-
-			// Add the results to the report section
-			sectionResults = append(sectionResults, checkResults...)
-		}
-
-		result.Sections[i] = ResultSection{
-			Title:   section.Title,
-			Results: sectionResults,
-		}
-	}
-
-	return result
+	Title   string                  `json:"title"`
+	Results []framework.CheckResult `json:"results"`
 }
 
 // ToJSON outputs a JSON formated report.
-func (result *ReportResult) ToJSON() (string, error) {
+func (result *Result) ToJSON() (string, error) {
 	//Generate the JSON representation of the report
 	out, err := json.MarshalIndent(result, "", " ")
 	if err != nil {
@@ -73,10 +36,10 @@ func (result *ReportResult) ToJSON() (string, error) {
 
 // ToText outputs the text for a given report result applying
 // the designated format strategy.
-func (result *ReportResult) ToText(format FormatStrategy) (string, error) {
+func (result *Result) ToText(format framework.FormatStrategy) (string, error) {
 	// Write the string parts to a buffer with maybe monads for streamlined
 	// error handling.
-	maybeBuffer := NewMaybeBuffer()
+	maybeBuffer := maybe.NewBuffer()
 
 	// Write report header
 	formattedHeader := format.FormatBold(reportHeader())
@@ -129,7 +92,7 @@ func titleHeader(title string) string {
 	)
 }
 
-func resultLine(result CheckResult) string {
+func resultLine(result framework.CheckResult) string {
 	switch {
 	case result.Message == "":
 		return fmt.Sprintf(
@@ -151,13 +114,13 @@ func resultLine(result CheckResult) string {
 
 func statusColor(status string) string {
 	switch status {
-	case STATUS_ERROR:
+	case framework.STATUS_ERROR:
 		return color.Red
-	case STATUS_FAIL:
+	case framework.STATUS_FAIL:
 		return color.Red
-	case STATUS_WARN:
+	case framework.STATUS_WARN:
 		return color.Yellow
-	case STATUS_PASS:
+	case framework.STATUS_PASS:
 		return color.Green
 	}
 

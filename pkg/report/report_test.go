@@ -1,9 +1,10 @@
-package framework_test
+package report_test
 
 import (
 	"testing"
 
 	"github.com/conjurinc/conjur-preflight/pkg/framework"
+	"github.com/conjurinc/conjur-preflight/pkg/report"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,8 +28,8 @@ func (*TestCheck) Run() <-chan []framework.CheckResult {
 }
 
 func TestReport(t *testing.T) {
-	testReport := framework.Report{
-		Sections: []framework.ReportSection{
+	testReport := report.Report{
+		Sections: []report.Section{
 			{
 				Title: "Test section",
 				Checks: []framework.Check{
@@ -77,8 +78,8 @@ func TestReport(t *testing.T) {
 }
 
 func TestJSONReport(t *testing.T) {
-	testReport := framework.Report{
-		Sections: []framework.ReportSection{
+	testReport := report.Report{
+		Sections: []report.Section{
 			{
 				Title: "Test section",
 				Checks: []framework.Check{
