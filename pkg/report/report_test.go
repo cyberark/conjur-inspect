@@ -13,6 +13,10 @@ import (
 
 type TestCheck struct{}
 
+func (*TestCheck) Describe() string {
+	return "Test"
+}
+
 func (*TestCheck) Run() <-chan []framework.CheckResult {
 	channel := make(chan []framework.CheckResult)
 

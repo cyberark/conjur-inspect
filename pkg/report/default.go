@@ -7,8 +7,8 @@ import (
 )
 
 // NewDefaultReport returns a report containing the standard pre-flight checks
-func NewDefaultReport(debug bool) Report {
-	return Report{
+func NewDefaultReport(debug bool) *Report {
+	return &Report{
 		Sections: []Section{
 			// TODO:
 			// - Recent load

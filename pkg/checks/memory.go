@@ -11,6 +11,11 @@ import (
 type Memory struct {
 }
 
+// Describe provides a textual description of what this check gathers info on
+func (*Memory) Describe() string {
+	return "memory"
+}
+
 func (memory *Memory) Run() <-chan []framework.CheckResult {
 	future := make(chan []framework.CheckResult)
 

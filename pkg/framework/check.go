@@ -18,6 +18,7 @@ const STATUS_ERROR = "ERROR"
 // Check represent a single operation (API call, external program execution,
 // etc.) that returns one or more result.
 type Check interface {
+	Describe() string
 	Run() <-chan []CheckResult
 }
 

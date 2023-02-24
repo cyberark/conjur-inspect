@@ -10,6 +10,11 @@ import (
 type Cpu struct {
 }
 
+// Describe provides a textual description of what this check gathers info on
+func (*Cpu) Describe() string {
+	return "CPU"
+}
+
 func (cpu *Cpu) Run() <-chan []framework.CheckResult {
 	future := make(chan []framework.CheckResult)
 

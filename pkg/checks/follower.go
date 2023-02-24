@@ -12,6 +12,11 @@ import (
 type Follower struct {
 }
 
+// Describe provides a textual description of what this check gathers info on
+func (*Follower) Describe() string {
+	return "follower"
+}
+
 // LeaderPort is the port that the follower listens on
 type LeaderPort struct {
 	PortName string

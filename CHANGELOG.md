@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `conjur-preflight` now has a cli option flag that can be used to output
   JSON formatted reports
   [conjurinc/conjur-preflight#18](https://github.com/conjurinc/conjur-preflight/pull/23)
+- Added a progress indicator for the running checks.
+  [conjurinc/conjur-preflight#24](https://github.com/conjurinc/conjur-preflight/pull/24)
 
 ## [0.2.0] - 2023-01-20
 
