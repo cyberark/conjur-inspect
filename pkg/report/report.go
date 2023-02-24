@@ -2,6 +2,7 @@ package report
 
 import (
 	"github.com/conjurinc/conjur-preflight/pkg/framework"
+	"github.com/conjurinc/conjur-preflight/pkg/version"
 )
 
 // Report contains an array of all sections and their reports
@@ -13,6 +14,7 @@ type Report struct {
 func (report *Report) Run() Result {
 
 	result := Result{
+		Version:  version.FullVersionName,
 		Sections: make([]ResultSection, len(report.Sections)),
 	}
 

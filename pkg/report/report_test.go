@@ -1,8 +1,11 @@
 package report_test
 
 import (
+	"io"
+	"strings"
 	"testing"
 
+	"github.com/conjurinc/conjur-preflight/pkg/formatting"
 	"github.com/conjurinc/conjur-preflight/pkg/framework"
 	"github.com/conjurinc/conjur-preflight/pkg/report"
 	"github.com/stretchr/testify/assert"
@@ -59,8 +62,15 @@ func TestReport(t *testing.T) {
 		testCheckResult,
 	)
 
-	textOutput, err := testReportResult.ToText(
-		&framework.RichTextFormatStrategy{},
+	builder := strings.Builder{}
+
+	textWriter := formatting.Text{
+		FormatStrategy: &formatting.RichANSIFormatStrategy{},
+	}
+
+	err := textWriter.Write(
+		io.Writer(&builder),
+		&testReportResult,
 	)
 	assert.Nil(t, err)
 
@@ -73,7 +83,7 @@ func TestReport(t *testing.T) {
 			"\033[1mTest section\n"+
 			"------------\033[0m\n"+
 			"Test Status - Test Check: Test Value (Test Message)\033[0m\n",
-		textOutput,
+		builder.String(),
 	)
 }
 
@@ -109,12 +119,20 @@ func TestJSONReport(t *testing.T) {
 		testCheckResult,
 	)
 
-	textOutput, err := testReportResult.ToJSON()
+	builder := strings.Builder{}
+
+	jsonWriter := formatting.JSON{}
+
+	err := jsonWriter.Write(
+		io.Writer(&builder),
+		&testReportResult,
+	)
+
 	assert.Nil(t, err)
 
 	assert.JSONEq(t,
 		`{
-            "version": "",
+            "version": "unset-unset (Build unset)",
             "sections": [
             {
                 "title": "Test section",
@@ -129,6 +147,6 @@ func TestJSONReport(t *testing.T) {
               }
              ]
             }`,
-		textOutput,
+		builder.String(),
 	)
 }
