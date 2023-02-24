@@ -99,4 +99,15 @@ func TestBind(t *testing.T) {
 
 	// It should return the default value for the Maybe type
 	assert.Equal(t, "", resultMaybe.Value())
+
+	// When the starting maybe is failed
+	startingMaybe = maybe.NewFailure[string](errors.New("initial error"))
+
+	resultMaybe = maybe.Bind(
+		startingMaybe,
+		func(in string) (string, error) {
+			return "", nil
+		},
+	)
+	assert.Error(t, resultMaybe.Error(), "initial error")
 }
