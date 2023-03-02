@@ -13,6 +13,60 @@ From here your pull request will be reviewed and once you've responded to all
 feedback it will be merged into the project. Congratulations, you're a
 contributor!
 
+## Running development version locally
+
+To run a development version of Conjur Inspect, start the development
+environment with:
+
+```sh-session
+$ cd dev
+$ ./start
+...
+[root@a0a4483ca6c9 conjur-preflight]#
+```
+
+This starts a development container and begins a terminal within. Then run
+the CLI from source with the command:
+
+```sh
+make run
+```
+
+### Building the Conjur Inspect CLI
+
+To build the CLI and its release artifacts, run the command:
+
+```sh
+bin/build-release
+```
+
+When this command finishes, the CLI binary and installers are available under
+the 'dist/` directory.
+
+### Running unit tests
+
+Run the Conjur Inspect unit tests with the command:
+
+```sh
+bin/test-unit
+```
+
+Alternatively, within the `dev/` containerized development environment, the unit
+tests may be run with the command:
+
+```sh
+make test
+```
+
+### Running integration tests
+
+To run a set of integration tests that exercise `conjur-inspect` in a couple of
+representative environments, use the command:
+
+```sh
+bin/test-integration
+```
+
 ## Releasing
 
 To create a new release, follow the instructions in our general release
