@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added a progress indicator for the running checks.
   [conjurinc/conjur-preflight#24](https://github.com/conjurinc/conjur-preflight/pull/24)
 
+### Fixed
+- Previously, if the user running `conjur-preflight` has insufficient permission
+  to access a partition mountpoint, then the check would result in a segfault.
+  Now, this logs a warning and skips the mountpoint in the report.
+  [conjurinc/conjur-preflight#28](https://github.com/conjurinc/conjur-preflight/pull/28)
+
 ## [0.2.0] - 2023-01-20
 
 ### Added
