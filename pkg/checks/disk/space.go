@@ -12,6 +12,15 @@ import (
 // SpaceCheck reports on the available partitions and devices on the current
 // machine, as well as their available disk space.
 type SpaceCheck struct {
+	partitionsFunc func(all bool) ([]disk.PartitionStat, error)
+	usageFunc      func(path string) (*disk.UsageStat, error)
+}
+
+func NewSpaceCheck() *SpaceCheck {
+	return &SpaceCheck{
+		partitionsFunc: disk.Partitions,
+		usageFunc:      disk.Usage,
+	}
 }
 
 // Describe provides a textual description of what this check gathers info on
@@ -24,7 +33,7 @@ func (spaceCheck *SpaceCheck) Run() <-chan []framework.CheckResult {
 	future := make(chan []framework.CheckResult)
 
 	go func() {
-		partitions, err := disk.Partitions(true)
+		partitions, err := spaceCheck.partitionsFunc(true)
 		// If we can't list the partitions, we exit early with the failure message
 		if err != nil {
 			log.Debug("Unable to list disk partitions: %s", err)
@@ -42,7 +51,7 @@ func (spaceCheck *SpaceCheck) Run() <-chan []framework.CheckResult {
 		results := []framework.CheckResult{}
 
 		for _, partition := range partitions {
-			usage, err := disk.Usage(partition.Mountpoint)
+			usage, err := spaceCheck.usageFunc(partition.Mountpoint)
 			if err != nil {
 				log.Debug(
 					"Unable to collect disk usage for '%s': %s",
