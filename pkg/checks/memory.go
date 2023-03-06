@@ -4,24 +4,40 @@ import (
 	"fmt"
 
 	"github.com/conjurinc/conjur-preflight/pkg/framework"
+	"github.com/conjurinc/conjur-preflight/pkg/log"
 	"github.com/dustin/go-humanize"
 	"github.com/shirou/gopsutil/v3/mem"
 )
 
-type Memory struct {
-}
+var getVirtualMemory func() (*mem.VirtualMemoryStat, error) = mem.VirtualMemory
+
+// Memory collects inspection information on the host machine's memory
+// availability and usage
+type Memory struct{}
 
 // Describe provides a textual description of what this check gathers info on
 func (*Memory) Describe() string {
 	return "memory"
 }
 
+// Run executes the Memory inspection checks
 func (memory *Memory) Run() <-chan []framework.CheckResult {
 	future := make(chan []framework.CheckResult)
 
 	go func() {
+		v, err := getVirtualMemory()
+		if err != nil {
+			log.Debug("Unable to inspect memory: %s", err)
+			future <- []framework.CheckResult{
+				{
+					Title:  "Error",
+					Status: framework.STATUS_ERROR,
+					Value:  fmt.Sprintf("%s", err),
+				},
+			}
 
-		v, _ := mem.VirtualMemory()
+			return
+		}
 
 		future <- []framework.CheckResult{
 			{

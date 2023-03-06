@@ -5,23 +5,40 @@ import (
 	"time"
 
 	"github.com/conjurinc/conjur-preflight/pkg/framework"
+	"github.com/conjurinc/conjur-preflight/pkg/log"
 	"github.com/hako/durafmt"
 	"github.com/shirou/gopsutil/v3/host"
 )
 
-type Host struct {
-}
+var getHostInfo func() (*host.InfoStat, error) = host.Info
 
-// Describe provides a textual description of what this check gathers info on
+// Host collects inspection information on the host machine's metadata, such
+// as the operating system
+type Host struct{}
+
+// Describe provides a textual description of what this check gathers
 func (*Host) Describe() string {
 	return "operating system"
 }
 
-func (*Host) Run() <-chan []framework.CheckResult {
+// Run executes the Host inspection checks
+func (host *Host) Run() <-chan []framework.CheckResult {
 	future := make(chan []framework.CheckResult)
 
 	go func() {
-		hostInfo, _ := host.Info()
+		hostInfo, err := getHostInfo()
+		if err != nil {
+			log.Debug("Unable to inspect host info: %s", err)
+			future <- []framework.CheckResult{
+				{
+					Title:  "Error",
+					Status: framework.STATUS_ERROR,
+					Value:  fmt.Sprintf("%s", err),
+				},
+			}
+
+			return
+		}
 
 		future <- []framework.CheckResult{
 			hostnameResult(hostInfo),

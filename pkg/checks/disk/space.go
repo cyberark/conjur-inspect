@@ -9,19 +9,14 @@ import (
 	"github.com/shirou/gopsutil/v3/disk"
 )
 
+// Aliasing our external dependencies like this allows to swap them out for
+// testing
+var getPartitions func(all bool) ([]disk.PartitionStat, error) = disk.Partitions
+var getUsage func(path string) (*disk.UsageStat, error) = disk.Usage
+
 // SpaceCheck reports on the available partitions and devices on the current
 // machine, as well as their available disk space.
-type SpaceCheck struct {
-	partitionsFunc func(all bool) ([]disk.PartitionStat, error)
-	usageFunc      func(path string) (*disk.UsageStat, error)
-}
-
-func NewSpaceCheck() *SpaceCheck {
-	return &SpaceCheck{
-		partitionsFunc: disk.Partitions,
-		usageFunc:      disk.Usage,
-	}
-}
+type SpaceCheck struct{}
 
 // Describe provides a textual description of what this check gathers info on
 func (*SpaceCheck) Describe() string {
@@ -33,7 +28,7 @@ func (spaceCheck *SpaceCheck) Run() <-chan []framework.CheckResult {
 	future := make(chan []framework.CheckResult)
 
 	go func() {
-		partitions, err := spaceCheck.partitionsFunc(true)
+		partitions, err := getPartitions(true)
 		// If we can't list the partitions, we exit early with the failure message
 		if err != nil {
 			log.Debug("Unable to list disk partitions: %s", err)
@@ -51,7 +46,7 @@ func (spaceCheck *SpaceCheck) Run() <-chan []framework.CheckResult {
 		results := []framework.CheckResult{}
 
 		for _, partition := range partitions {
-			usage, err := spaceCheck.usageFunc(partition.Mountpoint)
+			usage, err := getUsage(partition.Mountpoint)
 			if err != nil {
 				log.Debug(
 					"Unable to collect disk usage for '%s': %s",

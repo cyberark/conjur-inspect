@@ -1,15 +1,14 @@
-package checks_test
+package checks
 
 import (
 	"testing"
 
-	"github.com/conjurinc/conjur-preflight/pkg/checks"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestFollowerRun(t *testing.T) {
 	t.Setenv("MASTER_HOSTNAME", "http://example.com")
-	testCheck := &checks.Follower{}
+	testCheck := &Follower{}
 	resultChan := testCheck.Run()
 	results := <-resultChan
 

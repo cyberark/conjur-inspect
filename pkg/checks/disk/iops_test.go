@@ -94,6 +94,32 @@ func TestIopsWithNoJobs(t *testing.T) {
 	assert.Equal(t, "No job results returned by 'fio'", results[0].Message)
 }
 
+func TestIopsWithWorkingDirectoryError(t *testing.T) {
+	// Double the working directory function to simulate it failing with an error
+	originalWorkingDirectoryFunc := getWorkingDirectory
+	getWorkingDirectory = failedWorkingDir
+	defer func() {
+		getWorkingDirectory = originalWorkingDirectoryFunc
+	}()
+
+	testCheck := &IopsCheck{
+		debug:     true,
+		fioNewJob: newSuccessfulIopsFioJob,
+	}
+	resultChan := testCheck.Run()
+	results := <-resultChan
+
+	assert.Equal(
+		t,
+		2,
+		len(results),
+		"There are read and write IOPs results present",
+	)
+
+	assertReadIopsResult(t, results[0], framework.STATUS_INFO)
+	assertWriteIopsResult(t, results[1], framework.STATUS_INFO)
+}
+
 func assertReadIopsResult(
 	t *testing.T,
 	result framework.CheckResult,

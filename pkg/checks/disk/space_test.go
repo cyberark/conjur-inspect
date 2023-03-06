@@ -11,7 +11,7 @@ import (
 )
 
 func TestSpaceCheck(t *testing.T) {
-	testCheck := NewSpaceCheck()
+	testCheck := &SpaceCheck{}
 	resultChan := testCheck.Run()
 	results := <-resultChan
 
@@ -35,10 +35,14 @@ func TestSpaceCheck(t *testing.T) {
 }
 
 func TestPartitionListError(t *testing.T) {
-	testCheck := &SpaceCheck{
-		partitionsFunc: failedPartitionsFunc,
-		usageFunc:      disk.Usage,
-	}
+	// Double the usage function to simulate an error
+	originalPartitionsFunc := getPartitions
+	getPartitions = failedPartitionsFunc
+	defer func() {
+		getPartitions = originalPartitionsFunc
+	}()
+
+	testCheck := &SpaceCheck{}
 	resultChan := testCheck.Run()
 	results := <-resultChan
 
@@ -50,10 +54,14 @@ func TestPartitionListError(t *testing.T) {
 }
 
 func TestDiskUsageError(t *testing.T) {
-	testCheck := &SpaceCheck{
-		partitionsFunc: disk.Partitions,
-		usageFunc:      failedUsageFunc,
-	}
+	// Double the usage function to simulate an error
+	originalUsageFunc := getUsage
+	getUsage = failedUsageFunc
+	defer func() {
+		getUsage = originalUsageFunc
+	}()
+
+	testCheck := &SpaceCheck{}
 	resultChan := testCheck.Run()
 	results := <-resultChan
 

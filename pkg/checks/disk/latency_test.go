@@ -3,6 +3,7 @@
 package disk
 
 import (
+	"errors"
 	"regexp"
 	"testing"
 
@@ -69,6 +70,27 @@ func TestLatencyWithNoJobs(t *testing.T) {
 	assert.Equal(t, framework.STATUS_ERROR, results[0].Status)
 	assert.Equal(t, "N/A", results[0].Value)
 	assert.Equal(t, "No job results returned by 'fio'", results[0].Message)
+}
+
+func TestLatencyWithWorkingDirectoryError(t *testing.T) {
+	// Double the working directory function to simulate it failing with an error
+	originalWorkingDirectoryFunc := getWorkingDirectory
+	getWorkingDirectory = failedWorkingDir
+	defer func() {
+		getWorkingDirectory = originalWorkingDirectoryFunc
+	}()
+
+	testCheck := &LatencyCheck{
+		fioNewJob: newSuccessfulLatencyFioJob,
+	}
+	resultChan := testCheck.Run()
+	results := <-resultChan
+
+	assert.Equal(t, 3, len(results), "There are disk latency results present")
+
+	assertReadLatencyResult(t, results[0], framework.STATUS_INFO)
+	assertWriteLatencyResult(t, results[1], framework.STATUS_INFO)
+	assertSyncLatencyResult(t, results[2], framework.STATUS_INFO)
 }
 
 func assertReadLatencyResult(
@@ -186,4 +208,8 @@ func newPoorLatencyPerformanceFioJob(
 			},
 		},
 	}
+}
+
+func failedWorkingDir() (string, error) {
+	return "", errors.New("working directory error")
 }

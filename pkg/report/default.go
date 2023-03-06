@@ -21,7 +21,7 @@ func NewDefaultReport(debug bool) *Report {
 			{
 				Title: "Disk",
 				Checks: []framework.Check{
-					disk.NewSpaceCheck(),
+					&disk.SpaceCheck{},
 					disk.NewIopsCheck(debug),
 					disk.NewLatencyCheck(debug),
 				},
