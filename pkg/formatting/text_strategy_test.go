@@ -1,35 +1,36 @@
-package framework_test
+package formatting_test
 
 import (
 	"testing"
 
 	"github.com/TwiN/go-color"
-	"github.com/conjurinc/conjur-preflight/pkg/framework"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/conjurinc/conjur-preflight/pkg/formatting"
 )
 
 func TestRichTextFormatStrategy(t *testing.T) {
 
-	richText := framework.RichTextFormatStrategy{}
+	richText := formatting.RichANSIFormatStrategy{}
 
 	inputText := "test"
 
-	boldText := richText.FormatBold(inputText)
+	boldText := richText.Bold(inputText)
 	assert.Equal(t, "\x1b[1mtest\x1b[0m", boldText)
 
-	colorText := richText.FormatColor(inputText, color.Red)
+	colorText := richText.Color(inputText, color.Red)
 	assert.Equal(t, "\x1b[31mtest\x1b[0m", colorText)
 }
 
 func TestPlainTextFormatStrategy(t *testing.T) {
 
-	plainText := framework.PlainTextFormatStrategy{}
+	plainText := formatting.PlainFormatStrategy{}
 
 	inputText := "test"
 
-	boldText := plainText.FormatBold(inputText)
+	boldText := plainText.Bold(inputText)
 	assert.Equal(t, inputText, boldText)
 
-	colorText := plainText.FormatColor(inputText, color.Red)
+	colorText := plainText.Color(inputText, color.Red)
 	assert.Equal(t, inputText, colorText)
 }

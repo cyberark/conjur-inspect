@@ -13,6 +13,11 @@ import (
 type SpaceCheck struct {
 }
 
+// Describe provides a textual description of what this check gathers info on
+func (*SpaceCheck) Describe() string {
+	return "disk capacity"
+}
+
 // Run executes the disk checks and returns their results
 func (*SpaceCheck) Run() <-chan []framework.CheckResult {
 	future := make(chan []framework.CheckResult)

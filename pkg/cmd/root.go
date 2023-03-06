@@ -1,11 +1,10 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"os"
 
-	"github.com/conjurinc/conjur-preflight/pkg/framework"
+	"github.com/conjurinc/conjur-preflight/pkg/formatting"
 	"github.com/conjurinc/conjur-preflight/pkg/log"
 	"github.com/conjurinc/conjur-preflight/pkg/report"
 	"github.com/conjurinc/conjur-preflight/pkg/version"
@@ -13,13 +12,12 @@ import (
 )
 
 func init() {
-	// Create json flag for the conjur-preflight command to output a report.
-	// Usage: conjur-preflight --json or -j
-	rootCmd.PersistentFlags().BoolP("json", "j", false, "Output report in JSON")
+
 }
 
 func newRootCommand() *cobra.Command {
 	var debug bool
+	var jsonOutput bool
 
 	rootCmd := &cobra.Command{
 		Use:   "conjur-preflight",
@@ -34,36 +32,30 @@ func newRootCommand() *cobra.Command {
 			log.Debug("Running report...")
 			result := report.Run()
 
-			// Check if the json flag is set and output the JSON formatted output
-			jsonFlagValue, _ := cmd.Flags().GetBool("json")
-			if jsonFlagValue {
-				jsonReport, err := result.ToJSON()
-				if err != nil {
-					return err
-				}
-
-				fmt.Println(string(jsonReport))
-				return nil
-			}
-
-			// Determine whether we want to use rich text or plain text based on
-			// whether we're outputting directly to a terminal or not
-			o, _ := os.Stdout.Stat()
-			var formatStrategy framework.FormatStrategy
-			if (o.Mode() & os.ModeCharDevice) == os.ModeCharDevice { //Terminal
+			// Determine which output format we'll use
+			var writer formatting.Writer
+			switch {
+			case jsonOutput:
+				log.Debug("Using JSON report formatting")
+				writer = &formatting.JSON{}
+			case isTerminal(cmd.OutOrStdout()):
 				log.Debug("Using rich text report formatting")
-				formatStrategy = &framework.RichTextFormatStrategy{}
-			} else { //It is not the terminal
+				writer = &formatting.Text{
+					FormatStrategy: &formatting.RichANSIFormatStrategy{},
+				}
+			default:
 				log.Debug("Using plain text report formatting")
-				formatStrategy = &framework.PlainTextFormatStrategy{}
+				writer = &formatting.Text{
+					FormatStrategy: &formatting.PlainFormatStrategy{},
+				}
 			}
 
-			reportText, err := result.ToText(formatStrategy)
+			// Write the report result
+			err := writer.Write(cmd.OutOrStdout(), &result)
 			if err != nil {
 				return err
 			}
 
-			fmt.Fprintln(cmd.OutOrStdout(), reportText)
 			log.Debug("Preflight finished!")
 			return nil
 		},
@@ -78,8 +70,16 @@ func newRootCommand() *cobra.Command {
 		"debug logging output",
 	)
 
-	// TODO: Add JSON output option
-	// TODO: Verbose logging control
+	// Create json flag for the conjur-preflight command to output a report.
+	// Usage: conjur-preflight --json or -j
+	rootCmd.PersistentFlags().BoolVarP(
+		&jsonOutput,
+		"json",
+		"j",
+		false,
+		"Output report in JSON",
+	)
+
 	// TODO: Ability to adjust requirement criteria (PASS, WARN, FAIL checks)
 
 	return rootCmd
@@ -99,5 +99,22 @@ func Execute(stdout, stderr io.Writer) {
 	}
 }
 
+func isTerminal(writer io.Writer) bool {
+	// Test if the writer is for a file. If not, we know it isn't a terminal
+	file, ok := writer.(*os.File)
+	if !ok {
+		return false
+	}
+
+	o, err := file.Stat()
+
+	// If there's an error stat-ing the file, then assume it's not a terminal
+	if err != nil {
+		return false
+	}
+
+	// Check to see whether this is a device or a regular file
+	return (o.Mode() & os.ModeCharDevice) == os.ModeCharDevice
+}
+
 var rootCmd = newRootCommand()
-var jsonFlag bool

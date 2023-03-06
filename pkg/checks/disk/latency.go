@@ -30,6 +30,11 @@ func NewLatencyCheck(debug bool) *LatencyCheck {
 	}
 }
 
+// Describe provides a textual description of what this check gathers info on
+func (*LatencyCheck) Describe() string {
+	return "disk latency"
+}
+
 // Run executes the LatencyCheck by running `fio` and processing its output
 func (latencyCheck *LatencyCheck) Run() <-chan []framework.CheckResult {
 	future := make(chan []framework.CheckResult)

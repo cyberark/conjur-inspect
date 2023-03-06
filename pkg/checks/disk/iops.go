@@ -33,6 +33,11 @@ func NewIopsCheck(debug bool) *IopsCheck {
 	}
 }
 
+// Describe provides a textual description of what this check gathers info on
+func (*IopsCheck) Describe() string {
+	return "disk IOPs"
+}
+
 // Run executes the IopsCheck by running `fio` and processing its output
 func (iopsCheck *IopsCheck) Run() <-chan []framework.CheckResult {
 	future := make(chan []framework.CheckResult)

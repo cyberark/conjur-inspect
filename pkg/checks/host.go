@@ -12,6 +12,11 @@ import (
 type Host struct {
 }
 
+// Describe provides a textual description of what this check gathers info on
+func (*Host) Describe() string {
+	return "operating system"
+}
+
 func (*Host) Run() <-chan []framework.CheckResult {
 	future := make(chan []framework.CheckResult)
 
