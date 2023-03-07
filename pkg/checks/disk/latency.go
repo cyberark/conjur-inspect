@@ -2,10 +2,10 @@ package disk
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/conjurinc/conjur-preflight/pkg/checks/disk/fio"
 	"github.com/conjurinc/conjur-preflight/pkg/framework"
+	"github.com/conjurinc/conjur-preflight/pkg/log"
 )
 
 // LatencyCheck is a pre-flight check to report the read, write, and sync
@@ -90,7 +90,11 @@ func fioReadLatencyResult(jobResult *fio.JobResult) framework.CheckResult {
 		status = framework.STATUS_WARN
 	}
 
-	path, _ := os.Getwd()
+	path, err := getWorkingDirectory()
+	if err != nil {
+		log.Debug("Unable to get working directory: %s", err)
+		path = "working directory"
+	}
 
 	return framework.CheckResult{
 		Title:  fmt.Sprintf("FIO - Read Latency (99%%, %s)", path),
@@ -110,7 +114,11 @@ func fioWriteLatencyResult(jobResult *fio.JobResult) framework.CheckResult {
 		status = framework.STATUS_WARN
 	}
 
-	path, _ := os.Getwd()
+	path, err := getWorkingDirectory()
+	if err != nil {
+		log.Debug("Unable to get working directory: %s", err)
+		path = "working directory"
+	}
 
 	return framework.CheckResult{
 		Title:  fmt.Sprintf("FIO - Write Latency (99%%, %s)", path),
@@ -130,7 +138,11 @@ func fioSyncLatencyResult(jobResult *fio.JobResult) framework.CheckResult {
 		status = framework.STATUS_WARN
 	}
 
-	path, _ := os.Getwd()
+	path, err := getWorkingDirectory()
+	if err != nil {
+		log.Debug("Unable to get working directory: %s", err)
+		path = "working directory"
+	}
 
 	return framework.CheckResult{
 		Title:  fmt.Sprintf("FIO - Sync Latency (99%%, %s)", path),

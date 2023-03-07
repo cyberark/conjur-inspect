@@ -7,14 +7,17 @@ import (
 	"github.com/conjurinc/conjur-preflight/pkg/framework"
 )
 
+// Cpu collects inspection information on the host machines CPU cores and
+// architecture
 type Cpu struct {
 }
 
-// Describe provides a textual description of what this check gathers info on
+// Describe provides a textual description of the info this check gathers
 func (*Cpu) Describe() string {
 	return "CPU"
 }
 
+// Run executes the CPU inspection checks
 func (cpu *Cpu) Run() <-chan []framework.CheckResult {
 	future := make(chan []framework.CheckResult)
 

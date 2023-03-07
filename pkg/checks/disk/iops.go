@@ -23,6 +23,8 @@ type IopsCheck struct {
 	fioNewJob func(string, []string) fio.Executable
 }
 
+var getWorkingDirectory func() (string, error) = os.Getwd
+
 // NewIopsCheck instantiates an Iops check with the default dependencies
 func NewIopsCheck(debug bool) *IopsCheck {
 	return &IopsCheck{
@@ -91,7 +93,11 @@ func fioReadIopsResult(job *fio.JobResult) framework.CheckResult {
 	}
 
 	// Format title
-	path, _ := os.Getwd()
+	path, err := getWorkingDirectory()
+	if err != nil {
+		log.Debug("Unable to get working directory: %s", err)
+		path = "working directory"
+	}
 	titleStr := fmt.Sprintf("FIO - Read IOPs (%s)", path)
 
 	// Format value
@@ -119,7 +125,11 @@ func fioWriteIopsResult(job *fio.JobResult) framework.CheckResult {
 	}
 
 	// Format title
-	path, _ := os.Getwd()
+	path, err := getWorkingDirectory()
+	if err != nil {
+		log.Debug("Unable to get working directory: %s", err)
+		path = "working directory"
+	}
 	titleStr := fmt.Sprintf("FIO - Write IOPs (%s)", path)
 
 	// Format value

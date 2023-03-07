@@ -1,16 +1,17 @@
-package checks_test
+package checks
 
 import (
+	"errors"
 	"testing"
 
-	"github.com/conjurinc/conjur-preflight/pkg/checks"
 	"github.com/conjurinc/conjur-preflight/pkg/framework"
+	"github.com/shirou/gopsutil/v3/host"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/exp/slices"
 )
 
 func TestHostRun(t *testing.T) {
-	testCheck := &checks.Host{}
+	testCheck := &Host{}
 	resultChan := testCheck.Run()
 	results := <-resultChan
 
@@ -33,6 +34,57 @@ func TestHostRun(t *testing.T) {
 	assert.NotNil(t, virtualization, "Includes 'Virtualization'")
 	assert.Equal(t, framework.STATUS_INFO, virtualization.Status)
 	assert.NotEmpty(t, virtualization.Value)
+}
+
+func TestHostRunError(t *testing.T) {
+	// Double the host info function to simulate an error
+	originalHostInfo := getHostInfo
+	getHostInfo = failedHostInfoFunc
+	defer func() {
+		getHostInfo = originalHostInfo
+	}()
+
+	testCheck := &Host{}
+	resultChan := testCheck.Run()
+	results := <-resultChan
+
+	errResult := results[0]
+	assert.Equal(t, "Error", errResult.Title)
+	assert.Equal(t, "test host failure", errResult.Value)
+}
+
+func TestHostRunNoVirtualization(t *testing.T) {
+	// Double the host info function to simulate no virtualization
+	originalHostInfo := getHostInfo
+	getHostInfo = noVirtualizationHostInfoFunc
+	defer func() {
+		getHostInfo = originalHostInfo
+	}()
+
+	testCheck := &Host{}
+	resultChan := testCheck.Run()
+	results := <-resultChan
+
+	virtualization := GetResultByTitle(results, "Virtualization")
+	assert.NotNil(t, virtualization)
+	assert.Equal(t, framework.STATUS_INFO, virtualization.Status)
+	assert.NotEmpty(t, "None")
+}
+
+func failedHostInfoFunc() (*host.InfoStat, error) {
+	return nil, errors.New("test host failure")
+}
+
+func noVirtualizationHostInfoFunc() (*host.InfoStat, error) {
+	original, err := host.Info()
+	// We assume this will work on a test host. If not, abort the test run.
+	if err != nil {
+		panic(err)
+	}
+
+	original.VirtualizationSystem = ""
+
+	return original, nil
 }
 
 func GetResultByTitle(

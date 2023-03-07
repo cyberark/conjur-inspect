@@ -1,16 +1,15 @@
-package checks_test
+package checks
 
 import (
 	"regexp"
 	"testing"
 
-	"github.com/conjurinc/conjur-preflight/pkg/checks"
 	"github.com/conjurinc/conjur-preflight/pkg/framework"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCpuRun(t *testing.T) {
-	testCheck := &checks.Cpu{}
+	testCheck := &Cpu{}
 	resultChan := testCheck.Run()
 	results := <-resultChan
 

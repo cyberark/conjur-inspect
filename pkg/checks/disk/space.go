@@ -4,14 +4,19 @@ import (
 	"fmt"
 
 	"github.com/conjurinc/conjur-preflight/pkg/framework"
+	"github.com/conjurinc/conjur-preflight/pkg/log"
 	"github.com/dustin/go-humanize"
 	"github.com/shirou/gopsutil/v3/disk"
 )
 
+// Aliasing our external dependencies like this allows to swap them out for
+// testing
+var getPartitions func(all bool) ([]disk.PartitionStat, error) = disk.Partitions
+var getUsage func(path string) (*disk.UsageStat, error) = disk.Usage
+
 // SpaceCheck reports on the available partitions and devices on the current
 // machine, as well as their available disk space.
-type SpaceCheck struct {
-}
+type SpaceCheck struct{}
 
 // Describe provides a textual description of what this check gathers info on
 func (*SpaceCheck) Describe() string {
@@ -19,15 +24,38 @@ func (*SpaceCheck) Describe() string {
 }
 
 // Run executes the disk checks and returns their results
-func (*SpaceCheck) Run() <-chan []framework.CheckResult {
+func (spaceCheck *SpaceCheck) Run() <-chan []framework.CheckResult {
 	future := make(chan []framework.CheckResult)
 
 	go func() {
-		partitions, _ := disk.Partitions(true)
+		partitions, err := getPartitions(true)
+		// If we can't list the partitions, we exit early with the failure message
+		if err != nil {
+			log.Debug("Unable to list disk partitions: %s", err)
+			future <- []framework.CheckResult{
+				{
+					Title:  "Error",
+					Status: framework.STATUS_ERROR,
+					Value:  fmt.Sprintf("%s", err),
+				},
+			}
+
+			return
+		}
+
 		results := []framework.CheckResult{}
 
 		for _, partition := range partitions {
-			usage, _ := disk.Usage(partition.Mountpoint)
+			usage, err := getUsage(partition.Mountpoint)
+			if err != nil {
+				log.Debug(
+					"Unable to collect disk usage for '%s': %s",
+					partition.Mountpoint,
+					err,
+				)
+				continue
+			}
+
 			if usage.Total == 0 {
 				continue
 			}
