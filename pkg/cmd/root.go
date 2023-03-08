@@ -28,7 +28,6 @@ func newRootCommand() *cobra.Command {
 			}
 
 			report, err := report.NewDefaultReport(
-				debug,
 				reportID,
 				rawDataDir,
 			)

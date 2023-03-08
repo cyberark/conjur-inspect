@@ -14,7 +14,7 @@ func TestNewDefaultReport(t *testing.T) {
 
 	id := "test-id"
 
-	report, err := report.NewDefaultReport(false, id, ".")
+	report, err := report.NewDefaultReport(id, ".")
 
 	assert.Equal(t, id, report.ID())
 	assert.NotNil(t, report)

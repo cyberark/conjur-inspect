@@ -24,6 +24,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [conjurinc/conjur-preflight#18](https://github.com/conjurinc/conjur-preflight/pull/23)
 - Added a progress indicator for the running checks.
   [conjurinc/conjur-preflight#24](https://github.com/conjurinc/conjur-preflight/pull/24)
+- Raw report data is now collected during an inspection and saved as a report
+  result archive. The name and location of this archived are managed with the
+  new `--report-id` and `--raw-data-dir` command arguments.
+  [conjurinc/conjur-preflight#26](https://github.com/conjurinc/conjur-preflight/pull/26)
 
 ### Fixed
 - Previously, if the user running `conjur-preflight` has insufficient permission

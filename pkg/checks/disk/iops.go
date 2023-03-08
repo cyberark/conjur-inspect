@@ -1,12 +1,14 @@
 package disk
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/checks/disk/fio"
 	"github.com/cyberark/conjur-inspect/pkg/log"
+	"github.com/cyberark/conjur-inspect/pkg/output"
 )
 
 const iopsJobName = "conjur-fio-iops"
@@ -14,10 +16,6 @@ const iopsJobName = "conjur-fio-iops"
 // IopsCheck is a inspection check to report the read and write IOPs for the
 // directory in which `conjur-inspect` is run.
 type IopsCheck struct {
-	// When debug mode is enabled, the IOPs check will write the full fio
-	// results to a file.
-	debug bool
-
 	// We inject the fio command execution as a dependency that we can swap for
 	// unit testing
 	fioNewJob func(string, []string) fio.Executable
@@ -26,10 +24,8 @@ type IopsCheck struct {
 var getWorkingDirectory func() (string, error) = os.Getwd
 
 // NewIopsCheck instantiates an Iops check with the default dependencies
-func NewIopsCheck(debug bool) *IopsCheck {
+func NewIopsCheck() *IopsCheck {
 	return &IopsCheck{
-		debug: debug,
-
 		// Default dependencies
 		fioNewJob: fio.NewJob,
 	}
@@ -48,7 +44,9 @@ func (iopsCheck *IopsCheck) Run(
 
 	go func() {
 
-		fioResult, err := iopsCheck.runFioIopsTest()
+		fioResult, err := iopsCheck.runFioIopsTest(
+			context.OutputStore,
+		)
 
 		if err != nil {
 			future <- []check.Result{
@@ -150,7 +148,9 @@ func fioWriteIopsResult(job *fio.JobResult) check.Result {
 	}
 }
 
-func (iopsCheck *IopsCheck) runFioIopsTest() (*fio.Result, error) {
+func (iopsCheck *IopsCheck) runFioIopsTest(
+	store output.Store,
+) (*fio.Result, error) {
 	job := iopsCheck.fioNewJob(
 		iopsJobName,
 		[]string{
@@ -170,20 +170,10 @@ func (iopsCheck *IopsCheck) runFioIopsTest() (*fio.Result, error) {
 		},
 	)
 
-	// In debug mode, we'll write out the raw results from 'fio'
-	if iopsCheck.debug {
-		job.OnRawOutput(func(data []byte) { writeResultToFile(data, iopsJobName) })
-	}
+	// Save the full `fio` output to the results store
+	job.OnRawOutput(func(data []byte) {
+		store.Save(iopsJobName, bytes.NewReader(data))
+	})
 
 	return job.Exec()
-}
-
-func writeResultToFile(buffer []byte, jobName string) {
-	outputFilename := fmt.Sprintf("%s.json", jobName)
-
-	err := os.WriteFile(outputFilename, buffer, 0644)
-
-	if err != nil {
-		log.Warn("Failed to write result file for %s: %s", jobName, err)
-	}
 }

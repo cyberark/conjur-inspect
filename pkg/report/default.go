@@ -8,7 +8,6 @@ import (
 
 // NewDefaultReport returns a report containing the standard inspection checks
 func NewDefaultReport(
-	debug bool,
 	id string,
 	rawDataDir string,
 ) (Report, error) {
@@ -16,11 +15,11 @@ func NewDefaultReport(
 	return NewReport(
 		id,
 		rawDataDir,
-		defaultReportSections(debug),
+		defaultReportSections(),
 	)
 }
 
-func defaultReportSections(debug bool) []Section {
+func defaultReportSections() []Section {
 	return []Section{
 		// TODO:
 		// - Recent load
@@ -34,8 +33,8 @@ func defaultReportSections(debug bool) []Section {
 			Title: "Disk",
 			Checks: []check.Check{
 				&disk.SpaceCheck{},
-				disk.NewIopsCheck(debug),
-				disk.NewLatencyCheck(debug),
+				disk.NewIopsCheck(),
+				disk.NewLatencyCheck(),
 			},
 		},
 		{

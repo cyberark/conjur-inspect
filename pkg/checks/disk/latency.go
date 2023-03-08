@@ -1,29 +1,26 @@
 package disk
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/checks/disk/fio"
 	"github.com/cyberark/conjur-inspect/pkg/log"
+	"github.com/cyberark/conjur-inspect/pkg/output"
 )
 
 // LatencyCheck is a inspection check to report the read, write, and sync
 // latency for the directory in which `conjur-inspect` is run.
 type LatencyCheck struct {
-	// When debug mode is enabled, the latency check will write the full fio
-	// results to a file.
-	debug bool
-
 	// We inject the fio command execution as a dependency that we can swap for
 	// unit testing
 	fioNewJob func(string, []string) fio.Executable
 }
 
 // NewLatencyCheck instantiates a Latency check with the default dependencies
-func NewLatencyCheck(debug bool) *LatencyCheck {
+func NewLatencyCheck() *LatencyCheck {
 	return &LatencyCheck{
-		debug: debug,
 
 		// Default dependencies
 		fioNewJob: fio.NewJob,
@@ -42,7 +39,9 @@ func (latencyCheck *LatencyCheck) Run(
 	future := make(chan []check.Result)
 
 	go func() {
-		fioResult, err := latencyCheck.runFioLatencyTest()
+		fioResult, err := latencyCheck.runFioLatencyTest(
+			context.OutputStore,
+		)
 
 		if err != nil {
 			future <- []check.Result{
@@ -153,8 +152,10 @@ func fioSyncLatencyResult(jobResult *fio.JobResult) check.Result {
 	}
 }
 
-func (latencyCheck *LatencyCheck) runFioLatencyTest() (*fio.Result, error) {
-	return latencyCheck.fioNewJob(
+func (latencyCheck *LatencyCheck) runFioLatencyTest(
+	store output.Store,
+) (*fio.Result, error) {
+	job := latencyCheck.fioNewJob(
 		"conjur-fio-latency",
 		[]string{
 			"--rw=readwrite",
@@ -166,5 +167,12 @@ func (latencyCheck *LatencyCheck) runFioLatencyTest() (*fio.Result, error) {
 			"--name=conjur-fio-latency",
 			"--output-format=json",
 		},
-	).Exec()
+	)
+
+	// Save the full `fio` output to the results store
+	job.OnRawOutput(func(data []byte) {
+		store.Save("conjur-fio-latency", bytes.NewReader(data))
+	})
+
+	return job.Exec()
 }

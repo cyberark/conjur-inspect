@@ -27,7 +27,6 @@ func (job *mockFioJob) OnRawOutput(func([]byte)) {
 
 func TestIopsCheck(t *testing.T) {
 	testCheck := &IopsCheck{
-		debug:     true,
 		fioNewJob: newSuccessfulIopsFioJob,
 	}
 	resultChan := testCheck.Run(&check.RunContext{})
@@ -103,7 +102,6 @@ func TestIopsWithWorkingDirectoryError(t *testing.T) {
 	}()
 
 	testCheck := &IopsCheck{
-		debug:     true,
 		fioNewJob: newSuccessfulIopsFioJob,
 	}
 	resultChan := testCheck.Run(&check.RunContext{})
