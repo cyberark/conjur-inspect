@@ -5,7 +5,7 @@ import (
 	"net"
 	"os"
 
-	"github.com/cyberark/conjur-inspect/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/check"
 )
 
 // Follower implements a inspection check for the FOLLOWER environment variable.
@@ -25,18 +25,18 @@ type LeaderPort struct {
 }
 
 // Run executes the check
-func (follower *Follower) Run() <-chan []framework.CheckResult {
-	// Create a channel to communicate with the check framework
-	future := make(chan []framework.CheckResult)
+func (follower *Follower) Run() <-chan []check.Result {
+	// Create a channel to communicate with the check check
+	future := make(chan []check.Result)
 
 	go func() {
 		hostname := os.Getenv("MASTER_HOSTNAME")
 
 		if hostname == "" {
-			future <- []framework.CheckResult{
+			future <- []check.Result{
 				{
 					Title:   "Leader Hostname",
-					Status:  framework.STATUS_ERROR,
+					Status:  check.STATUS_ERROR,
 					Value:   "N/A",
 					Message: "Leader hostname is not set. Set the 'MASTER_HOSTNAME' environment variable to run this check",
 				},
@@ -62,16 +62,16 @@ func (follower *Follower) Run() <-chan []framework.CheckResult {
 		}
 
 		// a slice (array) of all port reports
-		results := []framework.CheckResult{}
+		results := []check.Result{}
 
 		for _, leaderPort := range leaderPorts {
-			result := framework.CheckResult{
+			result := check.Result{
 				Title: leaderPort.PortName,
 			}
 
 			leaderPort, err := checkPort(hostname, &leaderPort)
 			if err != nil {
-				result.Status = framework.STATUS_ERROR
+				result.Status = check.STATUS_ERROR
 				result.Value = "N/A"
 				result.Message = err.Error()
 				results = append(results, result)
@@ -79,7 +79,7 @@ func (follower *Follower) Run() <-chan []framework.CheckResult {
 				continue
 			}
 
-			result.Status = framework.STATUS_INFO
+			result.Status = check.STATUS_INFO
 			result.Value = net.JoinHostPort(hostname, leaderPort.Port)
 			result.Message = fmt.Sprintf("Port: %s is open", leaderPort.Port)
 

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/checks/disk/fio"
-	"github.com/cyberark/conjur-inspect/pkg/framework"
 	"github.com/cyberark/conjur-inspect/pkg/log"
 )
 
@@ -41,18 +41,18 @@ func (*IopsCheck) Describe() string {
 }
 
 // Run executes the IopsCheck by running `fio` and processing its output
-func (iopsCheck *IopsCheck) Run() <-chan []framework.CheckResult {
-	future := make(chan []framework.CheckResult)
+func (iopsCheck *IopsCheck) Run() <-chan []check.Result {
+	future := make(chan []check.Result)
 
 	go func() {
 
 		fioResult, err := iopsCheck.runFioIopsTest()
 
 		if err != nil {
-			future <- []framework.CheckResult{
+			future <- []check.Result{
 				{
 					Title:   "FIO IOPs",
-					Status:  framework.STATUS_ERROR,
+					Status:  check.STATUS_ERROR,
 					Value:   "N/A",
 					Message: err.Error(),
 				},
@@ -63,10 +63,10 @@ func (iopsCheck *IopsCheck) Run() <-chan []framework.CheckResult {
 
 		// Make sure a job exists in the fio results
 		if len(fioResult.Jobs) < 1 {
-			future <- []framework.CheckResult{
+			future <- []check.Result{
 				{
 					Title:   "FIO IOPs",
-					Status:  framework.STATUS_ERROR,
+					Status:  check.STATUS_ERROR,
 					Value:   "N/A",
 					Message: "No job results returned by 'fio'",
 				},
@@ -75,7 +75,7 @@ func (iopsCheck *IopsCheck) Run() <-chan []framework.CheckResult {
 			return
 		}
 
-		future <- []framework.CheckResult{
+		future <- []check.Result{
 			fioReadIopsResult(&fioResult.Jobs[0]),
 			fioWriteIopsResult(&fioResult.Jobs[0]),
 		}
@@ -84,12 +84,12 @@ func (iopsCheck *IopsCheck) Run() <-chan []framework.CheckResult {
 	return future
 }
 
-func fioReadIopsResult(job *fio.JobResult) framework.CheckResult {
+func fioReadIopsResult(job *fio.JobResult) check.Result {
 
 	// 50 iops min from https://etcd.io/docs/v3.3/op-guide/hardware/
-	status := framework.STATUS_INFO
+	status := check.STATUS_INFO
 	if job.Read.Iops < 50 {
-		status = framework.STATUS_WARN
+		status = check.STATUS_WARN
 	}
 
 	// Format title
@@ -109,19 +109,19 @@ func fioReadIopsResult(job *fio.JobResult) framework.CheckResult {
 		job.Read.IopsStddev,
 	)
 
-	return framework.CheckResult{
+	return check.Result{
 		Title:  titleStr,
 		Status: status,
 		Value:  valueStr,
 	}
 }
 
-func fioWriteIopsResult(job *fio.JobResult) framework.CheckResult {
+func fioWriteIopsResult(job *fio.JobResult) check.Result {
 
 	// 50 iops min from https://etcd.io/docs/v3.3/op-guide/hardware/
-	status := framework.STATUS_INFO
+	status := check.STATUS_INFO
 	if job.Write.Iops < 50 {
-		status = framework.STATUS_WARN
+		status = check.STATUS_WARN
 	}
 
 	// Format title
@@ -141,7 +141,7 @@ func fioWriteIopsResult(job *fio.JobResult) framework.CheckResult {
 		job.Write.IopsStddev,
 	)
 
-	return framework.CheckResult{
+	return check.Result{
 		Title:  titleStr,
 		Status: status,
 		Value:  valueStr,

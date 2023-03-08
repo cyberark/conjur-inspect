@@ -1,4 +1,4 @@
-package framework
+package check
 
 // STATUS_INFO means the result is informational only
 const STATUS_INFO = "INFO"
@@ -19,10 +19,10 @@ const STATUS_ERROR = "ERROR"
 // etc.) that returns one or more result.
 type Check interface {
 	Describe() string
-	Run() <-chan []CheckResult
+	Run() <-chan []Result
 }
 
-type CheckResult struct {
+type Result struct {
 	Title   string `json:"title"`
 	Value   string `json:"value"`
 	Status  string `json:"status"`

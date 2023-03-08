@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cyberark/conjur-inspect/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/log"
 	"github.com/hako/durafmt"
 	"github.com/shirou/gopsutil/v3/host"
@@ -22,17 +22,17 @@ func (*Host) Describe() string {
 }
 
 // Run executes the Host inspection checks
-func (host *Host) Run() <-chan []framework.CheckResult {
-	future := make(chan []framework.CheckResult)
+func (*Host) Run() <-chan []check.Result {
+	future := make(chan []check.Result)
 
 	go func() {
 		hostInfo, err := getHostInfo()
 		if err != nil {
 			log.Debug("Unable to inspect host info: %s", err)
-			future <- []framework.CheckResult{
+			future <- []check.Result{
 				{
 					Title:  "Error",
-					Status: framework.STATUS_ERROR,
+					Status: check.STATUS_ERROR,
 					Value:  fmt.Sprintf("%s", err),
 				},
 			}
@@ -40,7 +40,7 @@ func (host *Host) Run() <-chan []framework.CheckResult {
 			return
 		}
 
-		future <- []framework.CheckResult{
+		future <- []check.Result{
 			hostnameResult(hostInfo),
 			uptimeResult(hostInfo),
 			osResult(hostInfo),
@@ -51,26 +51,26 @@ func (host *Host) Run() <-chan []framework.CheckResult {
 	return future
 }
 
-func hostnameResult(hostInfo *host.InfoStat) framework.CheckResult {
-	return framework.CheckResult{
+func hostnameResult(hostInfo *host.InfoStat) check.Result {
+	return check.Result{
 		Title:  "Hostname",
-		Status: framework.STATUS_INFO,
+		Status: check.STATUS_INFO,
 		Value:  hostInfo.Hostname,
 	}
 }
 
-func uptimeResult(hostInfo *host.InfoStat) framework.CheckResult {
-	return framework.CheckResult{
+func uptimeResult(hostInfo *host.InfoStat) check.Result {
+	return check.Result{
 		Title:  "Uptime",
-		Status: framework.STATUS_INFO,
+		Status: check.STATUS_INFO,
 		Value:  durafmt.Parse(time.Duration(hostInfo.Uptime) * time.Second).String(),
 	}
 }
 
-func osResult(hostInfo *host.InfoStat) framework.CheckResult {
-	return framework.CheckResult{
+func osResult(hostInfo *host.InfoStat) check.Result {
+	return check.Result{
 		Title:  "OS",
-		Status: framework.STATUS_INFO,
+		Status: check.STATUS_INFO,
 		Value: fmt.Sprintf(
 			"%s, %s, %s, %s",
 			hostInfo.OS,
@@ -81,18 +81,18 @@ func osResult(hostInfo *host.InfoStat) framework.CheckResult {
 	}
 }
 
-func virtualizationResult(hostInfo *host.InfoStat) framework.CheckResult {
+func virtualizationResult(hostInfo *host.InfoStat) check.Result {
 	if hostInfo.VirtualizationSystem == "" {
-		return framework.CheckResult{
+		return check.Result{
 			Title:  "Virtualization",
-			Status: framework.STATUS_INFO,
+			Status: check.STATUS_INFO,
 			Value:  "None",
 		}
 	}
 
-	return framework.CheckResult{
+	return check.Result{
 		Title:  "Virtualization",
-		Status: framework.STATUS_INFO,
+		Status: check.STATUS_INFO,
 		Value: fmt.Sprintf(
 			"%s (%s)",
 			hostInfo.VirtualizationSystem,

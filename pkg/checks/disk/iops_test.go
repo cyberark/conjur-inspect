@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/checks/disk/fio"
-	"github.com/cyberark/conjur-inspect/pkg/framework"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -40,8 +40,8 @@ func TestIopsCheck(t *testing.T) {
 		"There are read and write IOPs results present",
 	)
 
-	assertReadIopsResult(t, results[0], framework.STATUS_INFO)
-	assertWriteIopsResult(t, results[1], framework.STATUS_INFO)
+	assertReadIopsResult(t, results[0], check.STATUS_INFO)
+	assertWriteIopsResult(t, results[1], check.STATUS_INFO)
 }
 
 func TestIopsCheckWithPoorPerformance(t *testing.T) {
@@ -58,8 +58,8 @@ func TestIopsCheckWithPoorPerformance(t *testing.T) {
 		"There are read and write IOPs results present",
 	)
 
-	assertReadIopsResult(t, results[0], framework.STATUS_WARN)
-	assertWriteIopsResult(t, results[1], framework.STATUS_WARN)
+	assertReadIopsResult(t, results[0], check.STATUS_WARN)
+	assertWriteIopsResult(t, results[1], check.STATUS_WARN)
 }
 
 func TestIopsWithError(t *testing.T) {
@@ -73,7 +73,7 @@ func TestIopsWithError(t *testing.T) {
 	assert.Equal(t, 1, len(results))
 
 	assert.Equal(t, "FIO IOPs", results[0].Title)
-	assert.Equal(t, framework.STATUS_ERROR, results[0].Status)
+	assert.Equal(t, check.STATUS_ERROR, results[0].Status)
 	assert.Equal(t, "N/A", results[0].Value)
 	assert.Equal(t, "test error", results[0].Message)
 }
@@ -89,7 +89,7 @@ func TestIopsWithNoJobs(t *testing.T) {
 	assert.Equal(t, 1, len(results))
 
 	assert.Equal(t, "FIO IOPs", results[0].Title)
-	assert.Equal(t, framework.STATUS_ERROR, results[0].Status)
+	assert.Equal(t, check.STATUS_ERROR, results[0].Status)
 	assert.Equal(t, "N/A", results[0].Value)
 	assert.Equal(t, "No job results returned by 'fio'", results[0].Message)
 }
@@ -116,13 +116,13 @@ func TestIopsWithWorkingDirectoryError(t *testing.T) {
 		"There are read and write IOPs results present",
 	)
 
-	assertReadIopsResult(t, results[0], framework.STATUS_INFO)
-	assertWriteIopsResult(t, results[1], framework.STATUS_INFO)
+	assertReadIopsResult(t, results[0], check.STATUS_INFO)
+	assertWriteIopsResult(t, results[1], check.STATUS_INFO)
 }
 
 func assertReadIopsResult(
 	t *testing.T,
-	result framework.CheckResult,
+	result check.Result,
 	expectedStatus string,
 ) {
 	assert.Regexp(
@@ -140,7 +140,7 @@ func assertReadIopsResult(
 
 func assertWriteIopsResult(
 	t *testing.T,
-	result framework.CheckResult,
+	result check.Result,
 	expectedStatus string,
 ) {
 	assert.Regexp(

@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/formatting"
-	"github.com/cyberark/conjur-inspect/pkg/framework"
 	"github.com/cyberark/conjur-inspect/pkg/report"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,11 +17,11 @@ func (*TestCheck) Describe() string {
 	return "Test"
 }
 
-func (*TestCheck) Run() <-chan []framework.CheckResult {
-	channel := make(chan []framework.CheckResult)
+func (*TestCheck) Run() <-chan []check.Result {
+	channel := make(chan []check.Result)
 
 	go func() {
-		channel <- []framework.CheckResult{
+		channel <- []check.Result{
 			{
 				Title:   "Test Check",
 				Status:  "Test Status",
@@ -39,7 +39,7 @@ func TestReport(t *testing.T) {
 		Sections: []report.Section{
 			{
 				Title: "Test section",
-				Checks: []framework.Check{
+				Checks: []check.Check{
 					&TestCheck{},
 				},
 			},
@@ -57,7 +57,7 @@ func TestReport(t *testing.T) {
 	testCheckResult := testSection.Results[0]
 	assert.Equal(
 		t,
-		framework.CheckResult{
+		check.Result{
 			Title:   "Test Check",
 			Status:  "Test Status",
 			Value:   "Test Value",
@@ -96,7 +96,7 @@ func TestJSONReport(t *testing.T) {
 		Sections: []report.Section{
 			{
 				Title: "Test section",
-				Checks: []framework.Check{
+				Checks: []check.Check{
 					&TestCheck{},
 				},
 			},
@@ -114,7 +114,7 @@ func TestJSONReport(t *testing.T) {
 	testCheckResult := testSection.Results[0]
 	assert.Equal(
 		t,
-		framework.CheckResult{
+		check.Result{
 			Title:   "Test Check",
 			Status:  "Test Status",
 			Value:   "Test Value",

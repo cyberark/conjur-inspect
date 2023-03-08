@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/checks/disk/fio"
-	"github.com/cyberark/conjur-inspect/pkg/framework"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,9 +21,9 @@ func TestLatencyCheck(t *testing.T) {
 
 	assert.Equal(t, 3, len(results), "There are disk latency results present")
 
-	assertReadLatencyResult(t, results[0], framework.STATUS_INFO)
-	assertWriteLatencyResult(t, results[1], framework.STATUS_INFO)
-	assertSyncLatencyResult(t, results[2], framework.STATUS_INFO)
+	assertReadLatencyResult(t, results[0], check.STATUS_INFO)
+	assertWriteLatencyResult(t, results[1], check.STATUS_INFO)
+	assertSyncLatencyResult(t, results[2], check.STATUS_INFO)
 }
 
 func TestLatencyCheckWithPoorPerformance(t *testing.T) {
@@ -35,9 +35,9 @@ func TestLatencyCheckWithPoorPerformance(t *testing.T) {
 
 	assert.Equal(t, 3, len(results), "There are disk latency results present")
 
-	assertReadLatencyResult(t, results[0], framework.STATUS_WARN)
-	assertWriteLatencyResult(t, results[1], framework.STATUS_WARN)
-	assertSyncLatencyResult(t, results[2], framework.STATUS_WARN)
+	assertReadLatencyResult(t, results[0], check.STATUS_WARN)
+	assertWriteLatencyResult(t, results[1], check.STATUS_WARN)
+	assertSyncLatencyResult(t, results[2], check.STATUS_WARN)
 }
 
 func TestLatencyWithError(t *testing.T) {
@@ -51,7 +51,7 @@ func TestLatencyWithError(t *testing.T) {
 	assert.Equal(t, 1, len(results))
 
 	assert.Equal(t, "FIO Latency", results[0].Title)
-	assert.Equal(t, framework.STATUS_ERROR, results[0].Status)
+	assert.Equal(t, check.STATUS_ERROR, results[0].Status)
 	assert.Equal(t, "N/A", results[0].Value)
 	assert.Equal(t, "test error", results[0].Message)
 }
@@ -67,7 +67,7 @@ func TestLatencyWithNoJobs(t *testing.T) {
 	assert.Equal(t, 1, len(results))
 
 	assert.Equal(t, "FIO Latency", results[0].Title)
-	assert.Equal(t, framework.STATUS_ERROR, results[0].Status)
+	assert.Equal(t, check.STATUS_ERROR, results[0].Status)
 	assert.Equal(t, "N/A", results[0].Value)
 	assert.Equal(t, "No job results returned by 'fio'", results[0].Message)
 }
@@ -88,14 +88,14 @@ func TestLatencyWithWorkingDirectoryError(t *testing.T) {
 
 	assert.Equal(t, 3, len(results), "There are disk latency results present")
 
-	assertReadLatencyResult(t, results[0], framework.STATUS_INFO)
-	assertWriteLatencyResult(t, results[1], framework.STATUS_INFO)
-	assertSyncLatencyResult(t, results[2], framework.STATUS_INFO)
+	assertReadLatencyResult(t, results[0], check.STATUS_INFO)
+	assertWriteLatencyResult(t, results[1], check.STATUS_INFO)
+	assertSyncLatencyResult(t, results[2], check.STATUS_INFO)
 }
 
 func assertReadLatencyResult(
 	t *testing.T,
-	result framework.CheckResult,
+	result check.Result,
 	expectedStatus string,
 ) {
 	assertLatencyResult(
@@ -108,7 +108,7 @@ func assertReadLatencyResult(
 
 func assertWriteLatencyResult(
 	t *testing.T,
-	result framework.CheckResult,
+	result check.Result,
 	expectedStatus string,
 ) {
 	assertLatencyResult(
@@ -121,7 +121,7 @@ func assertWriteLatencyResult(
 
 func assertSyncLatencyResult(
 	t *testing.T,
-	result framework.CheckResult,
+	result check.Result,
 	expectedStatus string,
 ) {
 	assertLatencyResult(
@@ -134,7 +134,7 @@ func assertSyncLatencyResult(
 
 func assertLatencyResult(
 	t *testing.T,
-	result framework.CheckResult,
+	result check.Result,
 	expectedTitleRegex string,
 	expectedStatus string,
 ) {

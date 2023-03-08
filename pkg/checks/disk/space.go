@@ -3,7 +3,7 @@ package disk
 import (
 	"fmt"
 
-	"github.com/cyberark/conjur-inspect/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/log"
 	"github.com/dustin/go-humanize"
 	"github.com/shirou/gopsutil/v3/disk"
@@ -24,18 +24,18 @@ func (*SpaceCheck) Describe() string {
 }
 
 // Run executes the disk checks and returns their results
-func (spaceCheck *SpaceCheck) Run() <-chan []framework.CheckResult {
-	future := make(chan []framework.CheckResult)
+func (*SpaceCheck) Run() <-chan []check.Result {
+	future := make(chan []check.Result)
 
 	go func() {
 		partitions, err := getPartitions(true)
 		// If we can't list the partitions, we exit early with the failure message
 		if err != nil {
 			log.Debug("Unable to list disk partitions: %s", err)
-			future <- []framework.CheckResult{
+			future <- []check.Result{
 				{
 					Title:  "Error",
-					Status: framework.STATUS_ERROR,
+					Status: check.STATUS_ERROR,
 					Value:  fmt.Sprintf("%s", err),
 				},
 			}
@@ -43,7 +43,7 @@ func (spaceCheck *SpaceCheck) Run() <-chan []framework.CheckResult {
 			return
 		}
 
-		results := []framework.CheckResult{}
+		results := []check.Result{}
 
 		for _, partition := range partitions {
 			usage, err := getUsage(partition.Mountpoint)
@@ -75,14 +75,14 @@ func (spaceCheck *SpaceCheck) Run() <-chan []framework.CheckResult {
 func partitionDiskSpaceResult(
 	partition disk.PartitionStat,
 	usage *disk.UsageStat,
-) framework.CheckResult {
-	return framework.CheckResult{
+) check.Result {
+	return check.Result{
 		Title: fmt.Sprintf(
 			"Disk Space (%s, %s)",
 			usage.Fstype,
 			partition.Mountpoint,
 		),
-		Status: framework.STATUS_INFO,
+		Status: check.STATUS_INFO,
 		Value: fmt.Sprintf(
 			"%s Total, %s Used (%s), %s Free",
 			humanize.Bytes(usage.Total),

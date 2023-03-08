@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/cyberark/conjur-inspect/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/version"
 	"github.com/schollz/progressbar/v3"
 )
@@ -27,7 +27,7 @@ func (report *Report) Run() Result {
 
 	for i, section := range report.Sections {
 
-		sectionResults := []framework.CheckResult{}
+		sectionResults := []check.Result{}
 
 		for _, check := range section.Checks {
 			// Update text in progress display

@@ -1,9 +1,9 @@
 package report
 
 import (
+	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/checks"
 	"github.com/cyberark/conjur-inspect/pkg/checks/disk"
-	"github.com/cyberark/conjur-inspect/pkg/framework"
 )
 
 // NewDefaultReport returns a report containing the standard inspection checks
@@ -14,13 +14,13 @@ func NewDefaultReport(debug bool) *Report {
 			// - Recent load
 			{
 				Title: "CPU",
-				Checks: []framework.Check{
+				Checks: []check.Check{
 					&checks.Cpu{},
 				},
 			},
 			{
 				Title: "Disk",
-				Checks: []framework.Check{
+				Checks: []check.Check{
 					&disk.SpaceCheck{},
 					disk.NewIopsCheck(debug),
 					disk.NewLatencyCheck(debug),
@@ -28,7 +28,7 @@ func NewDefaultReport(debug bool) *Report {
 			},
 			{
 				Title: "Memory",
-				Checks: []framework.Check{
+				Checks: []check.Check{
 					&checks.Memory{},
 				},
 			},
@@ -40,13 +40,13 @@ func NewDefaultReport(debug bool) *Report {
 			// },
 			{
 				Title: "Host",
-				Checks: []framework.Check{
+				Checks: []check.Check{
 					&checks.Host{},
 				},
 			},
 			{
 				Title: "Follower",
-				Checks: []framework.Check{
+				Checks: []check.Check{
 					&checks.Follower{},
 				},
 			},

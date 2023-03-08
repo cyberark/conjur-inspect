@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/cyberark/conjur-inspect/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/shirou/gopsutil/v3/host"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/exp/slices"
@@ -17,22 +17,22 @@ func TestHostRun(t *testing.T) {
 
 	hostname := GetResultByTitle(results, "Hostname")
 	assert.NotNil(t, hostname, "Includes 'Hostname'")
-	assert.Equal(t, framework.STATUS_INFO, hostname.Status)
+	assert.Equal(t, check.STATUS_INFO, hostname.Status)
 	assert.NotEmpty(t, hostname.Value)
 
 	uptime := GetResultByTitle(results, "Uptime")
 	assert.NotNil(t, uptime, "Includes 'Uptime'")
-	assert.Equal(t, framework.STATUS_INFO, uptime.Status)
+	assert.Equal(t, check.STATUS_INFO, uptime.Status)
 	assert.NotEmpty(t, uptime.Value)
 
 	os := GetResultByTitle(results, "OS")
 	assert.NotNil(t, os, "Includes 'OS'")
-	assert.Equal(t, framework.STATUS_INFO, os.Status)
+	assert.Equal(t, check.STATUS_INFO, os.Status)
 	assert.NotEmpty(t, os.Value)
 
 	virtualization := GetResultByTitle(results, "Virtualization")
 	assert.NotNil(t, virtualization, "Includes 'Virtualization'")
-	assert.Equal(t, framework.STATUS_INFO, virtualization.Status)
+	assert.Equal(t, check.STATUS_INFO, virtualization.Status)
 	assert.NotEmpty(t, virtualization.Value)
 }
 
@@ -67,7 +67,7 @@ func TestHostRunNoVirtualization(t *testing.T) {
 
 	virtualization := GetResultByTitle(results, "Virtualization")
 	assert.NotNil(t, virtualization)
-	assert.Equal(t, framework.STATUS_INFO, virtualization.Status)
+	assert.Equal(t, check.STATUS_INFO, virtualization.Status)
 	assert.NotEmpty(t, "None")
 }
 
@@ -88,12 +88,12 @@ func noVirtualizationHostInfoFunc() (*host.InfoStat, error) {
 }
 
 func GetResultByTitle(
-	results []framework.CheckResult,
+	results []check.Result,
 	title string,
-) *framework.CheckResult {
+) *check.Result {
 	idx := slices.IndexFunc(
 		results,
-		func(c framework.CheckResult) bool { return c.Title == title },
+		func(c check.Result) bool { return c.Title == title },
 	)
 
 	if idx < 0 {

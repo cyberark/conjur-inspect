@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/cyberark/conjur-inspect/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/stretchr/testify/assert"
 )
@@ -24,7 +24,7 @@ func TestSpaceCheck(t *testing.T) {
 			result.Title,
 			"Disk space title matches the expected format",
 		)
-		assert.Equal(t, framework.STATUS_INFO, result.Status)
+		assert.Equal(t, check.STATUS_INFO, result.Status)
 		assert.Regexp(
 			t,
 			regexp.MustCompile(`.+ Total, .+ Used \( ?\d+%\), .+ Free`),
