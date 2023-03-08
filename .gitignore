@@ -6,6 +6,7 @@ key.txt
 coverage.xml
 
 output/
+!pkg/output
 dist/
 dev/tmp
 build_ca_certificate

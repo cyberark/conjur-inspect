@@ -36,7 +36,9 @@ func (*LatencyCheck) Describe() string {
 }
 
 // Run executes the LatencyCheck by running `fio` and processing its output
-func (latencyCheck *LatencyCheck) Run() <-chan []check.Result {
+func (latencyCheck *LatencyCheck) Run(
+	context *check.RunContext,
+) <-chan []check.Result {
 	future := make(chan []check.Result)
 
 	go func() {

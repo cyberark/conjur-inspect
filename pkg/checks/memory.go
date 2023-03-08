@@ -21,7 +21,7 @@ func (*Memory) Describe() string {
 }
 
 // Run executes the Memory inspection checks
-func (memory *Memory) Run() <-chan []check.Result {
+func (memory *Memory) Run(context *check.RunContext) <-chan []check.Result {
 	future := make(chan []check.Result)
 
 	go func() {

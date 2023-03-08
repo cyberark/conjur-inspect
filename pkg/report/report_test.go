@@ -17,7 +17,7 @@ func (*TestCheck) Describe() string {
 	return "Test"
 }
 
-func (*TestCheck) Run() <-chan []check.Result {
+func (*TestCheck) Run(context *check.RunContext) <-chan []check.Result {
 	channel := make(chan []check.Result)
 
 	go func() {
@@ -35,16 +35,8 @@ func (*TestCheck) Run() <-chan []check.Result {
 }
 
 func TestReport(t *testing.T) {
-	testReport := report.Report{
-		Sections: []report.Section{
-			{
-				Title: "Test section",
-				Checks: []check.Check{
-					&TestCheck{},
-				},
-			},
-		},
-	}
+	testReport, err := newTestReport()
+	assert.Nil(t, err)
 
 	testReportResult := testReport.Run()
 
@@ -72,7 +64,7 @@ func TestReport(t *testing.T) {
 		FormatStrategy: &formatting.RichANSIFormatStrategy{},
 	}
 
-	err := textWriter.Write(
+	err = textWriter.Write(
 		io.Writer(&builder),
 		&testReportResult,
 	)
@@ -92,16 +84,8 @@ func TestReport(t *testing.T) {
 }
 
 func TestJSONReport(t *testing.T) {
-	testReport := report.Report{
-		Sections: []report.Section{
-			{
-				Title: "Test section",
-				Checks: []check.Check{
-					&TestCheck{},
-				},
-			},
-		},
-	}
+	testReport, err := newTestReport()
+	assert.Nil(t, err)
 
 	testReportResult := testReport.Run()
 
@@ -127,7 +111,7 @@ func TestJSONReport(t *testing.T) {
 
 	jsonWriter := formatting.JSON{}
 
-	err := jsonWriter.Write(
+	err = jsonWriter.Write(
 		io.Writer(&builder),
 		&testReportResult,
 	)
@@ -152,5 +136,20 @@ func TestJSONReport(t *testing.T) {
              ]
             }`,
 		builder.String(),
+	)
+}
+
+func newTestReport() (report.Report, error) {
+	return report.NewReport(
+		"test",
+		".",
+		[]report.Section{
+			{
+				Title: "Test section",
+				Checks: []check.Check{
+					&TestCheck{},
+				},
+			},
+		},
 	)
 }

@@ -25,7 +25,7 @@ type LeaderPort struct {
 }
 
 // Run executes the check
-func (follower *Follower) Run() <-chan []check.Result {
+func (follower *Follower) Run(context *check.RunContext) <-chan []check.Result {
 	// Create a channel to communicate with the check check
 	future := make(chan []check.Result)
 

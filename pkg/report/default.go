@@ -7,56 +7,67 @@ import (
 )
 
 // NewDefaultReport returns a report containing the standard inspection checks
-func NewDefaultReport(debug bool) *Report {
-	return &Report{
-		Sections: []Section{
-			// TODO:
-			// - Recent load
-			{
-				Title: "CPU",
-				Checks: []check.Check{
-					&checks.Cpu{},
-				},
+func NewDefaultReport(
+	debug bool,
+	id string,
+	rawDataDir string,
+) (Report, error) {
+
+	return NewReport(
+		id,
+		rawDataDir,
+		defaultReportSections(debug),
+	)
+}
+
+func defaultReportSections(debug bool) []Section {
+	return []Section{
+		// TODO:
+		// - Recent load
+		{
+			Title: "CPU",
+			Checks: []check.Check{
+				&checks.Cpu{},
 			},
-			{
-				Title: "Disk",
-				Checks: []check.Check{
-					&disk.SpaceCheck{},
-					disk.NewIopsCheck(debug),
-					disk.NewLatencyCheck(debug),
-				},
-			},
-			{
-				Title: "Memory",
-				Checks: []check.Check{
-					&checks.Memory{},
-				},
-			},
-			// TODO:
-			// - ipv6 status
-			// {
-			// 	Title:  "Network",
-			// 	Checks: []framework.Check{},
-			// },
-			{
-				Title: "Host",
-				Checks: []check.Check{
-					&checks.Host{},
-				},
-			},
-			{
-				Title: "Follower",
-				Checks: []check.Check{
-					&checks.Follower{},
-				},
-			},
-			// TODO:
-			// - Podman version
-			// - Docker version
-			// {
-			// 	Title:  "Container Runtime",
-			// 	Checks: []framework.Check{},
-			// },
 		},
+		{
+			Title: "Disk",
+			Checks: []check.Check{
+				&disk.SpaceCheck{},
+				disk.NewIopsCheck(debug),
+				disk.NewLatencyCheck(debug),
+			},
+		},
+		{
+			Title: "Memory",
+			Checks: []check.Check{
+				&checks.Memory{},
+			},
+		},
+		// TODO:
+		// - ipv6 status
+		// {
+		// 	Title:  "Network",
+		// 	Checks: []framework.Check{},
+		// },
+		{
+			Title: "Host",
+			Checks: []check.Check{
+				&checks.Host{},
+			},
+		},
+		{
+			Title: "Follower",
+			Checks: []check.Check{
+				&checks.Follower{},
+			},
+		},
+		// TODO:
+		// - Podman version
+		// - Docker version
+		// {
+		// 	Title:  "Container Runtime",
+		// 	Checks: []framework.Check{},
+		// },
 	}
 }

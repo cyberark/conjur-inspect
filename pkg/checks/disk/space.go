@@ -24,7 +24,7 @@ func (*SpaceCheck) Describe() string {
 }
 
 // Run executes the disk checks and returns their results
-func (*SpaceCheck) Run() <-chan []check.Result {
+func (*SpaceCheck) Run(context *check.RunContext) <-chan []check.Result {
 	future := make(chan []check.Result)
 
 	go func() {

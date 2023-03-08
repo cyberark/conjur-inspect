@@ -41,7 +41,9 @@ func (*IopsCheck) Describe() string {
 }
 
 // Run executes the IopsCheck by running `fio` and processing its output
-func (iopsCheck *IopsCheck) Run() <-chan []check.Result {
+func (iopsCheck *IopsCheck) Run(
+	context *check.RunContext,
+) <-chan []check.Result {
 	future := make(chan []check.Result)
 
 	go func() {

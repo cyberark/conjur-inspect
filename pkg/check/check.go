@@ -1,5 +1,7 @@
 package check
 
+import "github.com/cyberark/conjur-inspect/pkg/output"
+
 // STATUS_INFO means the result is informational only
 const STATUS_INFO = "INFO"
 
@@ -19,9 +21,17 @@ const STATUS_ERROR = "ERROR"
 // etc.) that returns one or more result.
 type Check interface {
 	Describe() string
-	Run() <-chan []Result
+	Run(context *RunContext) <-chan []Result
 }
 
+// RunContext is container of other services available to checks within the
+// context of a particular report run.
+type RunContext struct {
+	OutputStore output.Store
+}
+
+// Result is the outcome of a particular check. A check may produce multiple
+// results.
 type Result struct {
 	Title   string `json:"title"`
 	Value   string `json:"value"`

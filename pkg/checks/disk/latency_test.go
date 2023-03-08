@@ -16,7 +16,7 @@ func TestLatencyCheck(t *testing.T) {
 	testCheck := &LatencyCheck{
 		fioNewJob: newSuccessfulLatencyFioJob,
 	}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	assert.Equal(t, 3, len(results), "There are disk latency results present")
@@ -30,7 +30,7 @@ func TestLatencyCheckWithPoorPerformance(t *testing.T) {
 	testCheck := &LatencyCheck{
 		fioNewJob: newPoorLatencyPerformanceFioJob,
 	}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	assert.Equal(t, 3, len(results), "There are disk latency results present")
@@ -44,7 +44,7 @@ func TestLatencyWithError(t *testing.T) {
 	testCheck := &LatencyCheck{
 		fioNewJob: newErrorFioJob,
 	}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	// Expect only the error result
@@ -60,7 +60,7 @@ func TestLatencyWithNoJobs(t *testing.T) {
 	testCheck := &LatencyCheck{
 		fioNewJob: newEmptyFioJob,
 	}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	// Expect only the error result
@@ -83,7 +83,7 @@ func TestLatencyWithWorkingDirectoryError(t *testing.T) {
 	testCheck := &LatencyCheck{
 		fioNewJob: newSuccessfulLatencyFioJob,
 	}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	assert.Equal(t, 3, len(results), "There are disk latency results present")

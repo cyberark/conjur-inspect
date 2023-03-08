@@ -12,7 +12,7 @@ import (
 
 func TestSpaceCheck(t *testing.T) {
 	testCheck := &SpaceCheck{}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	assert.Greater(t, len(results), 0, "There are disk space results present")
@@ -43,7 +43,7 @@ func TestPartitionListError(t *testing.T) {
 	}()
 
 	testCheck := &SpaceCheck{}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	assert.Len(t, results, 1)
@@ -62,7 +62,7 @@ func TestDiskUsageError(t *testing.T) {
 	}()
 
 	testCheck := &SpaceCheck{}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	assert.Empty(t, results)

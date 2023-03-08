@@ -10,7 +10,7 @@ import (
 
 func TestCpuRun(t *testing.T) {
 	testCheck := &Cpu{}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	// Ensure the result includes a CPU Cores value

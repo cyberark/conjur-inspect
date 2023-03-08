@@ -11,7 +11,7 @@ import (
 
 func TestMemoryRun(t *testing.T) {
 	testCheck := &Memory{}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	memoryTotal := GetResultByTitle(results, "Memory Total")
@@ -39,7 +39,7 @@ func TestMemoryRunError(t *testing.T) {
 	}()
 
 	testCheck := &Memory{}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	assert.Len(t, results, 1)

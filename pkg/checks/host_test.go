@@ -12,7 +12,7 @@ import (
 
 func TestHostRun(t *testing.T) {
 	testCheck := &Host{}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	hostname := GetResultByTitle(results, "Hostname")
@@ -45,7 +45,7 @@ func TestHostRunError(t *testing.T) {
 	}()
 
 	testCheck := &Host{}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	errResult := results[0]
@@ -62,7 +62,7 @@ func TestHostRunNoVirtualization(t *testing.T) {
 	}()
 
 	testCheck := &Host{}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	virtualization := GetResultByTitle(results, "Virtualization")

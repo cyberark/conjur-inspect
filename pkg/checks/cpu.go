@@ -18,7 +18,7 @@ func (*Cpu) Describe() string {
 }
 
 // Run executes the CPU inspection checks
-func (cpu *Cpu) Run() <-chan []check.Result {
+func (cpu *Cpu) Run(_context *check.RunContext) <-chan []check.Result {
 	future := make(chan []check.Result)
 
 	// TODO: Can we return avg recent utilization?

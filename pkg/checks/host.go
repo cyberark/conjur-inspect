@@ -22,7 +22,7 @@ func (*Host) Describe() string {
 }
 
 // Run executes the Host inspection checks
-func (*Host) Run() <-chan []check.Result {
+func (*Host) Run(context *check.RunContext) <-chan []check.Result {
 	future := make(chan []check.Result)
 
 	go func() {

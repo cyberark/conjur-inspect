@@ -3,6 +3,7 @@ package cmd
 import (
 	"io"
 	"os"
+	"time"
 
 	"github.com/cyberark/conjur-inspect/pkg/formatting"
 	"github.com/cyberark/conjur-inspect/pkg/log"
@@ -11,13 +12,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
-
-}
-
 func newRootCommand() *cobra.Command {
 	var debug bool
 	var jsonOutput bool
+
+	var rawDataDir string
+	var reportID string
 
 	rootCmd := &cobra.Command{
 		Use:   "conjur-inspect",
@@ -27,7 +27,14 @@ func newRootCommand() *cobra.Command {
 				log.EnableDebugMode()
 			}
 
-			report := report.NewDefaultReport(debug)
+			report, err := report.NewDefaultReport(
+				debug,
+				reportID,
+				rawDataDir,
+			)
+			if err != nil {
+				return err
+			}
 
 			log.Debug("Running report...")
 			result := report.Run()
@@ -51,7 +58,7 @@ func newRootCommand() *cobra.Command {
 			}
 
 			// Write the report result
-			err := writer.Write(cmd.OutOrStdout(), &result)
+			err = writer.Write(cmd.OutOrStdout(), &result)
 			if err != nil {
 				return err
 			}
@@ -78,6 +85,25 @@ func newRootCommand() *cobra.Command {
 		"j",
 		false,
 		"Output report in JSON",
+	)
+
+	rootCmd.PersistentFlags().StringVarP(
+		&rawDataDir,
+		"data-output-dir",
+		"",  // No shorthand
+		".", // Default is the current working directory
+		"Where to save the raw data archive",
+	)
+
+	rootCmd.PersistentFlags().StringVarP(
+		&reportID,
+		"report-id",
+		"", // No shorthand
+
+		// This time stamp defines a custom format in golang, see here for more info:
+		// https://pkg.go.dev/time#pkg-constants
+		time.Now().Format("2006-01-02-15-04-05"), // Default is the current timestamp
+		"Correlation identifier used for the raw data archive and report output",
 	)
 
 	// TODO: Ability to adjust requirement criteria (PASS, WARN, FAIL checks)

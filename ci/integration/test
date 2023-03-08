@@ -81,6 +81,8 @@ run_integration_test() {
     "${image}" \
       /conjur-inspect/dist/conjur-inspect_linux_amd64_v1/conjur-inspect \
         --debug \
+        --report-id "$name" \
+        --data-output-dir "/conjur-inspect/ci/integration/results" \
       | tee "./results/${name}.txt"
 }
 
