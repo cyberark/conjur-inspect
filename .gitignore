@@ -25,3 +25,4 @@ VERSION
 ci/integration/results/
 
 .DS_Store
+coverage.html
