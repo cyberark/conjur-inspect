@@ -54,7 +54,7 @@ func (iopsCheck *IopsCheck) Run(
 			future <- []check.Result{
 				{
 					Title:   "FIO IOPs",
-					Status:  check.STATUS_ERROR,
+					Status:  check.StatusError,
 					Value:   "N/A",
 					Message: err.Error(),
 				},
@@ -68,7 +68,7 @@ func (iopsCheck *IopsCheck) Run(
 			future <- []check.Result{
 				{
 					Title:   "FIO IOPs",
-					Status:  check.STATUS_ERROR,
+					Status:  check.StatusError,
 					Value:   "N/A",
 					Message: "No job results returned by 'fio'",
 				},
@@ -89,9 +89,9 @@ func (iopsCheck *IopsCheck) Run(
 func fioReadIopsResult(job *fio.JobResult) check.Result {
 
 	// 50 iops min from https://etcd.io/docs/v3.3/op-guide/hardware/
-	status := check.STATUS_INFO
+	status := check.StatusInfo
 	if job.Read.Iops < 50 {
-		status = check.STATUS_WARN
+		status = check.StatusWarn
 	}
 
 	// Format title
@@ -121,9 +121,9 @@ func fioReadIopsResult(job *fio.JobResult) check.Result {
 func fioWriteIopsResult(job *fio.JobResult) check.Result {
 
 	// 50 iops min from https://etcd.io/docs/v3.3/op-guide/hardware/
-	status := check.STATUS_INFO
+	status := check.StatusInfo
 	if job.Write.Iops < 50 {
-		status = check.STATUS_WARN
+		status = check.StatusWarn
 	}
 
 	// Format title

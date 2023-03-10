@@ -98,13 +98,13 @@ func resultLine(result check.Result) string {
 
 func statusColor(status string) string {
 	switch status {
-	case check.STATUS_ERROR:
+	case check.StatusError:
 		return color.Red
-	case check.STATUS_FAIL:
+	case check.StatusFail:
 		return color.Red
-	case check.STATUS_WARN:
+	case check.StatusWarn:
 		return color.Yellow
-	case check.STATUS_PASS:
+	case check.StatusPass:
 		return color.Green
 	}
 

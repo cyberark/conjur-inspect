@@ -36,7 +36,7 @@ func (follower *Follower) Run(context *check.RunContext) <-chan []check.Result {
 			future <- []check.Result{
 				{
 					Title:   "Leader Hostname",
-					Status:  check.STATUS_ERROR,
+					Status:  check.StatusError,
 					Value:   "N/A",
 					Message: "Leader hostname is not set. Set the 'MASTER_HOSTNAME' environment variable to run this check",
 				},
@@ -71,7 +71,7 @@ func (follower *Follower) Run(context *check.RunContext) <-chan []check.Result {
 
 			leaderPort, err := checkPort(hostname, &leaderPort)
 			if err != nil {
-				result.Status = check.STATUS_ERROR
+				result.Status = check.StatusError
 				result.Value = "N/A"
 				result.Message = err.Error()
 				results = append(results, result)
@@ -79,7 +79,7 @@ func (follower *Follower) Run(context *check.RunContext) <-chan []check.Result {
 				continue
 			}
 
-			result.Status = check.STATUS_INFO
+			result.Status = check.StatusInfo
 			result.Value = net.JoinHostPort(hostname, leaderPort.Port)
 			result.Message = fmt.Sprintf("Port: %s is open", leaderPort.Port)
 

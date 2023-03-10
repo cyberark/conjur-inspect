@@ -35,7 +35,7 @@ func (*SpaceCheck) Run(context *check.RunContext) <-chan []check.Result {
 			future <- []check.Result{
 				{
 					Title:  "Error",
-					Status: check.STATUS_ERROR,
+					Status: check.StatusError,
 					Value:  fmt.Sprintf("%s", err),
 				},
 			}
@@ -82,7 +82,7 @@ func partitionDiskSpaceResult(
 			usage.Fstype,
 			partition.Mountpoint,
 		),
-		Status: check.STATUS_INFO,
+		Status: check.StatusInfo,
 		Value: fmt.Sprintf(
 			"%s Total, %s Used (%s), %s Free",
 			humanize.Bytes(usage.Total),

@@ -32,7 +32,7 @@ func (*Host) Run(context *check.RunContext) <-chan []check.Result {
 			future <- []check.Result{
 				{
 					Title:  "Error",
-					Status: check.STATUS_ERROR,
+					Status: check.StatusError,
 					Value:  fmt.Sprintf("%s", err),
 				},
 			}
@@ -54,7 +54,7 @@ func (*Host) Run(context *check.RunContext) <-chan []check.Result {
 func hostnameResult(hostInfo *host.InfoStat) check.Result {
 	return check.Result{
 		Title:  "Hostname",
-		Status: check.STATUS_INFO,
+		Status: check.StatusInfo,
 		Value:  hostInfo.Hostname,
 	}
 }
@@ -62,7 +62,7 @@ func hostnameResult(hostInfo *host.InfoStat) check.Result {
 func uptimeResult(hostInfo *host.InfoStat) check.Result {
 	return check.Result{
 		Title:  "Uptime",
-		Status: check.STATUS_INFO,
+		Status: check.StatusInfo,
 		Value:  durafmt.Parse(time.Duration(hostInfo.Uptime) * time.Second).String(),
 	}
 }
@@ -70,7 +70,7 @@ func uptimeResult(hostInfo *host.InfoStat) check.Result {
 func osResult(hostInfo *host.InfoStat) check.Result {
 	return check.Result{
 		Title:  "OS",
-		Status: check.STATUS_INFO,
+		Status: check.StatusInfo,
 		Value: fmt.Sprintf(
 			"%s, %s, %s, %s",
 			hostInfo.OS,
@@ -85,14 +85,14 @@ func virtualizationResult(hostInfo *host.InfoStat) check.Result {
 	if hostInfo.VirtualizationSystem == "" {
 		return check.Result{
 			Title:  "Virtualization",
-			Status: check.STATUS_INFO,
+			Status: check.StatusInfo,
 			Value:  "None",
 		}
 	}
 
 	return check.Result{
 		Title:  "Virtualization",
-		Status: check.STATUS_INFO,
+		Status: check.StatusInfo,
 		Value: fmt.Sprintf(
 			"%s (%s)",
 			hostInfo.VirtualizationSystem,

@@ -48,7 +48,7 @@ func (latencyCheck *LatencyCheck) Run(
 			future <- []check.Result{
 				{
 					Title:   "FIO Latency",
-					Status:  check.STATUS_ERROR,
+					Status:  check.StatusError,
 					Value:   "N/A",
 					Message: err.Error(),
 				},
@@ -62,7 +62,7 @@ func (latencyCheck *LatencyCheck) Run(
 			future <- []check.Result{
 				{
 					Title:   "FIO Latency",
-					Status:  check.STATUS_ERROR,
+					Status:  check.StatusError,
 					Value:   "N/A",
 					Message: "No job results returned by 'fio'",
 				},
@@ -87,9 +87,9 @@ func fioReadLatencyResult(jobResult *fio.JobResult) check.Result {
 
 	latMsStr := fmt.Sprintf("%0.2f ms", latMs)
 
-	status := check.STATUS_INFO
+	status := check.StatusInfo
 	if latMs > 10.0 {
-		status = check.STATUS_WARN
+		status = check.StatusWarn
 	}
 
 	path, err := getWorkingDirectory()
@@ -111,9 +111,9 @@ func fioWriteLatencyResult(jobResult *fio.JobResult) check.Result {
 
 	latMsStr := fmt.Sprintf("%0.2f ms", latMs)
 
-	status := check.STATUS_INFO
+	status := check.StatusInfo
 	if latMs > 10.0 {
-		status = check.STATUS_WARN
+		status = check.StatusWarn
 	}
 
 	path, err := getWorkingDirectory()
@@ -135,9 +135,9 @@ func fioSyncLatencyResult(jobResult *fio.JobResult) check.Result {
 
 	latMsStr := fmt.Sprintf("%0.2f ms", latMs)
 
-	status := check.STATUS_INFO
+	status := check.StatusInfo
 	if latMs > 10.0 {
-		status = check.STATUS_WARN
+		status = check.StatusWarn
 	}
 
 	path, err := getWorkingDirectory()

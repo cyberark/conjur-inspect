@@ -16,17 +16,17 @@ func TestMemoryRun(t *testing.T) {
 
 	memoryTotal := GetResultByTitle(results, "Memory Total")
 	assert.NotNil(t, memoryTotal, "Includes 'Memory Total'")
-	assert.Equal(t, check.STATUS_INFO, memoryTotal.Status)
+	assert.Equal(t, check.StatusInfo, memoryTotal.Status)
 	assert.NotEmpty(t, memoryTotal.Value)
 
 	memoryFree := GetResultByTitle(results, "Memory Free")
 	assert.NotNil(t, memoryFree, "Includes 'Memory Free'")
-	assert.Equal(t, check.STATUS_INFO, memoryFree.Status)
+	assert.Equal(t, check.StatusInfo, memoryFree.Status)
 	assert.NotEmpty(t, memoryFree.Value)
 
 	memoryUsed := GetResultByTitle(results, "Memory Used")
 	assert.NotNil(t, memoryUsed, "Includes 'Memory Used'")
-	assert.Equal(t, check.STATUS_INFO, memoryUsed.Status)
+	assert.Equal(t, check.StatusInfo, memoryUsed.Status)
 	assert.NotEmpty(t, memoryUsed.Value)
 }
 

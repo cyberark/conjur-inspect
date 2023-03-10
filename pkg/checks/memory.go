@@ -31,7 +31,7 @@ func (memory *Memory) Run(context *check.RunContext) <-chan []check.Result {
 			future <- []check.Result{
 				{
 					Title:  "Error",
-					Status: check.STATUS_ERROR,
+					Status: check.StatusError,
 					Value:  fmt.Sprintf("%s", err),
 				},
 			}
@@ -42,17 +42,17 @@ func (memory *Memory) Run(context *check.RunContext) <-chan []check.Result {
 		future <- []check.Result{
 			{
 				Title:  "Memory Total",
-				Status: check.STATUS_INFO,
+				Status: check.StatusInfo,
 				Value:  humanize.Bytes(v.Total),
 			},
 			{
 				Title:  "Memory Free",
-				Status: check.STATUS_INFO,
+				Status: check.StatusInfo,
 				Value:  humanize.Bytes(v.Free),
 			},
 			{
 				Title:  "Memory Used",
-				Status: check.STATUS_INFO,
+				Status: check.StatusInfo,
 				Value: fmt.Sprintf(
 					"%s (%.1f %%)",
 					humanize.Bytes(v.Used),

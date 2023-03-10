@@ -26,13 +26,13 @@ func (cpu *Cpu) Run(_context *check.RunContext) <-chan []check.Result {
 		future <- []check.Result{
 			{
 				Title:   "CPU Cores",
-				Status:  check.STATUS_INFO,
+				Status:  check.StatusInfo,
 				Value:   strconv.Itoa(runtime.NumCPU()),
 				Message: "",
 			},
 			{
 				Title:  "CPU Architecture",
-				Status: check.STATUS_INFO,
+				Status: check.StatusInfo,
 				Value:  runtime.GOARCH,
 			},
 		}

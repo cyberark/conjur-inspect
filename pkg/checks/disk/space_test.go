@@ -24,7 +24,7 @@ func TestSpaceCheck(t *testing.T) {
 			result.Title,
 			"Disk space title matches the expected format",
 		)
-		assert.Equal(t, check.STATUS_INFO, result.Status)
+		assert.Equal(t, check.StatusInfo, result.Status)
 		assert.Regexp(
 			t,
 			regexp.MustCompile(`.+ Total, .+ Used \( ?\d+%\), .+ Free`),
