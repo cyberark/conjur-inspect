@@ -5,6 +5,6 @@ services:
       context: .
       dockerfile: Dockerfile
     privileged: true
-    working_dir: /conjur-preflight
+    working_dir: /conjur-inspect
     volumes:
-      - ../:/conjur-preflight
+      - ../:/conjur-inspect

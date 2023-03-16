@@ -3,7 +3,7 @@ package report_test
 import (
 	"testing"
 
-	"github.com/conjurinc/conjur-preflight/pkg/report"
+	"github.com/cyberark/conjur-inspect/pkg/report"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -1,7 +1,7 @@
 package report
 
 import (
-	"github.com/conjurinc/conjur-preflight/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/framework"
 )
 
 // Result contains each sections check result

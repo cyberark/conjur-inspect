@@ -4,7 +4,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/conjurinc/conjur-preflight/pkg/cmd"
+	"github.com/cyberark/conjur-inspect/pkg/cmd"
 )
 
 var cmdStdout, cmdStderr io.Writer

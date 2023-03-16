@@ -1,5 +1,5 @@
 ---
-project_name: conjur-preflight
+project_name: conjur-inspect
 
 before:
   hooks:
@@ -9,8 +9,8 @@ before:
     - go generate ./...
 
 builds:
-  - main: ./cmd/conjur-preflight
-    binary: conjur-preflight
+  - main: ./cmd/conjur-inspect
+    binary: conjur-inspect
     env:
       - CGO_ENABLED=0
     # Tag 'netgo' is a Go build tag that ensures a pure Go networking stack
@@ -28,18 +28,18 @@ builds:
     # of `CONTRIBUTING.md` for more information.
     ldflags:
       - -w
-      - -X github.com/conjurinc/conjur-preflight/pkg/version.Commit={{ .ShortCommit }}
-      - -X github.com/conjurinc/conjur-preflight/pkg/version.Version={{ .Env.VERSION }}
-      - -X github.com/conjurinc/conjur-preflight/pkg/version.BuildNumber={{ .Env.BUILD_NUMBER }}
+      - -X github.com/cyberark/conjur-inspect/pkg/version.Commit={{ .ShortCommit }}
+      - -X github.com/cyberark/conjur-inspect/pkg/version.Version={{ .Env.VERSION }}
+      - -X github.com/cyberark/conjur-inspect/pkg/version.BuildNumber={{ .Env.BUILD_NUMBER }}
     hooks:
       post:
         # Copy the binary out into the <dist> path, and give the copy the name we
         # want in the release <extra_files>.
         - mkdir -p "{{ dir .Path }}/../binaries"
-        - cp "{{ .Path }}" "{{ dir .Path }}/../binaries/conjur-preflight{{ .Target }}{{ .Ext }}"
+        - cp "{{ .Path }}" "{{ dir .Path }}/../binaries/conjur-inspect{{ .Target }}{{ .Ext }}"
 
 archives:
-  - id: conjur-preflight-archive
+  - id: conjur-inspect-archive
     files:
       - CHANGELOG.md
       - LICENSE
@@ -52,7 +52,7 @@ checksum:
 
 nfpms:
   - bindir: /usr/bin
-    description: CyberArk Conjur Enterprise Preflight Qualification Tool
+    description: CyberArk Conjur Enterprise Inspection Tool
     file_name_template: "{{.ProjectName}}_{{.Env.VERSION}}_{{.Arch}}"
     formats:
       - deb

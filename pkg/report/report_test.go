@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/conjurinc/conjur-preflight/pkg/formatting"
-	"github.com/conjurinc/conjur-preflight/pkg/framework"
-	"github.com/conjurinc/conjur-preflight/pkg/report"
+	"github.com/cyberark/conjur-inspect/pkg/formatting"
+	"github.com/cyberark/conjur-inspect/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/report"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -81,7 +81,7 @@ func TestReport(t *testing.T) {
 	assert.Equal(
 		t,
 		"\033[1m========================================\n"+
-			"Conjur Enterprise Preflight Qualification\n"+
+			"Conjur Enterprise Inspection Report\n"+
 			"Version: unset-unset (Build unset)\n"+
 			"========================================\033[0m\n\n"+
 			"\033[1mTest section\n"+

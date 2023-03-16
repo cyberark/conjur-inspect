@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/conjurinc/conjur-preflight/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/framework"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/stretchr/testify/assert"
 )

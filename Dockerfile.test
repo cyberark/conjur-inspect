@@ -1,6 +1,6 @@
 FROM golang:1.19-alpine
 LABEL MAINTAINER CyberArk Software Ltd.
-LABEL id="conjur-preflight-test-runner"
+LABEL id="conjur-inspect-test-runner"
 
 # On CyberArk dev laptops, golang module dependencies are downloaded with a
 # corporate proxy in the middle. For these connections to succeed we need to
@@ -13,7 +13,7 @@ LABEL id="conjur-preflight-test-runner"
 ADD build_ca_certificate /usr/local/share/ca-certificates/
 RUN update-ca-certificates
 
-WORKDIR /conjur-preflight
+WORKDIR /conjur-inspect
 
 RUN apk add -u curl \
                gcc \
@@ -21,7 +21,7 @@ RUN apk add -u curl \
                mercurial \
                musl-dev
 
-COPY go.mod go.sum /conjur-preflight/
+COPY go.mod go.sum /conjur-inspect/
 
 RUN go mod download
 

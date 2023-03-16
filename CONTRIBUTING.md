@@ -22,7 +22,7 @@ environment with:
 $ cd dev
 $ ./start
 ...
-[root@a0a4483ca6c9 conjur-preflight]#
+[root@a0a4483ca6c9 conjur-inspect]#
 ```
 
 This starts a development container and begins a terminal within. Then run

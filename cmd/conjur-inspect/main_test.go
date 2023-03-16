@@ -13,7 +13,7 @@ func TestMain(t *testing.T) {
 	originalArgs := os.Args
 
 	// Sanity test for the program entrypoint
-	os.Args = []string{"conjur-preflight"}
+	os.Args = []string{"conjur-inspect"}
 
 	// Use local buffers rather than actually standard out and error
 	var localStdout, localStderr bytes.Buffer
@@ -26,7 +26,7 @@ func TestMain(t *testing.T) {
 	assert.Contains(
 		t,
 		localStdout.String(),
-		"Conjur Enterprise Preflight Qualification",
+		"Conjur Enterprise Inspection Report",
 	)
 
 	assert.Empty(t, localStderr.String())
@@ -40,7 +40,7 @@ func TestMainError(t *testing.T) {
 	originalArgs := os.Args
 
 	// Sanity test for the program entrypoint
-	os.Args = []string{"conjur-preflight", "bogus"}
+	os.Args = []string{"conjur-inspect", "bogus"}
 
 	// Use local buffers rather than actually standard out and error
 	var localStdout, localStderr bytes.Buffer
@@ -53,7 +53,7 @@ func TestMainError(t *testing.T) {
 	assert.Contains(
 		t,
 		localStdout.String(),
-		"Conjur Enterprise Preflight Qualification",
+		"Conjur Enterprise Inspection Report",
 	)
 
 	assert.Empty(t, localStderr.String())

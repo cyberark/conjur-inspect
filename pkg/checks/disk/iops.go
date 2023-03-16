@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/conjurinc/conjur-preflight/pkg/checks/disk/fio"
-	"github.com/conjurinc/conjur-preflight/pkg/framework"
-	"github.com/conjurinc/conjur-preflight/pkg/log"
+	"github.com/cyberark/conjur-inspect/pkg/checks/disk/fio"
+	"github.com/cyberark/conjur-inspect/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/log"
 )
 
 const iopsJobName = "conjur-fio-iops"
 
-// IopsCheck is a pre-flight check to report the read and write IOPs for the
-// directory in which `conjur-preflight` is run.
+// IopsCheck is a inspection check to report the read and write IOPs for the
+// directory in which `conjur-inspect` is run.
 type IopsCheck struct {
 	// When debug mode is enabled, the IOPs check will write the full fio
 	// results to a file.

@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.3.0] - 2023-01-26
 
+### Changed
+- Renamed `conjur-preflight` to `conjur-inspect`.
+  [cyberark/conjur-inspect#30](https://github.com/cyberark/conjur-inspect/pull/30)
+
 ### Added
 - `conjur-preflight` now has a follower port connectivity report where it checks
   if the required ports that the follower needs to be deployed are open.

@@ -1,6 +1,6 @@
 package report
 
-import "github.com/conjurinc/conjur-preflight/pkg/framework"
+import "github.com/cyberark/conjur-inspect/pkg/framework"
 
 // Section is the category of check
 type Section struct {

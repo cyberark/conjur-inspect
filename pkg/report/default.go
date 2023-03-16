@@ -1,12 +1,12 @@
 package report
 
 import (
-	"github.com/conjurinc/conjur-preflight/pkg/checks"
-	"github.com/conjurinc/conjur-preflight/pkg/checks/disk"
-	"github.com/conjurinc/conjur-preflight/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/checks"
+	"github.com/cyberark/conjur-inspect/pkg/checks/disk"
+	"github.com/cyberark/conjur-inspect/pkg/framework"
 )
 
-// NewDefaultReport returns a report containing the standard pre-flight checks
+// NewDefaultReport returns a report containing the standard inspection checks
 func NewDefaultReport(debug bool) *Report {
 	return &Report{
 		Sections: []Section{

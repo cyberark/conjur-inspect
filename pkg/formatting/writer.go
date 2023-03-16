@@ -3,7 +3,7 @@ package formatting
 import (
 	"io"
 
-	"github.com/conjurinc/conjur-preflight/pkg/report"
+	"github.com/cyberark/conjur-inspect/pkg/report"
 )
 
 // Writer represents an object than can render a

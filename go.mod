@@ -1,4 +1,4 @@
-module github.com/conjurinc/conjur-preflight
+module github.com/cyberark/conjur-inspect
 
 go 1.19
 

@@ -76,10 +76,10 @@ run_integration_test() {
   docker run \
     --rm \
     --name="$name" \
-    --volume="${REPO_ROOT}:/conjur-preflight" \
+    --volume="${REPO_ROOT}:/conjur-inspect" \
     "$@" \
     "${image}" \
-      /conjur-preflight/dist/conjur-preflight_linux_amd64_v1/conjur-preflight \
+      /conjur-inspect/dist/conjur-inspect_linux_amd64_v1/conjur-inspect \
         --debug \
       | tee "./results/${name}.txt"
 }
