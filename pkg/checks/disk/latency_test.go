@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/conjurinc/conjur-preflight/pkg/checks/disk/fio"
-	"github.com/conjurinc/conjur-preflight/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/checks/disk/fio"
+	"github.com/cyberark/conjur-inspect/pkg/framework"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -4,10 +4,10 @@ import (
 	"io"
 	"os"
 
-	"github.com/conjurinc/conjur-preflight/pkg/formatting"
-	"github.com/conjurinc/conjur-preflight/pkg/log"
-	"github.com/conjurinc/conjur-preflight/pkg/report"
-	"github.com/conjurinc/conjur-preflight/pkg/version"
+	"github.com/cyberark/conjur-inspect/pkg/formatting"
+	"github.com/cyberark/conjur-inspect/pkg/log"
+	"github.com/cyberark/conjur-inspect/pkg/report"
+	"github.com/cyberark/conjur-inspect/pkg/version"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +20,7 @@ func newRootCommand() *cobra.Command {
 	var jsonOutput bool
 
 	rootCmd := &cobra.Command{
-		Use:   "conjur-preflight",
+		Use:   "conjur-inspect",
 		Short: "Qualification CLI for common Conjur Enterprise self-hosted issues",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if debug {
@@ -56,7 +56,7 @@ func newRootCommand() *cobra.Command {
 				return err
 			}
 
-			log.Debug("Preflight finished!")
+			log.Debug("Inspection finished!")
 			return nil
 		},
 		Version: version.FullVersionName,
@@ -70,8 +70,8 @@ func newRootCommand() *cobra.Command {
 		"debug logging output",
 	)
 
-	// Create json flag for the conjur-preflight command to output a report.
-	// Usage: conjur-preflight --json or -j
+	// Create json flag for the conjur-inspect command to output a report.
+	// Usage: conjur-inspect --json or -j
 	rootCmd.PersistentFlags().BoolVarP(
 		&jsonOutput,
 		"json",

@@ -6,7 +6,7 @@ import (
 	"github.com/TwiN/go-color"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/conjurinc/conjur-preflight/pkg/formatting"
+	"github.com/cyberark/conjur-inspect/pkg/formatting"
 )
 
 func TestRichTextFormatStrategy(t *testing.T) {

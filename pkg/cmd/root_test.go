@@ -49,7 +49,7 @@ func TestExecuteWithJSONOutput(t *testing.T) {
 	stderr := io.Discard
 
 	// Execute the root command with the json flag set
-	os.Args = []string{"conjur-preflight", "--json"}
+	os.Args = []string{"conjur-inspect", "--json"}
 	Execute(&stdout, stderr)
 
 	// Test that the output is not empty
@@ -66,7 +66,7 @@ func TestExecuteWithDebugOutput(t *testing.T) {
 	stderr := io.Discard
 
 	// Execute the root command with the debug flag set
-	os.Args = []string{"conjur-preflight", "--debug"}
+	os.Args = []string{"conjur-inspect", "--debug"}
 	Execute(&stdout, stderr)
 
 	// Test that the output is not empty

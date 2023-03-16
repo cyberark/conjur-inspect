@@ -87,12 +87,12 @@ pipeline {
             onlyStable: false,
             sourceEncoding: 'ASCII',
             zoomCoverageChart: false
-            ccCoverage("gocov", "--prefix github.com/conjurinc/conjur-preflight")
+            ccCoverage("gocov", "--prefix github.com/cyberark/conjur-inspect")
         }
       }
     }
 
-    // This produces the conjur-preflight binaries for integration tests and
+    // This produces the conjur-inspect binaries for integration tests and
     // pushing a release when this is a RELEASE build.
     stage('Create Release Assets') {
       steps {
@@ -127,7 +127,7 @@ pipeline {
           // Copy any artifacts to assetDirectory to attach them to the Github release
 
           // Create Go application SBOM using the go.mod version for the golang container image
-          sh """go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --main "cmd/conjur-preflight/" --output "${billOfMaterialsDirectory}/go-app-bom.json" """
+          sh """go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --main "cmd/conjur-inspect/" --output "${billOfMaterialsDirectory}/go-app-bom.json" """
           // Create Go module SBOM
           sh """go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --output "${billOfMaterialsDirectory}/go-mod-bom.json" """
 

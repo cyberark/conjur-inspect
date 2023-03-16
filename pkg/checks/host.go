@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/conjurinc/conjur-preflight/pkg/framework"
-	"github.com/conjurinc/conjur-preflight/pkg/log"
+	"github.com/cyberark/conjur-inspect/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/log"
 	"github.com/hako/durafmt"
 	"github.com/shirou/gopsutil/v3/host"
 )

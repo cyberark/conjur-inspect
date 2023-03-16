@@ -21,14 +21,14 @@ function main() {
 
 function build_docker_ut_image() {
   echo "Building unit test image..."
-  docker build -f Dockerfile.test -t conjur-preflight-test-runner:latest .
+  docker build -f Dockerfile.test -t conjur-inspect-test-runner:latest .
 }
 
 function run_unit_tests() {
   echo "Running unit tests..."
   docker run --rm -t \
-             --volume "$PWD"/:/conjur-preflight/test/ \
-             conjur-preflight-test-runner:latest \
+             --volume "$PWD"/:/conjur-inspect/test/ \
+             conjur-inspect-test-runner:latest \
              -count=1 \
              -coverpkg=./... \
              -coverprofile="./test/c.out" \
@@ -40,14 +40,14 @@ function run_unit_tests() {
 function build_docker_junit_image() {
   rm -f junit.xml
   echo "Building junit image..."
-  docker build -f Dockerfile.junit -t conjur-preflight-junit:latest .
+  docker build -f Dockerfile.junit -t conjur-inspect-junit:latest .
 }
 
 function run_junit_report() {
   echo "Creating junit report and coverage output XML"
   docker run --rm \
     -v "$PWD"/:/test \
-    conjur-preflight-junit:latest \
+    conjur-inspect-junit:latest \
     bash -exc "
       cat ./junit.output | go-junit-report > ./junit.xml ;
       gocov convert ./c.out | gocov-xml > ./coverage.xml

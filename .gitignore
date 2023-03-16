@@ -11,9 +11,9 @@ dev/tmp
 build_ca_certificate
 
 # CLI binaries
-conjur-preflight
+conjur-inspect
 # Exclude binary entrypoint
-!cmd/conjur-preflight
+!cmd/conjur-inspect
 
 # Don't include auto-generated version file
 VERSION

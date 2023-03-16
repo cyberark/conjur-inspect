@@ -18,16 +18,16 @@ our certification levels, see
 
 ## Getting Started
 
-To run the Conjur Preflight tool, download the latest version for your system
-architecture from [Releases](https://github.com/conjurinc/conjur-preflight/releases)
+To run the Conjur Inspect tool, download the latest version for your system
+architecture from [Releases](https://github.com/cyberark/conjur-inspect/releases)
 to your target host machine. This is the machine or VM where the Conjur
 Enterprise container will run.
 
 Extract the tool, enable it to execute, and run it with:
 ```sh-session
-$ tar -xvf conjur-preflight-1.0.0_amd64.tgz
-$ chmod +x conjur-preflight-1.0.0_amd64
-$ ./conjur-preflight-1.0.0_amd64
+$ tar -xvf conjur-inspect-1.0.0_amd64.tgz
+$ chmod +x conjur-inspect-1.0.0_amd64
+$ ./conjur-inspect-1.0.0_amd64
 ...
 PASS / WARN / FAIL / ERROR
 ```

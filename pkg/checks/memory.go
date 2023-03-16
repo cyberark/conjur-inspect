@@ -3,8 +3,8 @@ package checks
 import (
 	"fmt"
 
-	"github.com/conjurinc/conjur-preflight/pkg/framework"
-	"github.com/conjurinc/conjur-preflight/pkg/log"
+	"github.com/cyberark/conjur-inspect/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/log"
 	"github.com/dustin/go-humanize"
 	"github.com/shirou/gopsutil/v3/mem"
 )

@@ -3,13 +3,13 @@ package disk
 import (
 	"fmt"
 
-	"github.com/conjurinc/conjur-preflight/pkg/checks/disk/fio"
-	"github.com/conjurinc/conjur-preflight/pkg/framework"
-	"github.com/conjurinc/conjur-preflight/pkg/log"
+	"github.com/cyberark/conjur-inspect/pkg/checks/disk/fio"
+	"github.com/cyberark/conjur-inspect/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/log"
 )
 
-// LatencyCheck is a pre-flight check to report the read, write, and sync
-// latency for the directory in which `conjur-preflight` is run.
+// LatencyCheck is a inspection check to report the read, write, and sync
+// latency for the directory in which `conjur-inspect` is run.
 type LatencyCheck struct {
 	// When debug mode is enabled, the latency check will write the full fio
 	// results to a file.

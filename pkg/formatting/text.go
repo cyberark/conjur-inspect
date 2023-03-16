@@ -5,9 +5,9 @@ import (
 	"io"
 	"strings"
 
-	"github.com/conjurinc/conjur-preflight/pkg/framework"
-	"github.com/conjurinc/conjur-preflight/pkg/maybe"
-	"github.com/conjurinc/conjur-preflight/pkg/report"
+	"github.com/cyberark/conjur-inspect/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/maybe"
+	"github.com/cyberark/conjur-inspect/pkg/report"
 
 	"github.com/TwiN/go-color"
 )
@@ -58,7 +58,7 @@ func reportHeader(version string) string {
 	return strings.Join(
 		[]string{
 			"========================================",
-			"Conjur Enterprise Preflight Qualification",
+			"Conjur Enterprise Inspection Report",
 			fmt.Sprintf("Version: %s", version),
 			"========================================",
 		},

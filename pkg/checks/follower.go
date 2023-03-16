@@ -5,10 +5,10 @@ import (
 	"net"
 	"os"
 
-	"github.com/conjurinc/conjur-preflight/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/framework"
 )
 
-// Follower implements a preflight check for the FOLLOWER environment variable.
+// Follower implements a inspection check for the FOLLOWER environment variable.
 type Follower struct {
 }
 

@@ -29,8 +29,8 @@ build_release() {
     --rm \
     --env VERSION="${VERSION}" \
     --env BUILD_NUMBER="${BUILD_NUMBER}" \
-    --volume "${PWD}/:/conjur-preflight/" \
-    --workdir "/conjur-preflight" \
+    --volume "${PWD}/:/conjur-inspect/" \
+    --workdir "/conjur-inspect" \
     "${GORELEASER_IMAGE}" \
       --skip-validate \
       --snapshot \

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/conjurinc/conjur-preflight/pkg/report"
+	"github.com/cyberark/conjur-inspect/pkg/report"
 )
 
 // JSON renders a report result as JSON

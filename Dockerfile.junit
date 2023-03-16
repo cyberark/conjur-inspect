@@ -1,6 +1,6 @@
 FROM golang:1.19-alpine
 LABEL MAINTAINER CyberArk Software Ltd.
-LABEL id="conjur-preflight-junit-processor"
+LABEL id="conjur-inspect-junit-processor"
 
 WORKDIR /test
 

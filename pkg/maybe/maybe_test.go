@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/conjurinc/conjur-preflight/pkg/maybe"
+	"github.com/cyberark/conjur-inspect/pkg/maybe"
 	"github.com/stretchr/testify/assert"
 )
 

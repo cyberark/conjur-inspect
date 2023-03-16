@@ -6,7 +6,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/conjurinc/conjur-preflight/pkg/log"
+	"github.com/cyberark/conjur-inspect/pkg/log"
 )
 
 const fioExecutable = "fio"

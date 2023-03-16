@@ -4,7 +4,7 @@ import (
 	"runtime"
 	"strconv"
 
-	"github.com/conjurinc/conjur-preflight/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/framework"
 )
 
 // Cpu collects inspection information on the host machines CPU cores and

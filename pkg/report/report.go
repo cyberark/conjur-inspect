@@ -5,8 +5,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/conjurinc/conjur-preflight/pkg/framework"
-	"github.com/conjurinc/conjur-preflight/pkg/version"
+	"github.com/cyberark/conjur-inspect/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/version"
 	"github.com/schollz/progressbar/v3"
 )
 
