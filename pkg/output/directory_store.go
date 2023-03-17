@@ -1,7 +1,6 @@
 package output
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"path"
@@ -23,8 +22,6 @@ func NewDirectoryStore(directory string) *DirectoryStore {
 // Save stores a given output to the directory as a file
 func (dirStore *DirectoryStore) Save(name string, reader io.Reader) error {
 	path := path.Join(dirStore.directory, name)
-
-	fmt.Println(path)
 
 	file, err := os.Create(path)
 	if err != nil {
