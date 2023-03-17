@@ -5,14 +5,14 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/cyberark/conjur-inspect/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSpaceCheck(t *testing.T) {
 	testCheck := &SpaceCheck{}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	assert.Greater(t, len(results), 0, "There are disk space results present")
@@ -24,7 +24,7 @@ func TestSpaceCheck(t *testing.T) {
 			result.Title,
 			"Disk space title matches the expected format",
 		)
-		assert.Equal(t, framework.STATUS_INFO, result.Status)
+		assert.Equal(t, check.StatusInfo, result.Status)
 		assert.Regexp(
 			t,
 			regexp.MustCompile(`.+ Total, .+ Used \( ?\d+%\), .+ Free`),
@@ -43,7 +43,7 @@ func TestPartitionListError(t *testing.T) {
 	}()
 
 	testCheck := &SpaceCheck{}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	assert.Len(t, results, 1)
@@ -62,7 +62,7 @@ func TestDiskUsageError(t *testing.T) {
 	}()
 
 	testCheck := &SpaceCheck{}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	assert.Empty(t, results)

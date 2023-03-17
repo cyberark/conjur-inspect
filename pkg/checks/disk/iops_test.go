@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/checks/disk/fio"
-	"github.com/cyberark/conjur-inspect/pkg/framework"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,10 +27,9 @@ func (job *mockFioJob) OnRawOutput(func([]byte)) {
 
 func TestIopsCheck(t *testing.T) {
 	testCheck := &IopsCheck{
-		debug:     true,
 		fioNewJob: newSuccessfulIopsFioJob,
 	}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	assert.Equal(
@@ -40,15 +39,15 @@ func TestIopsCheck(t *testing.T) {
 		"There are read and write IOPs results present",
 	)
 
-	assertReadIopsResult(t, results[0], framework.STATUS_INFO)
-	assertWriteIopsResult(t, results[1], framework.STATUS_INFO)
+	assertReadIopsResult(t, results[0], check.StatusInfo)
+	assertWriteIopsResult(t, results[1], check.StatusInfo)
 }
 
 func TestIopsCheckWithPoorPerformance(t *testing.T) {
 	testCheck := &IopsCheck{
 		fioNewJob: newPoorIopsPerformanceFioJob,
 	}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	assert.Equal(
@@ -58,22 +57,22 @@ func TestIopsCheckWithPoorPerformance(t *testing.T) {
 		"There are read and write IOPs results present",
 	)
 
-	assertReadIopsResult(t, results[0], framework.STATUS_WARN)
-	assertWriteIopsResult(t, results[1], framework.STATUS_WARN)
+	assertReadIopsResult(t, results[0], check.StatusWarn)
+	assertWriteIopsResult(t, results[1], check.StatusWarn)
 }
 
 func TestIopsWithError(t *testing.T) {
 	testCheck := &IopsCheck{
 		fioNewJob: newErrorFioJob,
 	}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	// Expect only the error result
 	assert.Equal(t, 1, len(results))
 
 	assert.Equal(t, "FIO IOPs", results[0].Title)
-	assert.Equal(t, framework.STATUS_ERROR, results[0].Status)
+	assert.Equal(t, check.StatusError, results[0].Status)
 	assert.Equal(t, "N/A", results[0].Value)
 	assert.Equal(t, "test error", results[0].Message)
 }
@@ -82,14 +81,14 @@ func TestIopsWithNoJobs(t *testing.T) {
 	testCheck := &IopsCheck{
 		fioNewJob: newEmptyFioJob,
 	}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	// Expect only the error result
 	assert.Equal(t, 1, len(results))
 
 	assert.Equal(t, "FIO IOPs", results[0].Title)
-	assert.Equal(t, framework.STATUS_ERROR, results[0].Status)
+	assert.Equal(t, check.StatusError, results[0].Status)
 	assert.Equal(t, "N/A", results[0].Value)
 	assert.Equal(t, "No job results returned by 'fio'", results[0].Message)
 }
@@ -103,10 +102,9 @@ func TestIopsWithWorkingDirectoryError(t *testing.T) {
 	}()
 
 	testCheck := &IopsCheck{
-		debug:     true,
 		fioNewJob: newSuccessfulIopsFioJob,
 	}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	assert.Equal(
@@ -116,13 +114,13 @@ func TestIopsWithWorkingDirectoryError(t *testing.T) {
 		"There are read and write IOPs results present",
 	)
 
-	assertReadIopsResult(t, results[0], framework.STATUS_INFO)
-	assertWriteIopsResult(t, results[1], framework.STATUS_INFO)
+	assertReadIopsResult(t, results[0], check.StatusInfo)
+	assertWriteIopsResult(t, results[1], check.StatusInfo)
 }
 
 func assertReadIopsResult(
 	t *testing.T,
-	result framework.CheckResult,
+	result check.Result,
 	expectedStatus string,
 ) {
 	assert.Regexp(
@@ -140,7 +138,7 @@ func assertReadIopsResult(
 
 func assertWriteIopsResult(
 	t *testing.T,
-	result framework.CheckResult,
+	result check.Result,
 	expectedStatus string,
 ) {
 	assert.Regexp(

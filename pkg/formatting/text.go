@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/cyberark/conjur-inspect/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/maybe"
 	"github.com/cyberark/conjur-inspect/pkg/report"
 
@@ -76,7 +76,7 @@ func titleHeader(title string) string {
 	)
 }
 
-func resultLine(result framework.CheckResult) string {
+func resultLine(result check.Result) string {
 	switch {
 	case result.Message == "":
 		return fmt.Sprintf(
@@ -98,13 +98,13 @@ func resultLine(result framework.CheckResult) string {
 
 func statusColor(status string) string {
 	switch status {
-	case framework.STATUS_ERROR:
+	case check.StatusError:
 		return color.Red
-	case framework.STATUS_FAIL:
+	case check.StatusFail:
 		return color.Red
-	case framework.STATUS_WARN:
+	case check.StatusWarn:
 		return color.Yellow
-	case framework.STATUS_PASS:
+	case check.StatusPass:
 		return color.Green
 	}
 

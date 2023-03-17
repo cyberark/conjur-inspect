@@ -1,12 +1,14 @@
 package disk
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 
+	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/checks/disk/fio"
-	"github.com/cyberark/conjur-inspect/pkg/framework"
 	"github.com/cyberark/conjur-inspect/pkg/log"
+	"github.com/cyberark/conjur-inspect/pkg/output"
 )
 
 const iopsJobName = "conjur-fio-iops"
@@ -14,10 +16,6 @@ const iopsJobName = "conjur-fio-iops"
 // IopsCheck is a inspection check to report the read and write IOPs for the
 // directory in which `conjur-inspect` is run.
 type IopsCheck struct {
-	// When debug mode is enabled, the IOPs check will write the full fio
-	// results to a file.
-	debug bool
-
 	// We inject the fio command execution as a dependency that we can swap for
 	// unit testing
 	fioNewJob func(string, []string) fio.Executable
@@ -26,10 +24,8 @@ type IopsCheck struct {
 var getWorkingDirectory func() (string, error) = os.Getwd
 
 // NewIopsCheck instantiates an Iops check with the default dependencies
-func NewIopsCheck(debug bool) *IopsCheck {
+func NewIopsCheck() *IopsCheck {
 	return &IopsCheck{
-		debug: debug,
-
 		// Default dependencies
 		fioNewJob: fio.NewJob,
 	}
@@ -41,18 +37,22 @@ func (*IopsCheck) Describe() string {
 }
 
 // Run executes the IopsCheck by running `fio` and processing its output
-func (iopsCheck *IopsCheck) Run() <-chan []framework.CheckResult {
-	future := make(chan []framework.CheckResult)
+func (iopsCheck *IopsCheck) Run(
+	context *check.RunContext,
+) <-chan []check.Result {
+	future := make(chan []check.Result)
 
 	go func() {
 
-		fioResult, err := iopsCheck.runFioIopsTest()
+		fioResult, err := iopsCheck.runFioIopsTest(
+			context.OutputStore,
+		)
 
 		if err != nil {
-			future <- []framework.CheckResult{
+			future <- []check.Result{
 				{
 					Title:   "FIO IOPs",
-					Status:  framework.STATUS_ERROR,
+					Status:  check.StatusError,
 					Value:   "N/A",
 					Message: err.Error(),
 				},
@@ -63,10 +63,10 @@ func (iopsCheck *IopsCheck) Run() <-chan []framework.CheckResult {
 
 		// Make sure a job exists in the fio results
 		if len(fioResult.Jobs) < 1 {
-			future <- []framework.CheckResult{
+			future <- []check.Result{
 				{
 					Title:   "FIO IOPs",
-					Status:  framework.STATUS_ERROR,
+					Status:  check.StatusError,
 					Value:   "N/A",
 					Message: "No job results returned by 'fio'",
 				},
@@ -75,7 +75,7 @@ func (iopsCheck *IopsCheck) Run() <-chan []framework.CheckResult {
 			return
 		}
 
-		future <- []framework.CheckResult{
+		future <- []check.Result{
 			fioReadIopsResult(&fioResult.Jobs[0]),
 			fioWriteIopsResult(&fioResult.Jobs[0]),
 		}
@@ -84,12 +84,12 @@ func (iopsCheck *IopsCheck) Run() <-chan []framework.CheckResult {
 	return future
 }
 
-func fioReadIopsResult(job *fio.JobResult) framework.CheckResult {
+func fioReadIopsResult(job *fio.JobResult) check.Result {
 
 	// 50 iops min from https://etcd.io/docs/v3.3/op-guide/hardware/
-	status := framework.STATUS_INFO
+	status := check.StatusInfo
 	if job.Read.Iops < 50 {
-		status = framework.STATUS_WARN
+		status = check.StatusWarn
 	}
 
 	// Format title
@@ -109,19 +109,19 @@ func fioReadIopsResult(job *fio.JobResult) framework.CheckResult {
 		job.Read.IopsStddev,
 	)
 
-	return framework.CheckResult{
+	return check.Result{
 		Title:  titleStr,
 		Status: status,
 		Value:  valueStr,
 	}
 }
 
-func fioWriteIopsResult(job *fio.JobResult) framework.CheckResult {
+func fioWriteIopsResult(job *fio.JobResult) check.Result {
 
 	// 50 iops min from https://etcd.io/docs/v3.3/op-guide/hardware/
-	status := framework.STATUS_INFO
+	status := check.StatusInfo
 	if job.Write.Iops < 50 {
-		status = framework.STATUS_WARN
+		status = check.StatusWarn
 	}
 
 	// Format title
@@ -141,14 +141,16 @@ func fioWriteIopsResult(job *fio.JobResult) framework.CheckResult {
 		job.Write.IopsStddev,
 	)
 
-	return framework.CheckResult{
+	return check.Result{
 		Title:  titleStr,
 		Status: status,
 		Value:  valueStr,
 	}
 }
 
-func (iopsCheck *IopsCheck) runFioIopsTest() (*fio.Result, error) {
+func (iopsCheck *IopsCheck) runFioIopsTest(
+	store output.Store,
+) (*fio.Result, error) {
 	job := iopsCheck.fioNewJob(
 		iopsJobName,
 		[]string{
@@ -168,20 +170,10 @@ func (iopsCheck *IopsCheck) runFioIopsTest() (*fio.Result, error) {
 		},
 	)
 
-	// In debug mode, we'll write out the raw results from 'fio'
-	if iopsCheck.debug {
-		job.OnRawOutput(func(data []byte) { writeResultToFile(data, iopsJobName) })
-	}
+	// Save the full `fio` output to the results store
+	job.OnRawOutput(func(data []byte) {
+		store.Save(iopsJobName, bytes.NewReader(data))
+	})
 
 	return job.Exec()
-}
-
-func writeResultToFile(buffer []byte, jobName string) {
-	outputFilename := fmt.Sprintf("%s.json", jobName)
-
-	err := os.WriteFile(outputFilename, buffer, 0644)
-
-	if err != nil {
-		log.Warn("Failed to write result file for %s: %s", jobName, err)
-	}
 }

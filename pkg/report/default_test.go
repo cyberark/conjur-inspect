@@ -12,7 +12,11 @@ func TestNewDefaultReport(t *testing.T) {
 	// call the constructor to ensure we don't introduce any runtime errors and
 	// that there are some report sections.
 
-	report := report.NewDefaultReport(false)
+	id := "test-id"
 
-	assert.Greater(t, len(report.Sections), 0)
+	report, err := report.NewDefaultReport(id, ".")
+
+	assert.Equal(t, id, report.ID())
+	assert.NotNil(t, report)
+	assert.Nil(t, err)
 }

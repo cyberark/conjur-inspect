@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/formatting"
-	"github.com/cyberark/conjur-inspect/pkg/framework"
 	"github.com/cyberark/conjur-inspect/pkg/report"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,11 +17,11 @@ func (*TestCheck) Describe() string {
 	return "Test"
 }
 
-func (*TestCheck) Run() <-chan []framework.CheckResult {
-	channel := make(chan []framework.CheckResult)
+func (*TestCheck) Run(context *check.RunContext) <-chan []check.Result {
+	channel := make(chan []check.Result)
 
 	go func() {
-		channel <- []framework.CheckResult{
+		channel <- []check.Result{
 			{
 				Title:   "Test Check",
 				Status:  "Test Status",
@@ -35,16 +35,8 @@ func (*TestCheck) Run() <-chan []framework.CheckResult {
 }
 
 func TestReport(t *testing.T) {
-	testReport := report.Report{
-		Sections: []report.Section{
-			{
-				Title: "Test section",
-				Checks: []framework.Check{
-					&TestCheck{},
-				},
-			},
-		},
-	}
+	testReport, err := newTestReport()
+	assert.Nil(t, err)
 
 	testReportResult := testReport.Run()
 
@@ -57,7 +49,7 @@ func TestReport(t *testing.T) {
 	testCheckResult := testSection.Results[0]
 	assert.Equal(
 		t,
-		framework.CheckResult{
+		check.Result{
 			Title:   "Test Check",
 			Status:  "Test Status",
 			Value:   "Test Value",
@@ -72,7 +64,7 @@ func TestReport(t *testing.T) {
 		FormatStrategy: &formatting.RichANSIFormatStrategy{},
 	}
 
-	err := textWriter.Write(
+	err = textWriter.Write(
 		io.Writer(&builder),
 		&testReportResult,
 	)
@@ -92,16 +84,8 @@ func TestReport(t *testing.T) {
 }
 
 func TestJSONReport(t *testing.T) {
-	testReport := report.Report{
-		Sections: []report.Section{
-			{
-				Title: "Test section",
-				Checks: []framework.Check{
-					&TestCheck{},
-				},
-			},
-		},
-	}
+	testReport, err := newTestReport()
+	assert.Nil(t, err)
 
 	testReportResult := testReport.Run()
 
@@ -114,7 +98,7 @@ func TestJSONReport(t *testing.T) {
 	testCheckResult := testSection.Results[0]
 	assert.Equal(
 		t,
-		framework.CheckResult{
+		check.Result{
 			Title:   "Test Check",
 			Status:  "Test Status",
 			Value:   "Test Value",
@@ -127,7 +111,7 @@ func TestJSONReport(t *testing.T) {
 
 	jsonWriter := formatting.JSON{}
 
-	err := jsonWriter.Write(
+	err = jsonWriter.Write(
 		io.Writer(&builder),
 		&testReportResult,
 	)
@@ -152,5 +136,20 @@ func TestJSONReport(t *testing.T) {
              ]
             }`,
 		builder.String(),
+	)
+}
+
+func newTestReport() (report.Report, error) {
+	return report.NewReport(
+		"test",
+		".",
+		[]report.Section{
+			{
+				Title: "Test section",
+				Checks: []check.Check{
+					&TestCheck{},
+				},
+			},
+		},
 	)
 }

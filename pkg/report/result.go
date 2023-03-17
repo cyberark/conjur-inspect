@@ -1,8 +1,6 @@
 package report
 
-import (
-	"github.com/cyberark/conjur-inspect/pkg/framework"
-)
+import "github.com/cyberark/conjur-inspect/pkg/check"
 
 // Result contains each sections check result
 type Result struct {
@@ -12,6 +10,6 @@ type Result struct {
 
 // ResultSection is the individual check and its result
 type ResultSection struct {
-	Title   string                  `json:"title"`
-	Results []framework.CheckResult `json:"results"`
+	Title   string         `json:"title"`
+	Results []check.Result `json:"results"`
 }

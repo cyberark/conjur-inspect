@@ -3,13 +3,14 @@ package checks
 import (
 	"testing"
 
+	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestFollowerRun(t *testing.T) {
 	t.Setenv("MASTER_HOSTNAME", "http://example.com")
 	testCheck := &Follower{}
-	resultChan := testCheck.Run()
+	resultChan := testCheck.Run(&check.RunContext{})
 	results := <-resultChan
 
 	leaderReplicationPort := GetResultByTitle(results, "Leader Replication Port")

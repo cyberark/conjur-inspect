@@ -4,7 +4,7 @@ import (
 	"runtime"
 	"strconv"
 
-	"github.com/cyberark/conjur-inspect/pkg/framework"
+	"github.com/cyberark/conjur-inspect/pkg/check"
 )
 
 // Cpu collects inspection information on the host machines CPU cores and
@@ -18,21 +18,21 @@ func (*Cpu) Describe() string {
 }
 
 // Run executes the CPU inspection checks
-func (cpu *Cpu) Run() <-chan []framework.CheckResult {
-	future := make(chan []framework.CheckResult)
+func (cpu *Cpu) Run(_context *check.RunContext) <-chan []check.Result {
+	future := make(chan []check.Result)
 
 	// TODO: Can we return avg recent utilization?
 	go func() {
-		future <- []framework.CheckResult{
+		future <- []check.Result{
 			{
 				Title:   "CPU Cores",
-				Status:  framework.STATUS_INFO,
+				Status:  check.StatusInfo,
 				Value:   strconv.Itoa(runtime.NumCPU()),
 				Message: "",
 			},
 			{
 				Title:  "CPU Architecture",
-				Status: framework.STATUS_INFO,
+				Status: check.StatusInfo,
 				Value:  runtime.GOARCH,
 			},
 		}
