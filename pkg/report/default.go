@@ -61,12 +61,12 @@ func defaultReportSections() []Section {
 				&checks.Follower{},
 			},
 		},
-		// TODO:
-		// - Podman version
-		// - Docker version
-		// {
-		// 	Title:  "Container Runtime",
-		// 	Checks: []framework.Check{},
-		// },
+		{
+			Title: "Container Runtime",
+			Checks: []check.Check{
+				&checks.Docker{},
+				&checks.Podman{},
+			},
+		},
 	}
 }

@@ -7,4 +7,5 @@ services:
     privileged: true
     working_dir: /conjur-inspect
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - ../:/conjur-inspect

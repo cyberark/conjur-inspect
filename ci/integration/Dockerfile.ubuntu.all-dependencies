@@ -1,27 +1,16 @@
 FROM ubuntu
 
+# Install Docker
 RUN apt-get update && \
-    apt-get remove -y \
-        docker \
-        docker.io \
-        containerd \
-        runc && \
-    apt-get install -y \
-        ca-certificates \
-        curl \
-        gnupg \
-        lsb-release && \
-    mkdir -p /etc/apt/keyrings && \
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
-        gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-        $(lsb_release -cs) stable" | \
-        tee /etc/apt/sources.list.d/docker.list > /dev/null && \
-    apt-get update && \
-    apt-get install -y \
-        docker-ce \
-        docker-ce-cli \
-        containerd.io
+    apt-get install -y curl &&\
+    curl -sSL https://get.docker.com/ | sh -e
 
+# Install flexible io tester
 RUN apt-get update && \
     apt-get install -y fio
+
+# Set custom entrypoint to start Docker daemon in the container
+COPY ubuntu-entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
