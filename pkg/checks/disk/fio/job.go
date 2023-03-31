@@ -54,8 +54,10 @@ func (job *Job) Exec() (*Result, error) {
 	defer cleanup()
 
 	// Run 'fio' command
-	output, _, err := executeFioFunc(job.Args...)
+	output, stderr, err := executeFioFunc(job.Args...)
 	if err != nil {
+		log.Debug("Unable to execute 'fio' job:")
+		log.Debug(string(stderr))
 		return nil, fmt.Errorf("unable to execute 'fio' job: %s", err)
 	}
 

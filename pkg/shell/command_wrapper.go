@@ -3,6 +3,9 @@ package shell
 import (
 	"bytes"
 	"os/exec"
+	"strings"
+
+	"github.com/cyberark/conjur-inspect/pkg/log"
 )
 
 // CommandWrapper represents a wrapper around an executable command
@@ -33,6 +36,11 @@ func (wrapper *CommandWrapper) Run() (stdout, stderr []byte, err error) {
 	if err != nil {
 		return outBuffer.Bytes(), errBuffer.Bytes(), err
 	}
+
+	log.Debug(
+		"Executing command: %s",
+		strings.Join(append([]string{cmdPath}, wrapper.args...), " "),
+	)
 
 	exec := exec.Command(cmdPath, wrapper.args...)
 
