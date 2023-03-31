@@ -11,7 +11,7 @@ import (
 
 const fioExecutable = "fio"
 
-var executeFioFunc func(args ...string) (stderr, stdout []byte, err error) = executeFio
+var executeFioFunc func(args ...string) (stdout, stderr []byte, err error) = executeFio
 
 // Executable represents an operation that can produce an fio result and
 // emit raw output data.
@@ -94,6 +94,6 @@ func usingJobDirectory(jobName string) (func(), error) {
 	}, nil
 }
 
-func executeFio(args ...string) (stderr, stdout []byte, err error) {
+func executeFio(args ...string) (stdout, stderr []byte, err error) {
 	return shell.NewCommandWrapper(fioExecutable, args...).Run()
 }
