@@ -11,7 +11,7 @@ import (
 
 const fioExecutable = "fio"
 
-var executeFioFunc func(args ...string) (stderr, stdout []byte, err error) = executeFio
+var executeFioFunc func(args ...string) (stdout, stderr []byte, err error) = executeFio
 
 // Executable represents an operation that can produce an fio result and
 // emit raw output data.
@@ -54,8 +54,10 @@ func (job *Job) Exec() (*Result, error) {
 	defer cleanup()
 
 	// Run 'fio' command
-	output, _, err := executeFioFunc(job.Args...)
+	output, stderr, err := executeFioFunc(job.Args...)
 	if err != nil {
+		log.Debug("Unable to execute 'fio' job:")
+		log.Debug(string(stderr))
 		return nil, fmt.Errorf("unable to execute 'fio' job: %s", err)
 	}
 
@@ -94,6 +96,6 @@ func usingJobDirectory(jobName string) (func(), error) {
 	}, nil
 }
 
-func executeFio(args ...string) (stderr, stdout []byte, err error) {
+func executeFio(args ...string) (stdout, stderr []byte, err error) {
 	return shell.NewCommandWrapper(fioExecutable, args...).Run()
 }

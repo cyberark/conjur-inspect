@@ -31,6 +31,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added container runtime checks to report on the available Docker and/or
   Podman version and configuration.
   [cyberark/conjur-inspect#15](https://github.com/cyberark/conjur-inspect/pull/15)
+- Added more debug logs for shell command execution to improve error
+  troubleshooting experience.
+  [cyberark/conjur-inspect#31](https://github.com/cyberark/conjur-inspect/pull/31)
 
 ### Fixed
 - Previously, if the user running `conjur-preflight` has insufficient permission
