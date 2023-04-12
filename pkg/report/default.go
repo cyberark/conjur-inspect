@@ -68,5 +68,11 @@ func defaultReportSections() []Section {
 				&checks.Podman{},
 			},
 		},
+		{
+			Title: "Ulimits",
+			Checks: []check.Check{
+				&checks.Ulimit{},
+			},
+		},
 	}
 }
