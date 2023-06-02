@@ -41,6 +41,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   Now, this logs a warning and skips the mountpoint in the report.
   [conjurinc/conjur-preflight#28](https://github.com/conjurinc/conjur-preflight/pull/28)
 
+### Security
+- Forced golang.org/x/net to use v0.7.0
+  [cyberark/conjur-inspect#34](https://github.com/cyberark/conjur-inspect/pull/34)
+
 ## [0.2.0] - 2023-01-20
 
 ### Added
