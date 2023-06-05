@@ -39,7 +39,8 @@ apt install conjur-inspect_0.3.0_386.deb
 
 ### Running
 
-Run Conjur Inspect with the command:
+Run Conjur Inspect with the following command as the same system user that will
+run the Conjur container:
 
 ```
 $ conjur-inspect
