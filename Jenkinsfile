@@ -1,4 +1,5 @@
 #!/usr/bin/env groovy
+@Library("product-pipelines-shared-library") _
 
 // Automated release, promotion and dependencies
 properties([
@@ -14,11 +15,14 @@ if (params.MODE == "PROMOTE") {
     // Any publishing of targetVersion artifacts occur here
     // Anything added to assetDirectory will be attached to the Github Release
   }
+
+  // Copy Github Enterprise release to Github
+  release.copyEnterpriseRelease(params.VERSION_TO_PROMOTE)
   return
 }
 
 pipeline {
-  agent { label 'executor-v2' }
+  agent { label 'conjur-enterprise-common-agent' }
 
   options {
     timestamps()
@@ -51,28 +55,42 @@ pipeline {
       }
     }
 
+    stage('Get InfraPool Agent') {
+      steps {
+        script {
+          INFRAPOOL_EXECUTORV2_AGENT_0 = getInfraPoolAgent.connected(type: "ExecutorV2", quantity: 1, duration: 1)[0]
+        }
+      }
+    }
+
     // Generates a VERSION file based on the current build number and latest version in CHANGELOG.md
     stage('Validate Changelog and set version') {
       steps {
-        sh './bin/parse-changelog'
-        updateVersion("CHANGELOG.md", "${BUILD_NUMBER}")
+        script {
+          INFRAPOOL_EXECUTORV2_AGENT_0.agentSh './bin/parse-changelog'
+          updateVersion(INFRAPOOL_EXECUTORV2_AGENT_0, "CHANGELOG.md", "${BUILD_NUMBER}")
+        }
       }
     }
 
     stage('Get latest upstream dependencies') {
       steps {
-        updateGoDependencies('${WORKSPACE}/go.mod')
+        updateGoDependencies(INFRAPOOL_EXECUTORV2_AGENT_0, '${WORKSPACE}/go.mod')
       }
     }
 
 
     stage('Run Unit Tests') {
       steps {
-        sh './bin/test-unit'
+        script {
+          INFRAPOOL_EXECUTORV2_AGENT_0.agentSh './bin/test-unit'
+          INFRAPOOL_EXECUTORV2_AGENT_0.agentStash name: 'junit-coverage', includes: '*.xml'
+        }
       }
 
       post {
         always {
+          unstash 'junit-coverage'
           junit 'junit.xml'
 
           cobertura autoUpdateHealth: false,
@@ -87,7 +105,7 @@ pipeline {
             onlyStable: false,
             sourceEncoding: 'ASCII',
             zoomCoverageChart: false
-            ccCoverage("gocov", "--prefix github.com/cyberark/conjur-inspect")
+            codacy action: 'reportCoverage', filePath: "coverage.xml"
         }
       }
     }
@@ -96,13 +114,17 @@ pipeline {
     // pushing a release when this is a RELEASE build.
     stage('Create Release Assets') {
       steps {
-        sh "bin/build-release"
+        script {
+          INFRAPOOL_EXECUTORV2_AGENT_0.agentSh "bin/build-release"
+        }
       }
       post {
         always {
-           archiveArtifacts artifacts: 'dist/*.tar.gz', allowEmptyArchive: true, fingerprint: false
-           archiveArtifacts artifacts: 'dist/*.rpm', allowEmptyArchive: true, fingerprint: false
-           archiveArtifacts artifacts: 'dist/*.deb', allowEmptyArchive: true, fingerprint: false
+          script {
+            INFRAPOOL_EXECUTORV2_AGENT_0.agentArchiveArtifacts artifacts: 'dist/*.tar.gz', allowEmptyArchive: true, fingerprint: false
+            INFRAPOOL_EXECUTORV2_AGENT_0.agentArchiveArtifacts artifacts: 'dist/*.rpm', allowEmptyArchive: true, fingerprint: false
+            INFRAPOOL_EXECUTORV2_AGENT_0.agentArchiveArtifacts artifacts: 'dist/*.deb', allowEmptyArchive: true, fingerprint: false
+          }
         }
       }
     }
@@ -112,11 +134,15 @@ pipeline {
     // from a few various environments without running the tool manually.
     stage('Run Integration Tests') {
       steps {
-        sh 'bin/test-integration'
+        script {
+          INFRAPOOL_EXECUTORV2_AGENT_0.agentSh 'bin/test-integration'
+        }
       }
       post {
         always {
-           archiveArtifacts artifacts: 'ci/integration/results/**', allowEmptyArchive: true, fingerprint: false
+          script {
+            INFRAPOOL_EXECUTORV2_AGENT_0.agentArchiveArtifacts artifacts: 'ci/integration/results/**', allowEmptyArchive: true, fingerprint: false
+          }
         }
       }
     }
@@ -129,22 +155,24 @@ pipeline {
       }
 
       steps {
-        release { billOfMaterialsDirectory, assetDirectory, toolsDirectory ->
-          // Publish release artifacts to all the appropriate locations
-          // Copy any artifacts to assetDirectory to attach them to the Github release
+        script {
+          release(INFRAPOOL_EXECUTORV2_AGENT_0) { billOfMaterialsDirectory, assetDirectory, toolsDirectory ->
+            // Publish release artifacts to all the appropriate locations
+            // Copy any artifacts to assetDirectory to attach them to the Github release
 
-          // Create Go application SBOM using the go.mod version for the golang container image
-          sh """go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --main "cmd/conjur-inspect/" --output "${billOfMaterialsDirectory}/go-app-bom.json" """
-          // Create Go module SBOM
-          sh """go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --output "${billOfMaterialsDirectory}/go-mod-bom.json" """
-
-          // Add goreleaser artifacts to release
-          sh """cp dist/*.tar.gz "${assetDirectory}" """
-          sh """cp dist/*.rpm "${assetDirectory}" """
-          sh """cp dist/*.deb "${assetDirectory}" """
-          sh """cp "dist/SHA256SUMS.txt" "${assetDirectory}" """
+            // Create Go application SBOM using the go.mod version for the golang container image
+            INFRAPOOL_EXECUTORV2_AGENT_0.agentSh """export PATH="${toolsDirectory}/bin:${PATH}" && go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --main "cmd/conjur-inspect/" --output "${billOfMaterialsDirectory}/go-app-bom.json" """
+            // Create Go module SBOM
+            INFRAPOOL_EXECUTORV2_AGENT_0.agentSh """export PATH="${toolsDirectory}/bin:${PATH}" && go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --output "${billOfMaterialsDirectory}/go-mod-bom.json" """
+          }
         }
       }
+    }
+  }
+
+  post {
+    always {
+      releaseInfraPoolAgent(".infrapool/release_agents")
     }
   }
 }
