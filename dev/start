@@ -2,4 +2,4 @@
 
 set -eu
 
-docker-compose run --rm --build dev
+docker compose run --rm --build dev
