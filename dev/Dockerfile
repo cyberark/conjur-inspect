@@ -1,4 +1,4 @@
-FROM redhat/ubi8
+FROM redhat/ubi9
 
 # Install podman
 RUN yum install -y \
