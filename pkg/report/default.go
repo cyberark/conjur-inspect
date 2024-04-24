@@ -4,6 +4,7 @@ import (
 	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/checks"
 	"github.com/cyberark/conjur-inspect/pkg/checks/disk"
+	"github.com/cyberark/conjur-inspect/pkg/container"
 )
 
 // NewDefaultReport returns a report containing the standard inspection checks
@@ -64,8 +65,12 @@ func defaultReportSections() []Section {
 		{
 			Title: "Container Runtime",
 			Checks: []check.Check{
-				&checks.Docker{},
-				&checks.Podman{},
+				&checks.Container{
+					Provider: &container.DockerProvider{},
+				},
+				&checks.Container{
+					Provider: &container.PodmanProvider{},
+				},
 			},
 		},
 		{

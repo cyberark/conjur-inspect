@@ -1,15 +1,16 @@
-package checks
+// Package container defines the providers for concrete container engines
+// (e.g. Docker, Podman)
+package container
 
 import (
 	"errors"
 	"testing"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
-	"github.com/cyberark/conjur-inspect/pkg/test"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDockerRunSuccess(t *testing.T) {
+func TestDockerProviderInfo(t *testing.T) {
 	// Mock dependencies
 	oldFunc := executeDockerInfoFunc
 	executeDockerInfoFunc = func() (stdout, stderr []byte, err error) {
@@ -20,10 +21,11 @@ func TestDockerRunSuccess(t *testing.T) {
 		executeDockerInfoFunc = oldFunc
 	}()
 
-	// Run the check
-	docker := &Docker{}
-	context := test.NewRunContext()
-	results := <-docker.Run(&context)
+	// Get the info
+	docker := &DockerProvider{}
+	dockerInfo, err := docker.Info()
+
+	assert.NoError(t, err)
 
 	// Check the results
 	expected := []check.Result{
@@ -43,10 +45,10 @@ func TestDockerRunSuccess(t *testing.T) {
 			Value:  "/var/lib/docker",
 		},
 	}
-	assert.Equal(t, expected, results)
+	assert.Equal(t, expected, dockerInfo.Results())
 }
 
-func TestDockerRunFailure(t *testing.T) {
+func TestDockerProviderInfoFailure(t *testing.T) {
 	// Mock dependencies
 	oldFunc := executeDockerInfoFunc
 	executeDockerInfoFunc = func() (stdout, stderr []byte, err error) {
@@ -57,24 +59,16 @@ func TestDockerRunFailure(t *testing.T) {
 		executeDockerInfoFunc = oldFunc
 	}()
 
-	// Run the check
-	docker := &Docker{}
-	context := test.NewRunContext()
-	results := <-docker.Run(&context)
+	// Get the info
+	docker := &DockerProvider{}
+	dockerInfo, err := docker.Info()
 
-	// Check the results
-	expected := []check.Result{
-		{
-			Title:   "Docker",
-			Status:  check.StatusError,
-			Value:   "N/A",
-			Message: "failed to inspect Docker runtime: fake error ()",
-		},
-	}
-	assert.Equal(t, expected, results)
+	assert.Nil(t, dockerInfo)
+
+	assert.Error(t, err)
 }
 
-func TestDockerRunServerError(t *testing.T) {
+func TestDockerProviderInfoServerError(t *testing.T) {
 	// Mock dependencies
 	oldFunc := executeDockerInfoFunc
 	executeDockerInfoFunc = func() (stdout, stderr []byte, err error) {
@@ -85,19 +79,11 @@ func TestDockerRunServerError(t *testing.T) {
 		executeDockerInfoFunc = oldFunc
 	}()
 
-	// Run the check
-	docker := &Docker{}
-	context := test.NewRunContext()
-	results := <-docker.Run(&context)
+	// Get the info
+	docker := &DockerProvider{}
+	dockerInfo, err := docker.Info()
 
-	// Check the results
-	expected := []check.Result{
-		{
-			Title:   "Docker",
-			Status:  check.StatusError,
-			Value:   "N/A",
-			Message: "Test error",
-		},
-	}
-	assert.Equal(t, expected, results)
+	assert.Nil(t, dockerInfo)
+
+	assert.Error(t, err)
 }

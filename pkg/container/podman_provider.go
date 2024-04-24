@@ -1,59 +1,28 @@
-package checks
+// Package container defines the providers for concrete container engines
+// (e.g. Docker, Podman)
+package container
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
-	"github.com/cyberark/conjur-inspect/pkg/log"
-	"github.com/cyberark/conjur-inspect/pkg/output"
 	"github.com/cyberark/conjur-inspect/pkg/shell"
 )
 
-var executePodmanInfoFunc func() (stderr, stdout []byte, err error) = executePodmanInfo
+// Function variable for dependency injection
+var executePodmanInfoFunc = executePodmanInfo
 
-// Podman collects the information on the version of Podman on the system
-type Podman struct{}
+// PodmanProvider is a concrete implementation of the
+// ContainerProvider interface for Podman
+type PodmanProvider struct{}
 
-// Describe provides a textual description of what this check gathers info on
-func (*Podman) Describe() string {
-	return "Podman runtime"
+type PodmanProviderInfo struct {
+	rawData []byte
+	info    *PodmanInfo
 }
 
-// Run performs the Podman inspection checks
-func (podman *Podman) Run(context *check.RunContext) <-chan []check.Result {
-	future := make(chan []check.Result)
-
-	go func() {
-		podmanInfo, err := getPodmanInfo(context.OutputStore)
-		if err != nil {
-			future <- []check.Result{
-				{
-					Title:   "Podman",
-					Status:  check.StatusError,
-					Value:   "N/A",
-					Message: err.Error(),
-				},
-			}
-
-			return
-		}
-
-		future <- []check.Result{
-			podmanVersionResult(podmanInfo),
-			podmanDriverResult(podmanInfo),
-			podmanGraphRootResult(podmanInfo),
-			podmanRunRootResult(podmanInfo),
-			podmanVolumeRootResult(podmanInfo),
-		}
-	}() // async
-
-	return future
-}
-
-// PodmanInfo contains the key fields from the `podman info` output
 type PodmanInfo struct {
 	Version VersionInfo `json:"version"`
 	Store   StoreInfo   `json:"store"`
@@ -72,7 +41,13 @@ type StoreInfo struct {
 	VolumePath      string `json:"volumePath"`
 }
 
-func getPodmanInfo(outputStore output.Store) (*PodmanInfo, error) {
+// Name returns the name of the Podman provider
+func (*PodmanProvider) Name() string {
+	return "Podman"
+}
+
+// Info returns the Podman runtime info
+func (*PodmanProvider) Info() (ContainerProviderInfo, error) {
 	stdout, stderr, err := executePodmanInfoFunc()
 	if err != nil {
 		return nil, fmt.Errorf(
@@ -82,18 +57,33 @@ func getPodmanInfo(outputStore output.Store) (*PodmanInfo, error) {
 		)
 	}
 
-	// Save raw podman info output
-	outputReader := bytes.NewReader(stdout)
-	err = outputStore.Save("podman-info.json", outputReader)
+	// Parse the JSON output
+	podmanInfo := &PodmanInfo{}
+	err = json.Unmarshal(stdout, podmanInfo)
 	if err != nil {
-		log.Warn("Failed to save podman info output: %s", err)
+		return nil, fmt.Errorf("failed to parse Podman info output: %w", err)
 	}
 
-	// Parse the podman info output
-	podmanInfo := PodmanInfo{}
-	err = json.Unmarshal(stdout, &podmanInfo)
+	podmanProviderInfo := &PodmanProviderInfo{
+		rawData: stdout,
+		info:    podmanInfo,
+	}
 
-	return &podmanInfo, err
+	return podmanProviderInfo, nil
+}
+
+func (info *PodmanProviderInfo) Results() []check.Result {
+	return []check.Result{
+		podmanVersionResult(info.info),
+		podmanDriverResult(info.info),
+		podmanGraphRootResult(info.info),
+		podmanRunRootResult(info.info),
+		podmanVolumeRootResult(info.info),
+	}
+}
+
+func (info *PodmanProviderInfo) RawData() []byte {
+	return info.rawData
 }
 
 func podmanVersionResult(podmanInfo *PodmanInfo) check.Result {
