@@ -15,6 +15,7 @@ type ContainerProvider interface {
 // Container is an interface for a container instance
 type Container interface {
 	ID() string
+	Inspect() ([]byte, error)
 }
 
 // ContainerProviderInfo is an interface for the results of

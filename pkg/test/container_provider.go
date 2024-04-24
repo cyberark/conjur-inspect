@@ -9,6 +9,9 @@ import (
 // ContainerProvider is a mock implementation of the ContainerProvider interface
 // for testing
 type ContainerProvider struct {
+	InspectError  error
+	InspectResult []byte
+
 	InfoError   error
 	InfoRawData []byte
 	InfoResults []check.Result
@@ -24,6 +27,9 @@ type ContainerProviderInfo struct {
 // Container is a mock implementation of the Container interface for testing
 type Container struct {
 	ContainerID string
+
+	InspectError  error
+	InspectResult []byte
 }
 
 // Name returns the name of the container provider
@@ -48,7 +54,9 @@ func (provider *ContainerProvider) Container(
 	containerID string,
 ) container.Container {
 	return &Container{
-		ContainerID: containerID,
+		ContainerID:   containerID,
+		InspectError:  provider.InspectError,
+		InspectResult: provider.InspectResult,
 	}
 }
 
@@ -65,4 +73,13 @@ func (providerInfo *ContainerProviderInfo) RawData() []byte {
 // ID returns the container ID
 func (container *Container) ID() string {
 	return container.ContainerID
+}
+
+// Inspect returns the JSON output of the mock `inspect` command
+func (container *Container) Inspect() ([]byte, error) {
+	if container.InspectError != nil {
+		return nil, container.InspectError
+	}
+
+	return container.InspectResult, nil
 }

@@ -63,12 +63,21 @@ func defaultReportSections() []Section {
 			},
 		},
 		{
-			Title: "Container Runtime",
+			Title: "Container",
 			Checks: []check.Check{
+				// Runtime
 				&checks.ContainerRuntime{
 					Provider: &container.DockerProvider{},
 				},
 				&checks.ContainerRuntime{
+					Provider: &container.PodmanProvider{},
+				},
+
+				// Container inspect
+				&checks.ContainerInspect{
+					Provider: &container.DockerProvider{},
+				},
+				&checks.ContainerInspect{
 					Provider: &container.PodmanProvider{},
 				},
 			},
