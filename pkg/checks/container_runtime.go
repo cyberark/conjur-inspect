@@ -12,18 +12,19 @@ import (
 	"github.com/cyberark/conjur-inspect/pkg/log"
 )
 
-// Docker collects the information on the version of Docker on the system
-type Container struct {
+// ContainerRuntime collects the information on the version of the
+// container runtime on the system
+type ContainerRuntime struct {
 	Provider container.ContainerProvider
 }
 
 // Describe provides a textual description of what this check gathers info on
-func (container *Container) Describe() string {
+func (container *ContainerRuntime) Describe() string {
 	return fmt.Sprintf("%s runtime", container.Provider.Name())
 }
 
 // Run performs the Docker inspection checks
-func (container *Container) Run(context *check.RunContext) <-chan []check.Result {
+func (container *ContainerRuntime) Run(context *check.RunContext) <-chan []check.Result {
 	future := make(chan []check.Result)
 
 	go func() {

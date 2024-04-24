@@ -10,16 +10,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Define a mock version of executePodmanInfo that returns some expected output
-func mockExecutePodmanInfo() (stdout, stderr []byte, err error) {
-	stdout = []byte(`{"version": {"version": "2.2.1"}, "store": {"graphDriverName": "overlay", "graphRoot": "/var/lib/containers/storage", "runRoot": "/run/user/0", "volumePath": "/var/lib/containers/storage/volumes"}}`)
-	return stdout, stderr, nil
-}
-
 func TestPodmanProviderInfo(t *testing.T) {
+	rawOutput := []byte(`{"version": {"version": "2.2.1"}, "store": {"graphDriverName": "overlay", "graphRoot": "/var/lib/containers/storage", "runRoot": "/run/user/0", "volumePath": "/var/lib/containers/storage/volumes"}}`)
+
 	// Mock executePodmanInfoFunc to return expected output
 	originalFunc := executePodmanInfoFunc
-	executePodmanInfoFunc = mockExecutePodmanInfo
+	executePodmanInfoFunc = func() (stdout, stderr []byte, err error) {
+		stdout = rawOutput
+		return stdout, stderr, err
+	}
 	defer func() {
 		executeDockerInfoFunc = originalFunc
 	}()
@@ -59,6 +58,28 @@ func TestPodmanProviderInfo(t *testing.T) {
 		},
 	}
 	assert.Equal(t, expected, podmanInfo.Results())
+
+	// Check the raw data
+	assert.Equal(t, rawOutput, podmanInfo.RawData())
+}
+
+func TestPodmanProviderInfoParseError(t *testing.T) {
+	// Mock dependencies
+	oldFunc := executeDockerInfoFunc
+	executePodmanInfoFunc = func() (stdout, stderr []byte, err error) {
+		stdout = []byte(`invalid json`)
+		return stdout, stderr, err
+	}
+	defer func() {
+		executePodmanInfoFunc = oldFunc
+	}()
+
+	// Get the info
+	podman := &PodmanProvider{}
+	podmanInfo, err := podman.Info()
+
+	assert.Nil(t, podmanInfo)
+	assert.ErrorContains(t, err, "failed to parse Podman info output: ")
 }
 
 func TestPodmanProviderInfoError(t *testing.T) {
@@ -77,4 +98,15 @@ func TestPodmanProviderInfoError(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, podmanInfo)
+}
+
+func TestPodmanProviderContainer(t *testing.T) {
+	containerID := "test-container"
+
+	// Get the container
+	podman := &PodmanProvider{}
+	container := podman.Container(containerID)
+
+	// Check the container
+	assert.Equal(t, containerID, container.ID())
 }

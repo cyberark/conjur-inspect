@@ -11,10 +11,12 @@ import (
 )
 
 func TestDockerProviderInfo(t *testing.T) {
+	rawOutput := []byte(`{"ServerVersion":"20.10.7","Driver":"overlay2","DockerRootDir":"/var/lib/docker"}`)
+
 	// Mock dependencies
 	oldFunc := executeDockerInfoFunc
 	executeDockerInfoFunc = func() (stdout, stderr []byte, err error) {
-		stdout = []byte(`{"ServerVersion":"20.10.7","Driver":"overlay2","DockerRootDir":"/var/lib/docker"}`)
+		stdout = rawOutput
 		return stdout, stderr, err
 	}
 	defer func() {
@@ -46,6 +48,27 @@ func TestDockerProviderInfo(t *testing.T) {
 		},
 	}
 	assert.Equal(t, expected, dockerInfo.Results())
+
+	assert.Equal(t, rawOutput, dockerInfo.RawData())
+}
+
+func TestDockerProviderInfoParseError(t *testing.T) {
+	// Mock dependencies
+	oldFunc := executeDockerInfoFunc
+	executeDockerInfoFunc = func() (stdout, stderr []byte, err error) {
+		stdout = []byte(`invalid json`)
+		return stdout, stderr, err
+	}
+	defer func() {
+		executeDockerInfoFunc = oldFunc
+	}()
+
+	// Get the info
+	docker := &DockerProvider{}
+	dockerInfo, err := docker.Info()
+
+	assert.Nil(t, dockerInfo)
+	assert.ErrorContains(t, err, "failed to parse Docker info output: ")
 }
 
 func TestDockerProviderInfoFailure(t *testing.T) {
@@ -86,4 +109,15 @@ func TestDockerProviderInfoServerError(t *testing.T) {
 	assert.Nil(t, dockerInfo)
 
 	assert.Error(t, err)
+}
+
+func TestDockerProviderContainer(t *testing.T) {
+	containerID := "test-container"
+
+	// Get the container
+	docker := &DockerProvider{}
+	container := docker.Container(containerID)
+
+	// Check the container
+	assert.Equal(t, containerID, container.ID())
 }

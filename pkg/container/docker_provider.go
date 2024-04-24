@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/shell"
 )
 
@@ -17,18 +16,6 @@ var executeDockerInfoFunc = executeDockerInfo
 // DockerProvider is a concrete implementation of the
 // ContainerProvider interface for Docker
 type DockerProvider struct {
-}
-
-type DockerProviderInfo struct {
-	rawData []byte
-	info    *DockerInfo
-}
-
-type DockerInfo struct {
-	ServerErrors  []string `json:"ServerErrors"`
-	ServerVersion string   `json:"ServerVersion"`
-	Driver        string   `json:"Driver"`
-	DockerRootDir string   `json:"DockerRootDir"`
 }
 
 // Name returns the name of the Docker provider
@@ -70,40 +57,9 @@ func (*DockerProvider) Info() (ContainerProviderInfo, error) {
 	return dockerProviderInfo, nil
 }
 
-func (info *DockerProviderInfo) Results() []check.Result {
-	return []check.Result{
-		dockerVersionResult(info.info),
-		dockerDriverResult(info.info),
-		dockerRootDirResult(info.info),
-	}
-}
-
-func (info *DockerProviderInfo) RawData() []byte {
-	return info.rawData
-}
-
-func dockerVersionResult(dockerInfo *DockerInfo) check.Result {
-	return check.Result{
-		Title:  "Docker Version",
-		Status: check.StatusInfo,
-		Value:  dockerInfo.ServerVersion,
-	}
-}
-
-func dockerDriverResult(dockerInfo *DockerInfo) check.Result {
-	return check.Result{
-		Title:  "Docker Driver",
-		Status: check.StatusInfo,
-		Value:  dockerInfo.Driver,
-	}
-}
-
-func dockerRootDirResult(dockerInfo *DockerInfo) check.Result {
-	return check.Result{
-		Title:  "Docker Root Directory",
-		Status: check.StatusInfo,
-		Value:  dockerInfo.DockerRootDir,
-	}
+// Container returns a Docker container instance for the given ID or name
+func (*DockerProvider) Container(containerID string) Container {
+	return &DockerContainer{ContainerID: containerID}
 }
 
 func executeDockerInfo() (stdout, stderr []byte, err error) {

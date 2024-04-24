@@ -38,7 +38,7 @@ func TestReport(t *testing.T) {
 	testReport, err := newTestReport()
 	assert.Nil(t, err)
 
-	testReportResult := testReport.Run()
+	testReportResult := testReport.Run("")
 
 	assert.NotEmpty(t, testReportResult.Sections)
 
@@ -87,7 +87,7 @@ func TestJSONReport(t *testing.T) {
 	testReport, err := newTestReport()
 	assert.Nil(t, err)
 
-	testReportResult := testReport.Run()
+	testReportResult := testReport.Run("")
 
 	assert.NotEmpty(t, testReportResult.Sections)
 

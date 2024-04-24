@@ -9,6 +9,12 @@ import "github.com/cyberark/conjur-inspect/pkg/check"
 type ContainerProvider interface {
 	Name() string
 	Info() (ContainerProviderInfo, error)
+	Container(containerID string) Container
+}
+
+// Container is an interface for a container instance
+type Container interface {
+	ID() string
 }
 
 // ContainerProviderInfo is an interface for the results of
