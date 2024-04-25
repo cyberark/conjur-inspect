@@ -21,6 +21,7 @@ builds:
       - -a
     goos:
       - linux
+      - darwin
     goamd64:
       - v1
     # The `Tag` override is there to provide the git commit information in the
