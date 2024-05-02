@@ -16,7 +16,7 @@ import (
 // Report contains an array of all sections and their reports
 type Report interface {
 	ID() string
-	Run() Result
+	Run(ContainerID string) Result
 }
 
 type report struct {
@@ -62,7 +62,7 @@ func (report *report) ID() string {
 }
 
 // Run starts each check and returns a report of the results
-func (report *report) Run() Result {
+func (report *report) Run(containerID string) Result {
 	defer report.outputStore.Cleanup()
 
 	result := Result{
@@ -84,6 +84,7 @@ func (report *report) Run() Result {
 			// Start check, this happens asynchronously
 			checkResults := <-currentCheck.Run(
 				&check.RunContext{
+					ContainerID: containerID,
 					OutputStore: report.outputStore,
 				},
 			)

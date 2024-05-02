@@ -28,6 +28,7 @@ type Check interface {
 // context of a particular report run.
 type RunContext struct {
 	OutputStore output.Store
+	ContainerID string
 }
 
 // Result is the outcome of a particular check. A check may produce multiple

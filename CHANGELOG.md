@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
+## [0.4.0] - 2024-04-24
+
+### Added
+- Added `--container-id` argument, which takes either a container ID or name
+  to run container specific checks against. CNJR-4620
+- Added container specific check to record the `podman inspect` or
+  `docker inspect` output for the specified container. CNJR-2399
+
 ## [0.3.0] - 2023-01-26
 
 ### Changed

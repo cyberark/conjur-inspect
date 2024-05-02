@@ -16,6 +16,7 @@ func newRootCommand() *cobra.Command {
 	var debug bool
 	var jsonOutput bool
 
+	var containerID string
 	var rawDataDir string
 	var reportID string
 
@@ -36,7 +37,7 @@ func newRootCommand() *cobra.Command {
 			}
 
 			log.Debug("Running report...")
-			result := report.Run()
+			result := report.Run(containerID)
 
 			// Determine which output format we'll use
 			var writer formatting.Writer
@@ -74,6 +75,16 @@ func newRootCommand() *cobra.Command {
 		"",
 		false,
 		"debug logging output",
+	)
+
+	// Create json flag for the conjur-inspect command to output a report.
+	// Usage: conjur-inspect --json or -j
+	rootCmd.PersistentFlags().StringVarP(
+		&containerID,
+		"container-id",
+		"", // No shorthand
+		"", // No default
+		"Conjur Enterprise container ID or name to inspect",
 	)
 
 	// Create json flag for the conjur-inspect command to output a report.
