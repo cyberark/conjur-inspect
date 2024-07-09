@@ -7,7 +7,6 @@ import (
 
 	"github.com/cyberark/conjur-inspect/pkg/formatting"
 	"github.com/cyberark/conjur-inspect/pkg/log"
-	"github.com/cyberark/conjur-inspect/pkg/report"
 	"github.com/cyberark/conjur-inspect/pkg/version"
 	"github.com/spf13/cobra"
 )
@@ -28,7 +27,7 @@ func newRootCommand() *cobra.Command {
 				log.EnableDebugMode()
 			}
 
-			report, err := report.NewDefaultReport(
+			report, err := NewDefaultReport(
 				reportID,
 				rawDataDir,
 			)

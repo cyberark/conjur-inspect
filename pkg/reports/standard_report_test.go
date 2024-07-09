@@ -1,4 +1,4 @@
-package report_test
+package reports_test
 
 import (
 	"io"
@@ -8,6 +8,7 @@ import (
 	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/formatting"
 	"github.com/cyberark/conjur-inspect/pkg/report"
+	"github.com/cyberark/conjur-inspect/pkg/reports"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -140,7 +141,7 @@ func TestJSONReport(t *testing.T) {
 }
 
 func newTestReport() (report.Report, error) {
-	return report.NewReport(
+	return reports.NewStandardReport(
 		"test",
 		".",
 		[]report.Section{

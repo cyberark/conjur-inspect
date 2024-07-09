@@ -1,27 +1,29 @@
-package report
+package cmd
 
 import (
 	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/checks"
 	"github.com/cyberark/conjur-inspect/pkg/checks/disk"
 	"github.com/cyberark/conjur-inspect/pkg/container"
+	"github.com/cyberark/conjur-inspect/pkg/report"
+	"github.com/cyberark/conjur-inspect/pkg/reports"
 )
 
 // NewDefaultReport returns a report containing the standard inspection checks
 func NewDefaultReport(
 	id string,
 	rawDataDir string,
-) (Report, error) {
+) (report.Report, error) {
 
-	return NewReport(
+	return reports.NewStandardReport(
 		id,
 		rawDataDir,
 		defaultReportSections(),
 	)
 }
 
-func defaultReportSections() []Section {
-	return []Section{
+func defaultReportSections() []report.Section {
+	return []report.Section{
 		// TODO:
 		// - Recent load
 		{
