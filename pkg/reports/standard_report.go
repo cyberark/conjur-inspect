@@ -89,6 +89,12 @@ func (sr *StandardReport) Run(containerID string) report.Result {
 
 	progress.Finish()
 
+	// Write the report result to the output archive
+	err := sr.archiveReport(&result)
+	if err != nil {
+		log.Error("Failed to archive report: %s", err)
+	}
+
 	// Archive the raw outputs
 	err = sr.outputArchive.Archive(
 		sr.ID(),
@@ -101,7 +107,28 @@ func (sr *StandardReport) Run(containerID string) report.Result {
 	return result
 }
 
-func (sr *standardReport) checkCount() int {
+func (sr *StandardReport) archiveReport(result *report.Result) error {
+	var buffer bytes.Buffer
+
+	// Always use JSON for the archived report
+	writer := &formatting.JSON{}
+
+	// Write the report result
+	err := writer.Write(&buffer, result)
+	if err != nil {
+		return err
+	}
+
+	// Save the report to the output store
+	err = sr.outputStore.Save("conjur-inspect.json", &buffer)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (sr *StandardReport) checkCount() int {
 	count := 0
 	for _, section := range sr.sections {
 		count += len(section.Checks)

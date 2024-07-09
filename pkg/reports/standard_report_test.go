@@ -44,6 +44,16 @@ func TestReport(t *testing.T) {
 	// Assert that the report has result sections
 	assert.NotEmpty(t, testReportResult.Sections)
 
+	// Assert that the output store contains the report JSON
+	outputStoreItems, err := outputStore.Items()
+	assert.NoError(t, err)
+	assert.Len(t, outputStoreItems, 1)
+
+	outputStoreItem := outputStoreItems[0]
+	outputStoreItemInfo, err := outputStoreItem.Info()
+	assert.NoError(t, err)
+	assert.Equal(t, "conjur-inspect.json", outputStoreItemInfo.Name())
+
 	// Assert that the output store was archived
 	assert.True(t, outputArchive.IsArchived())
 
