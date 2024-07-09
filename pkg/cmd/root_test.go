@@ -7,6 +7,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cyberark/conjur-inspect/pkg/report"
+	"github.com/cyberark/conjur-inspect/pkg/reports"
+	"github.com/cyberark/conjur-inspect/pkg/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -35,6 +38,8 @@ func TestExecute(t *testing.T) {
 	// Redirect stdout to a buffer so we can capture the output
 	var stdout bytes.Buffer
 	stderr := io.Discard
+
+	defaultReportConstructor = newTestReport
 
 	// Execute the root command
 	Execute(&stdout, stderr)
@@ -71,4 +76,17 @@ func TestExecuteWithDebugOutput(t *testing.T) {
 
 	// Test that the output is not empty
 	assert.NotEmpty(t, stdout.String())
+}
+
+func newTestReport(string, string) (report.Report, error) {
+	outputStore := test.NewOutputStore()
+	outputArchive := &test.OutputArchive{}
+	report := reports.NewStandardReport(
+		"test",
+		[]report.Section{},
+		outputStore,
+		outputArchive,
+	)
+
+	return report, nil
 }

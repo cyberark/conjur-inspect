@@ -11,6 +11,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var defaultReportConstructor = NewDefaultReport
+
 func newRootCommand() *cobra.Command {
 	var debug bool
 	var jsonOutput bool
@@ -27,10 +29,7 @@ func newRootCommand() *cobra.Command {
 				log.EnableDebugMode()
 			}
 
-			report, err := NewDefaultReport(
-				reportID,
-				rawDataDir,
-			)
+			report, err := defaultReportConstructor(reportID, rawDataDir)
 			if err != nil {
 				return err
 			}

@@ -1,3 +1,4 @@
+// Package reports contains concrete report implementations
 package reports
 
 import (
@@ -5,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/formatting"
@@ -16,7 +16,9 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
-type standardReport struct {
+// StandardReport is a report that runs a series of checks and reports the
+// results.
+type StandardReport struct {
 	id       string
 	sections []report.Section
 
@@ -24,42 +26,28 @@ type standardReport struct {
 	outputArchive output.Archive
 }
 
-// NewReport instantiates a new Report struct with the expected fields (e.g. ID)
+// NewStandardReport initializes and returns a new StandardReport.
 func NewStandardReport(
 	id string,
-	rawDataDir string,
 	sections []report.Section,
-) (report.Report, error) {
-
-	storeDirectory := path.Join(rawDataDir, id)
-
-	err := os.MkdirAll(storeDirectory, 0755)
-	if err != nil {
-		return nil, err
-	}
-
-	outputStore := output.NewDirectoryStore(storeDirectory)
-	outputArchive := &output.TarGzipArchive{
-		OutputDir: rawDataDir,
-	}
-
-	newReport := standardReport{
-		id:       id,
-		sections: sections,
-
+	outputStore output.Store,
+	outputArchive output.Archive,
+) report.Report {
+	return &StandardReport{
+		id:            id,
+		sections:      sections,
 		outputStore:   outputStore,
 		outputArchive: outputArchive,
 	}
-
-	return &newReport, nil
 }
 
-func (sr *standardReport) ID() string {
+// ID returns the given ID of the report
+func (sr *StandardReport) ID() string {
 	return sr.id
 }
 
 // Run starts each check and returns a report of the results
-func (sr *standardReport) Run(containerID string) report.Result {
+func (sr *StandardReport) Run(containerID string) report.Result {
 	defer sr.outputStore.Cleanup()
 
 	result := report.Result{

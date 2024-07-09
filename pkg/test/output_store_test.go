@@ -43,6 +43,7 @@ func TestOutputStore(t *testing.T) {
 	})
 
 	t.Run("Empty store", func(t *testing.T) {
+		store := NewOutputStore()
 		items, err := store.Items()
 		assert.NoError(t, err)
 		assert.Equal(t, 0, len(items))
@@ -55,8 +56,10 @@ func TestOutputStore(t *testing.T) {
 		err = store.Cleanup()
 		assert.NoError(t, err)
 
+		// Expect cleanup not to remove the items from the test store so that these
+		// may be inspected in the test assertions.
 		items, err := store.Items()
 		assert.NoError(t, err)
-		assert.Equal(t, 0, len(items))
+		assert.Equal(t, 1, len(items))
 	})
 }
