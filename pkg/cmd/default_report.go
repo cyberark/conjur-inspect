@@ -101,6 +101,26 @@ func defaultReportSections() []report.Section {
 			},
 		},
 		{
+			Title: "Conjur",
+			Checks: []check.Check{
+				// Health
+				&checks.ConjurHealth{
+					Provider: &container.DockerProvider{},
+				},
+				&checks.ConjurHealth{
+					Provider: &container.PodmanProvider{},
+				},
+
+				// Info
+				&checks.ConjurInfo{
+					Provider: &container.DockerProvider{},
+				},
+				&checks.ConjurInfo{
+					Provider: &container.PodmanProvider{},
+				},
+			},
+		},
+		{
 			Title: "Ulimits",
 			Checks: []check.Check{
 				&checks.Ulimit{},

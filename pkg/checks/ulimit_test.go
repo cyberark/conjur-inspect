@@ -21,7 +21,7 @@ func TestUlimitRun(t *testing.T) {
 
 	// Run the check
 	ulimit := &Ulimit{}
-	context := test.NewRunContext()
+	context := test.NewRunContext("")
 	results := <-ulimit.Run(&context)
 
 	coreFileSize := GetResultByTitle(results, "core file size (blocks, -c)")
