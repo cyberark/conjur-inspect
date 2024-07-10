@@ -9,3 +9,9 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ../:/conjur-inspect
+    depends_on:
+      - cuke-master
+
+  cuke-master:
+    container_name: conjur-inspect-cuke-master
+    image: registry.tld/conjur-appliance-cuke-master:5.0-stable
