@@ -10,7 +10,7 @@ import (
 )
 
 // Function variable for dependency injection
-var executeDockerInspectFunc = executeDockerInspect
+var dockerFunc = docker
 
 // DockerContainer is a concrete implementation of the Container interface
 type DockerContainer struct {
@@ -24,7 +24,14 @@ func (container *DockerContainer) ID() string {
 
 // Inspect returns the JSON output of the `docker inspect` command
 func (container *DockerContainer) Inspect() ([]byte, error) {
-	stdout, stderr, err := executeDockerInspectFunc(container.ContainerID)
+	stdout, stderr, err := dockerFunc(
+		"inspect",
+		"--format",
+		"json",
+		"--size",
+		container.ContainerID,
+	)
+
 	if err != nil {
 		return nil, fmt.Errorf(
 			"failed to inspect Podman container %s: %w (%s)",
@@ -37,13 +44,16 @@ func (container *DockerContainer) Inspect() ([]byte, error) {
 	return stdout, nil
 }
 
-func executeDockerInspect(containerID string) (stdout, stderr []byte, err error) {
-	return shell.NewCommandWrapper(
-		"docker",
-		"inspect",
-		"--format",
-		"json",
-		"--size",
-		containerID,
-	).Run()
+// Exec runs a command inside the container
+func (container *DockerContainer) Exec(
+	command ...string,
+) (stdout, stderr []byte, err error) {
+	args := append([]string{"exec", container.ContainerID}, command...)
+	return dockerFunc(args...)
+}
+
+func docker(
+	command ...string,
+) (stdout, stderr []byte, err error) {
+	return shell.NewCommandWrapper("docker", command...).Run()
 }

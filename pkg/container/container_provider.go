@@ -16,6 +16,7 @@ type ContainerProvider interface {
 type Container interface {
 	ID() string
 	Inspect() ([]byte, error)
+	Exec(command ...string) (stdout, stderr []byte, err error)
 }
 
 // ContainerProviderInfo is an interface for the results of
