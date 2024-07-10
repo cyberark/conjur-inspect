@@ -41,6 +41,7 @@ func (container *PodmanContainer) Inspect() ([]byte, error) {
 func executePodmanInspect(containerID string) (stdout, stderr []byte, err error) {
 	return shell.NewCommandWrapper(
 		"podman",
+		"container",
 		"inspect",
 		"--format",
 		"json",
