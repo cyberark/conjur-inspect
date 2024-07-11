@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - The JSON inspection report is now included in the output archive file. This
   allows the single file to include all relevant data.
   CNJR-1649
+- Added Conjur health and info checks for the specified container. CNJR-2397
 
 ## [0.3.0] - 2023-01-26
 

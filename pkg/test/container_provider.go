@@ -15,6 +15,10 @@ type ContainerProvider struct {
 	InfoError   error
 	InfoRawData []byte
 	InfoResults []check.Result
+
+	ExecError  error
+	ExecStdout []byte
+	ExecStderr []byte
 }
 
 // ContainerProviderInfo is a mock implementation of the ContainerProviderInfo
@@ -30,6 +34,10 @@ type Container struct {
 
 	InspectError  error
 	InspectResult []byte
+
+	ExecError  error
+	ExecStdout []byte
+	ExecStderr []byte
 }
 
 // Name returns the name of the container provider
@@ -54,9 +62,14 @@ func (provider *ContainerProvider) Container(
 	containerID string,
 ) container.Container {
 	return &Container{
-		ContainerID:   containerID,
+		ContainerID: containerID,
+
 		InspectError:  provider.InspectError,
 		InspectResult: provider.InspectResult,
+
+		ExecError:  provider.ExecError,
+		ExecStdout: provider.ExecStdout,
+		ExecStderr: provider.ExecStderr,
 	}
 }
 
@@ -82,4 +95,11 @@ func (container *Container) Inspect() ([]byte, error) {
 	}
 
 	return container.InspectResult, nil
+}
+
+// Exec returns the JSON output of the mock `exec` command
+func (container *Container) Exec(
+	command ...string,
+) (stdout, stderr []byte, err error) {
+	return container.ExecStdout, container.ExecStderr, container.ExecError
 }

@@ -10,7 +10,7 @@ import (
 )
 
 // Function variable for dependency injection
-var executePodmanInspectFunc = executePodmanInspect
+var podmanFunc = podman
 
 // PodmanContainer is a concrete implementation of the Container interface
 // for Podman
@@ -25,7 +25,15 @@ func (container *PodmanContainer) ID() string {
 
 // Inspect returns the JSON output of the `podman inspect` command
 func (container *PodmanContainer) Inspect() ([]byte, error) {
-	stdout, stderr, err := executePodmanInspectFunc(container.ContainerID)
+	stdout, stderr, err := podmanFunc(
+		"container",
+		"inspect",
+		"--format",
+		"json",
+		"--size",
+		container.ContainerID,
+	)
+
 	if err != nil {
 		return nil, fmt.Errorf(
 			"failed to inspect Podman container %s: %w (%s)",
@@ -38,13 +46,16 @@ func (container *PodmanContainer) Inspect() ([]byte, error) {
 	return stdout, nil
 }
 
-func executePodmanInspect(containerID string) (stdout, stderr []byte, err error) {
-	return shell.NewCommandWrapper(
-		"podman",
-		"inspect",
-		"--format",
-		"json",
-		"--size",
-		containerID,
-	).Run()
+// Exec runs a command inside the container
+func (container *PodmanContainer) Exec(
+	command ...string,
+) (stdout, stderr []byte, err error) {
+	args := append([]string{"exec", container.ContainerID}, command...)
+	return podmanFunc(args...)
+}
+
+func podman(
+	command ...string,
+) (stdout, stderr []byte, err error) {
+	return shell.NewCommandWrapper("podman", command...).Run()
 }

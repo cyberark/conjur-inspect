@@ -13,13 +13,13 @@ func TestDockerContainerInspect(t *testing.T) {
 	rawOutput := []byte(`{"Test Key":"Test Value"}`)
 
 	// Mock dependencies
-	oldFunc := executeDockerInspectFunc
-	executeDockerInspectFunc = func(string) (stdout, stderr []byte, err error) {
+	oldFunc := dockerFunc
+	dockerFunc = func(...string) (stdout, stderr []byte, err error) {
 		stdout = rawOutput
 		return stdout, stderr, err
 	}
 	defer func() {
-		executeDockerInspectFunc = oldFunc
+		dockerFunc = oldFunc
 	}()
 
 	dockerContainer := &DockerContainer{
@@ -35,13 +35,13 @@ func TestDockerContainerInspect(t *testing.T) {
 func TestDockerContainerInspectError(t *testing.T) {
 	testError := errors.New("fake error")
 	// Mock dependencies
-	oldFunc := executeDockerInspectFunc
-	executeDockerInspectFunc = func(string) (stdout, stderr []byte, err error) {
+	oldFunc := dockerFunc
+	dockerFunc = func(...string) (stdout, stderr []byte, err error) {
 		err = testError
 		return stdout, stderr, err
 	}
 	defer func() {
-		executeDockerInspectFunc = oldFunc
+		dockerFunc = oldFunc
 	}()
 
 	dockerContainer := &DockerContainer{
@@ -51,4 +51,52 @@ func TestDockerContainerInspectError(t *testing.T) {
 	inspectResult, err := dockerContainer.Inspect()
 	assert.Error(t, testError, err)
 	assert.Nil(t, inspectResult)
+}
+
+func TestDockerContainerExec(t *testing.T) {
+	standardOut := []byte("test standard output")
+	standardErr := []byte("test standard error")
+
+	// Mock dependencies
+	oldFunc := dockerFunc
+	dockerFunc = func(...string) (stdout, stderr []byte, err error) {
+		stdout = standardOut
+		stderr = standardErr
+		return stdout, stderr, err
+	}
+	defer func() {
+		dockerFunc = oldFunc
+	}()
+
+	dockerContainer := &DockerContainer{
+		ContainerID: "test-container",
+	}
+
+	execStdout, execStderr, err := dockerContainer.Exec("test")
+	assert.NoError(t, err)
+	assert.Equal(t, standardOut, execStdout)
+	assert.Equal(t, standardErr, execStderr)
+}
+
+func TestDockerContainerExecError(t *testing.T) {
+	testError := errors.New("fake error")
+
+	// Mock dependencies
+	oldFunc := dockerFunc
+	dockerFunc = func(...string) (stdout, stderr []byte, err error) {
+		err = testError
+		return stdout, stderr, err
+	}
+	defer func() {
+		dockerFunc = oldFunc
+	}()
+
+	dockerContainer := &DockerContainer{
+		ContainerID: "test-container",
+	}
+
+	stdout, stderr, err := dockerContainer.Exec("test")
+	assert.Error(t, testError, err)
+	assert.Nil(t, stdout)
+	assert.Nil(t, stderr)
 }
