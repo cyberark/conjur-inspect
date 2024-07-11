@@ -1,4 +1,4 @@
-package report_test
+package reports_test
 
 import (
 	"io"
@@ -8,6 +8,8 @@ import (
 	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/formatting"
 	"github.com/cyberark/conjur-inspect/pkg/report"
+	"github.com/cyberark/conjur-inspect/pkg/reports"
+	"github.com/cyberark/conjur-inspect/pkg/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -35,13 +37,27 @@ func (*TestCheck) Run(context *check.RunContext) <-chan []check.Result {
 }
 
 func TestReport(t *testing.T) {
-	testReport, err := newTestReport()
-	assert.Nil(t, err)
+	testReport, outputStore, outputArchive := newTestReport()
 
 	testReportResult := testReport.Run("")
 
+	// Assert that the report has result sections
 	assert.NotEmpty(t, testReportResult.Sections)
 
+	// Assert that the output store contains the report JSON
+	outputStoreItems, err := outputStore.Items()
+	assert.NoError(t, err)
+	assert.Len(t, outputStoreItems, 1)
+
+	outputStoreItem := outputStoreItems[0]
+	outputStoreItemInfo, err := outputStoreItem.Info()
+	assert.NoError(t, err)
+	assert.Equal(t, "conjur-inspect.json", outputStoreItemInfo.Name())
+
+	// Assert that the output store was archived
+	assert.True(t, outputArchive.IsArchived())
+
+	// Assert that the results contain our expected sections and checks
 	testSection := testReportResult.Sections[0]
 	assert.Equal(t, "Test section", testSection.Title)
 	assert.NotEmpty(t, testSection.Results)
@@ -84,8 +100,7 @@ func TestReport(t *testing.T) {
 }
 
 func TestJSONReport(t *testing.T) {
-	testReport, err := newTestReport()
-	assert.Nil(t, err)
+	testReport, _, _ := newTestReport()
 
 	testReportResult := testReport.Run("")
 
@@ -111,7 +126,7 @@ func TestJSONReport(t *testing.T) {
 
 	jsonWriter := formatting.JSON{}
 
-	err = jsonWriter.Write(
+	err := jsonWriter.Write(
 		io.Writer(&builder),
 		&testReportResult,
 	)
@@ -139,10 +154,11 @@ func TestJSONReport(t *testing.T) {
 	)
 }
 
-func newTestReport() (report.Report, error) {
-	return report.NewReport(
+func newTestReport() (report.Report, *test.OutputStore, *test.OutputArchive) {
+	outputStore := test.NewOutputStore()
+	outputArchive := &test.OutputArchive{}
+	report := reports.NewStandardReport(
 		"test",
-		".",
 		[]report.Section{
 			{
 				Title: "Test section",
@@ -151,5 +167,9 @@ func newTestReport() (report.Report, error) {
 				},
 			},
 		},
+		outputStore,
+		outputArchive,
 	)
+
+	return report, outputStore, outputArchive
 }

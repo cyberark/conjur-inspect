@@ -7,10 +7,11 @@ import (
 
 	"github.com/cyberark/conjur-inspect/pkg/formatting"
 	"github.com/cyberark/conjur-inspect/pkg/log"
-	"github.com/cyberark/conjur-inspect/pkg/report"
 	"github.com/cyberark/conjur-inspect/pkg/version"
 	"github.com/spf13/cobra"
 )
+
+var defaultReportConstructor = NewDefaultReport
 
 func newRootCommand() *cobra.Command {
 	var debug bool
@@ -28,10 +29,7 @@ func newRootCommand() *cobra.Command {
 				log.EnableDebugMode()
 			}
 
-			report, err := report.NewDefaultReport(
-				reportID,
-				rawDataDir,
-			)
+			report, err := defaultReportConstructor(reportID, rawDataDir)
 			if err != nil {
 				return err
 			}

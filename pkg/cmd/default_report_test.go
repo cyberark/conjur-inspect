@@ -1,9 +1,9 @@
-package report_test
+package cmd_test
 
 import (
 	"testing"
 
-	"github.com/cyberark/conjur-inspect/pkg/report"
+	"github.com/cyberark/conjur-inspect/pkg/cmd"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,7 +14,7 @@ func TestNewDefaultReport(t *testing.T) {
 
 	id := "test-id"
 
-	report, err := report.NewDefaultReport(id, ".")
+	report, err := cmd.NewDefaultReport(id, ".")
 
 	assert.Equal(t, id, report.ID())
 	assert.NotNil(t, report)

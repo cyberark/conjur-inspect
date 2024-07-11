@@ -1,27 +1,45 @@
-package report
+// Package cmd is the entry point for the conjur-inspect command line tool.
+package cmd
 
 import (
+	"os"
+	"path"
+
 	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/checks"
 	"github.com/cyberark/conjur-inspect/pkg/checks/disk"
 	"github.com/cyberark/conjur-inspect/pkg/container"
+	"github.com/cyberark/conjur-inspect/pkg/output"
+	"github.com/cyberark/conjur-inspect/pkg/report"
+	"github.com/cyberark/conjur-inspect/pkg/reports"
 )
 
 // NewDefaultReport returns a report containing the standard inspection checks
 func NewDefaultReport(
 	id string,
 	rawDataDir string,
-) (Report, error) {
+) (report.Report, error) {
 
-	return NewReport(
+	storeDirectory := path.Join(rawDataDir, id)
+
+	err := os.MkdirAll(storeDirectory, 0755)
+	if err != nil {
+		return nil, err
+	}
+
+	outputStore := output.NewDirectoryStore(storeDirectory)
+	outputArchive := &output.TarGzipArchive{OutputDir: rawDataDir}
+
+	return reports.NewStandardReport(
 		id,
-		rawDataDir,
 		defaultReportSections(),
-	)
+		outputStore,
+		outputArchive,
+	), nil
 }
 
-func defaultReportSections() []Section {
-	return []Section{
+func defaultReportSections() []report.Section {
+	return []report.Section{
 		// TODO:
 		// - Recent load
 		{

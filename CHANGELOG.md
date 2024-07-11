@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   to run container specific checks against. CNJR-4620
 - Added container specific check to record the `podman inspect` or
   `docker inspect` output for the specified container. CNJR-2399
+- The JSON inspection report is now included in the output archive file. This
+  allows the single file to include all relevant data.
+  CNJR-1649
 
 ## [0.3.0] - 2023-01-26
 

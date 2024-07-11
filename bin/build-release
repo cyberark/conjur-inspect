@@ -17,7 +17,7 @@ VERSION="${VERSION/-*/}"
 # BUILD_NUMBER is provided by Jenkins, we use '0' for local builds.
 BUILD_NUMBER="${BUILD_NUMBER:-0}"
 
-GORELEASER_IMAGE="goreleaser/goreleaser:latest"
+GORELEASER_IMAGE="goreleaser/goreleaser:v1.26.2"
 
 main() {
   build_release
@@ -32,9 +32,9 @@ build_release() {
     --volume "${PWD}/:/conjur-inspect/" \
     --workdir "/conjur-inspect" \
     "${GORELEASER_IMAGE}" \
-      --skip-validate \
+      --skip=validate \
       --snapshot \
-      --rm-dist
+      --clean
   echo "Release built. Artifacts can be found in dist/"
 }
 

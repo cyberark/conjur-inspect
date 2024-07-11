@@ -59,7 +59,8 @@ func (store *OutputStore) Items() ([]output.StoreItem, error) {
 
 // Cleanup removes the directory and files used for this output store
 func (store *OutputStore) Cleanup() error {
-	store.items = make(map[string]OutputStoreItem)
+	// Don't clear the map, we will use it to check status of the store in tests
+	// store.items = make(map[string]OutputStoreItem)
 	return nil
 }
 
