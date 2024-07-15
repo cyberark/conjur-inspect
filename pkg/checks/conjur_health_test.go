@@ -3,6 +3,7 @@ package checks
 import (
 	"errors"
 	"io"
+	"strings"
 	"testing"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
@@ -11,10 +12,10 @@ import (
 )
 
 func TestConjurHealthRun(t *testing.T) {
-	healthJSON := []byte(`{"ok": true, "degraded": false}`)
+	healthJSON := `{"ok": true, "degraded": false}`
 
 	containerProvider := &test.ContainerProvider{
-		ExecStdout: healthJSON,
+		ExecStdout: strings.NewReader(healthJSON),
 	}
 
 	// Create the ConjurHealth instance
@@ -63,7 +64,7 @@ func TestConjurHealthRun(t *testing.T) {
 
 	outputStoreItemData, err := io.ReadAll(outputStoreItemReader)
 	assert.NoError(t, err)
-	assert.Equal(t, healthJSON, outputStoreItemData)
+	assert.Equal(t, healthJSON, string(outputStoreItemData))
 }
 
 func TestConjurHealthRun_NoContainerID(t *testing.T) {
@@ -91,7 +92,7 @@ func TestConjurHealthRun_NoContainerID(t *testing.T) {
 
 func TestConjurHealthRun_ExecError(t *testing.T) {
 	containerProvider := &test.ContainerProvider{
-		ExecStderr: []byte("test stderr"),
+		ExecStderr: strings.NewReader("test stderr"),
 		ExecError:  errors.New("test error"),
 	}
 
@@ -123,10 +124,10 @@ func TestConjurHealthRun_ExecError(t *testing.T) {
 }
 
 func TestConjurHealthRun_UnmarshalError(t *testing.T) {
-	healthJSON := []byte(`{"ok": "invalid", "degraded": false}`)
+	healthJSON := `{"ok": "invalid", "degraded": false}`
 
 	containerProvider := &test.ContainerProvider{
-		ExecStdout: healthJSON,
+		ExecStdout: strings.NewReader(healthJSON),
 	}
 
 	// Create the ConjurHealth instance
@@ -172,5 +173,5 @@ func TestConjurHealthRun_UnmarshalError(t *testing.T) {
 
 	outputStoreItemData, err := io.ReadAll(outputStoreItemReader)
 	assert.NoError(t, err)
-	assert.Equal(t, healthJSON, outputStoreItemData)
+	assert.Equal(t, healthJSON, string(outputStoreItemData))
 }

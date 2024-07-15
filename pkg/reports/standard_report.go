@@ -120,7 +120,7 @@ func (sr *StandardReport) archiveReport(result *report.Result) error {
 	}
 
 	// Save the report to the output store
-	err = sr.outputStore.Save("conjur-inspect.json", &buffer)
+	_, err = sr.outputStore.Save("conjur-inspect.json", &buffer)
 	if err != nil {
 		return err
 	}

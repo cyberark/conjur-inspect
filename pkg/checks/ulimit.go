@@ -1,14 +1,15 @@
 package checks
 
 import (
-	"regexp"
+	"bufio"
+	"io"
 	"strings"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/shell"
 )
 
-var executeUlimitInfoFunc func() (stderr, stdout []byte, err error) = executeUlimitInfo
+var executeUlimitInfoFunc func() (stderr, stdout io.Reader, err error) = executeUlimitInfo
 
 // Ulimit collects information on the systems avalible resources.
 type Ulimit struct{}
@@ -32,31 +33,20 @@ func (ulimit *Ulimit) Run(context *check.RunContext) <-chan []check.Result {
 					Title:   "Ulimit Error",
 					Status:  check.StatusError,
 					Value:   "N/A",
-					Message: string(stderr),
+					Message: shell.ReadOrDefault(stderr, "N/A"),
 				},
 			}
 			return
 		}
 
-		stringOutput := string(ulimitOutput)
-
 		// A slice of all ulimit results.
 		results := []check.Result{}
 
-		// Remove extra spaces from the output using regex.
-		space := regexp.MustCompile(` {2,}`)
-		stringOutput = space.ReplaceAllString(stringOutput, " ")
-
-		// Split the modified stringOutput on newline characters to process each line.
-		ulimitLines := strings.Split(stringOutput, "\n")
-
-		for _, line := range ulimitLines {
-			if len(line) == 0 {
-				continue
-			}
-
+		// Iterate over output lines
+		scanner := bufio.NewScanner(ulimitOutput)
+		for scanner.Scan() {
 			// Extract the resource name and value
-			fields := strings.Fields(line)
+			fields := strings.Fields(scanner.Text())
 
 			// Extract the resource name by joining all elements before the last element in fields.
 			resourceName := strings.Join(fields[:len(fields)-1], " ")
@@ -79,7 +69,7 @@ func (ulimit *Ulimit) Run(context *check.RunContext) <-chan []check.Result {
 	return future
 }
 
-func executeUlimitInfo() (stdout, stderr []byte, err error) {
+func executeUlimitInfo() (stdout, stderr io.Reader, err error) {
 	return shell.NewCommandWrapper(
 		"sh",
 		"-c",

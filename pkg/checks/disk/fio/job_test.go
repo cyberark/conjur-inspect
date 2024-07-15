@@ -2,6 +2,8 @@ package fio
 
 import (
 	"fmt"
+	"io"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,8 +11,8 @@ import (
 
 var testJobArgs = []string{"test_arg_1", "test_arg_2"}
 
-func TestJob_Exec(t *testing.T) {
-	var outputDestination string
+func TestJobExec(t *testing.T) {
+	var outputDestination []byte
 	expectedOutput := `{"test_key": "test_value"}`
 
 	originalFunc := executeFioFunc
@@ -25,7 +27,7 @@ func TestJob_Exec(t *testing.T) {
 		Args: testJobArgs,
 
 		rawOutputCallback: func(data []byte) {
-			outputDestination = string(data)
+			outputDestination = data
 		},
 	}
 
@@ -33,10 +35,10 @@ func TestJob_Exec(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
-	assert.Equal(t, expectedOutput, outputDestination)
+	assert.Equal(t, expectedOutput, string(outputDestination))
 }
 
-func TestJob_Exec_CommandError(t *testing.T) {
+func TestJobExecCommandError(t *testing.T) {
 	originalFunc := executeFioFunc
 	executeFioFunc = mockExecuteFioFunc("", "", fmt.Errorf("test error"))
 	defer func() {
@@ -49,7 +51,7 @@ func TestJob_Exec_CommandError(t *testing.T) {
 	assert.ErrorContains(t, err, "unable to execute 'fio' job:")
 }
 
-func TestJob_Exec_ParseError(t *testing.T) {
+func TestJobExecParseError(t *testing.T) {
 	originalFunc := executeFioFunc
 	executeFioFunc = mockExecuteFioFunc("invalid JSON", "", nil)
 	defer func() {
@@ -74,8 +76,8 @@ func mockExecuteFioFunc(
 	stdout string,
 	stderr string,
 	err error,
-) func(args ...string) ([]byte, []byte, error) {
-	return func(args ...string) ([]byte, []byte, error) {
-		return []byte(stdout), []byte(stderr), err
+) func(args ...string) (io.Reader, io.Reader, error) {
+	return func(args ...string) (io.Reader, io.Reader, error) {
+		return strings.NewReader(stdout), strings.NewReader(stderr), err
 	}
 }

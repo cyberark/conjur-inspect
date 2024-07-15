@@ -5,6 +5,7 @@ package container
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/cyberark/conjur-inspect/pkg/shell"
@@ -30,13 +31,14 @@ func (*DockerProvider) Info() (ContainerProviderInfo, error) {
 		return nil, fmt.Errorf(
 			"failed to inspect Docker runtime: %w (%s)",
 			err,
-			strings.TrimSpace(string(stderr)),
+			strings.TrimSpace(shell.ReadOrDefault(stderr, "N/A")),
 		)
 	}
 
 	// Parse the JSON output
 	dockerInfo := &DockerInfo{}
-	err = json.Unmarshal(stdout, dockerInfo)
+	jsonDecoder := json.NewDecoder(stdout)
+	err = jsonDecoder.Decode(dockerInfo)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse Docker info output: %w", err)
 	}
@@ -62,7 +64,7 @@ func (*DockerProvider) Container(containerID string) Container {
 	return &DockerContainer{ContainerID: containerID}
 }
 
-func executeDockerInfo() (stdout, stderr []byte, err error) {
+func executeDockerInfo() (stdout, stderr io.Reader, err error) {
 	return shell.NewCommandWrapper(
 		"docker",
 		"--debug",

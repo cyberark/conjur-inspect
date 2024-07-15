@@ -2,6 +2,8 @@
 package test
 
 import (
+	"io"
+
 	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/container"
 )
@@ -10,21 +12,21 @@ import (
 // for testing
 type ContainerProvider struct {
 	InspectError  error
-	InspectResult []byte
+	InspectResult io.Reader
 
 	InfoError   error
-	InfoRawData []byte
+	InfoRawData io.Reader
 	InfoResults []check.Result
 
 	ExecError  error
-	ExecStdout []byte
-	ExecStderr []byte
+	ExecStdout io.Reader
+	ExecStderr io.Reader
 }
 
 // ContainerProviderInfo is a mock implementation of the ContainerProviderInfo
 // interface for testing
 type ContainerProviderInfo struct {
-	InfoRawData []byte
+	InfoRawData io.Reader
 	InfoResults []check.Result
 }
 
@@ -33,11 +35,11 @@ type Container struct {
 	ContainerID string
 
 	InspectError  error
-	InspectResult []byte
+	InspectResult io.Reader
 
 	ExecError  error
-	ExecStdout []byte
-	ExecStderr []byte
+	ExecStdout io.Reader
+	ExecStderr io.Reader
 }
 
 // Name returns the name of the container provider
@@ -79,7 +81,7 @@ func (providerInfo *ContainerProviderInfo) Results() []check.Result {
 }
 
 // RawData returns the raw data
-func (providerInfo *ContainerProviderInfo) RawData() []byte {
+func (providerInfo *ContainerProviderInfo) RawData() io.Reader {
 	return providerInfo.InfoRawData
 }
 
@@ -89,7 +91,7 @@ func (container *Container) ID() string {
 }
 
 // Inspect returns the JSON output of the mock `inspect` command
-func (container *Container) Inspect() ([]byte, error) {
+func (container *Container) Inspect() (io.Reader, error) {
 	if container.InspectError != nil {
 		return nil, container.InspectError
 	}
@@ -100,6 +102,6 @@ func (container *Container) Inspect() ([]byte, error) {
 // Exec returns the JSON output of the mock `exec` command
 func (container *Container) Exec(
 	command ...string,
-) (stdout, stderr []byte, err error) {
+) (stdout, stderr io.Reader, err error) {
 	return container.ExecStdout, container.ExecStderr, container.ExecError
 }

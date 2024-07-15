@@ -5,6 +5,7 @@ package checks
 import (
 	"errors"
 	"io"
+	"strings"
 	"testing"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
@@ -15,7 +16,7 @@ import (
 func TestContainerRuntimeRun(t *testing.T) {
 	testCheck := &ContainerRuntime{
 		Provider: &test.ContainerProvider{
-			InfoRawData: []byte("test info"),
+			InfoRawData: strings.NewReader("test info"),
 			InfoResults: []check.Result{
 				{
 					Title:   "Test Container Runtime Check",

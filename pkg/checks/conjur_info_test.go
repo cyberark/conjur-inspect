@@ -3,6 +3,7 @@ package checks
 import (
 	"errors"
 	"io"
+	"strings"
 	"testing"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
@@ -11,10 +12,10 @@ import (
 )
 
 func TestConjurInfoRun(t *testing.T) {
-	infoJSON := []byte(`{"version": "1.2.3", "release": "4.5.6"}`)
+	infoJSON := `{"version": "1.2.3", "release": "4.5.6"}`
 
 	containerProvider := &test.ContainerProvider{
-		ExecStdout: infoJSON,
+		ExecStdout: strings.NewReader(infoJSON),
 	}
 
 	// Create the ConjurInfo instance
@@ -63,7 +64,7 @@ func TestConjurInfoRun(t *testing.T) {
 
 	outputStoreItemData, err := io.ReadAll(outputStoreItemReader)
 	assert.NoError(t, err)
-	assert.Equal(t, infoJSON, outputStoreItemData)
+	assert.Equal(t, infoJSON, string(outputStoreItemData))
 }
 
 func TestConjurInfoRun_NoContainerID(t *testing.T) {
@@ -91,7 +92,7 @@ func TestConjurInfoRun_NoContainerID(t *testing.T) {
 
 func TestConjurInfoRun_ExecError(t *testing.T) {
 	containerProvider := &test.ContainerProvider{
-		ExecStderr: []byte("test stderr"),
+		ExecStderr: strings.NewReader("test stderr"),
 		ExecError:  errors.New("test error"),
 	}
 
@@ -123,10 +124,10 @@ func TestConjurInfoRun_ExecError(t *testing.T) {
 }
 
 func TestConjurInfoRun_UnmarshalError(t *testing.T) {
-	infoJSON := []byte(`{"version": 1, "release": false}`)
+	infoJSON := `{"version": 1, "release": false}`
 
 	containerProvider := &test.ContainerProvider{
-		ExecStdout: infoJSON,
+		ExecStdout: strings.NewReader(infoJSON),
 	}
 
 	// Create the ConjurHealth instance
@@ -172,5 +173,5 @@ func TestConjurInfoRun_UnmarshalError(t *testing.T) {
 
 	outputStoreItemData, err := io.ReadAll(outputStoreItemReader)
 	assert.NoError(t, err)
-	assert.Equal(t, infoJSON, outputStoreItemData)
+	assert.Equal(t, infoJSON, string(outputStoreItemData))
 }

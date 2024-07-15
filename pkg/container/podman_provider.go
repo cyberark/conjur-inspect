@@ -5,6 +5,7 @@ package container
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/cyberark/conjur-inspect/pkg/shell"
@@ -29,13 +30,14 @@ func (*PodmanProvider) Info() (ContainerProviderInfo, error) {
 		return nil, fmt.Errorf(
 			"failed to inspect Podman runtime: %w (%s)",
 			err,
-			strings.TrimSpace(string(stderr)),
+			strings.TrimSpace(shell.ReadOrDefault(stderr, "N/A")),
 		)
 	}
 
 	// Parse the JSON output
 	podmanInfo := &PodmanInfo{}
-	err = json.Unmarshal(stdout, podmanInfo)
+	jsonDecoder := json.NewDecoder(stdout)
+	err = jsonDecoder.Decode(podmanInfo)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse Podman info output: %w", err)
 	}
@@ -53,7 +55,7 @@ func (*PodmanProvider) Container(containerID string) Container {
 	return &PodmanContainer{ContainerID: containerID}
 }
 
-func executePodmanInfo() (stdout, stderr []byte, err error) {
+func executePodmanInfo() (stdout, stderr io.Reader, err error) {
 	return shell.NewCommandWrapper(
 		"podman",
 		"info",

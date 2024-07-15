@@ -4,6 +4,7 @@ package container
 
 import (
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/cyberark/conjur-inspect/pkg/shell"
@@ -23,7 +24,7 @@ func (container *DockerContainer) ID() string {
 }
 
 // Inspect returns the JSON output of the `docker inspect` command
-func (container *DockerContainer) Inspect() ([]byte, error) {
+func (container *DockerContainer) Inspect() (io.Reader, error) {
 	stdout, stderr, err := dockerFunc(
 		"inspect",
 		"--format",
@@ -37,7 +38,7 @@ func (container *DockerContainer) Inspect() ([]byte, error) {
 			"failed to inspect Podman container %s: %w (%s)",
 			container.ContainerID,
 			err,
-			strings.TrimSpace(string(stderr)),
+			strings.TrimSpace(shell.ReadOrDefault(stderr, "N/A")),
 		)
 	}
 
@@ -47,13 +48,13 @@ func (container *DockerContainer) Inspect() ([]byte, error) {
 // Exec runs a command inside the container
 func (container *DockerContainer) Exec(
 	command ...string,
-) (stdout, stderr []byte, err error) {
+) (stdout, stderr io.Reader, err error) {
 	args := append([]string{"exec", container.ContainerID}, command...)
 	return dockerFunc(args...)
 }
 
 func docker(
 	command ...string,
-) (stdout, stderr []byte, err error) {
+) (stdout, stderr io.Reader, err error) {
 	return shell.NewCommandWrapper("docker", command...).Run()
 }

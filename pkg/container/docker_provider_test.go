@@ -4,6 +4,8 @@ package container
 
 import (
 	"errors"
+	"io"
+	"strings"
 	"testing"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
@@ -11,11 +13,11 @@ import (
 )
 
 func TestDockerProviderInfo(t *testing.T) {
-	rawOutput := []byte(`{"ServerVersion":"20.10.7","Driver":"overlay2","DockerRootDir":"/var/lib/docker"}`)
+	rawOutput := strings.NewReader(`{"ServerVersion":"20.10.7","Driver":"overlay2","DockerRootDir":"/var/lib/docker"}`)
 
 	// Mock dependencies
 	oldFunc := executeDockerInfoFunc
-	executeDockerInfoFunc = func() (stdout, stderr []byte, err error) {
+	executeDockerInfoFunc = func() (stdout, stderr io.Reader, err error) {
 		stdout = rawOutput
 		return stdout, stderr, err
 	}
@@ -55,8 +57,8 @@ func TestDockerProviderInfo(t *testing.T) {
 func TestDockerProviderInfoParseError(t *testing.T) {
 	// Mock dependencies
 	oldFunc := executeDockerInfoFunc
-	executeDockerInfoFunc = func() (stdout, stderr []byte, err error) {
-		stdout = []byte(`invalid json`)
+	executeDockerInfoFunc = func() (stdout, stderr io.Reader, err error) {
+		stdout = strings.NewReader("invalid json")
 		return stdout, stderr, err
 	}
 	defer func() {
@@ -74,7 +76,7 @@ func TestDockerProviderInfoParseError(t *testing.T) {
 func TestDockerProviderInfoFailure(t *testing.T) {
 	// Mock dependencies
 	oldFunc := executeDockerInfoFunc
-	executeDockerInfoFunc = func() (stdout, stderr []byte, err error) {
+	executeDockerInfoFunc = func() (stdout, stderr io.Reader, err error) {
 		err = errors.New("fake error")
 		return stdout, stderr, err
 	}
@@ -94,8 +96,8 @@ func TestDockerProviderInfoFailure(t *testing.T) {
 func TestDockerProviderInfoServerError(t *testing.T) {
 	// Mock dependencies
 	oldFunc := executeDockerInfoFunc
-	executeDockerInfoFunc = func() (stdout, stderr []byte, err error) {
-		stdout = []byte(`{"ServerErrors": ["Test error"]}`)
+	executeDockerInfoFunc = func() (stdout, stderr io.Reader, err error) {
+		stdout = strings.NewReader(`{"ServerErrors": ["Test error"]}`)
 		return stdout, stderr, err
 	}
 	defer func() {

@@ -4,18 +4,20 @@ package container
 
 import (
 	"errors"
+	"io"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestDockerContainerInspect(t *testing.T) {
-	rawOutput := []byte(`{"Test Key":"Test Value"}`)
+	rawOutput := `{"Test Key":"Test Value"}`
 
 	// Mock dependencies
 	oldFunc := dockerFunc
-	dockerFunc = func(...string) (stdout, stderr []byte, err error) {
-		stdout = rawOutput
+	dockerFunc = func(...string) (stdout, stderr io.Reader, err error) {
+		stdout = strings.NewReader(rawOutput)
 		return stdout, stderr, err
 	}
 	defer func() {
@@ -29,14 +31,17 @@ func TestDockerContainerInspect(t *testing.T) {
 	inspectResult, err := dockerContainer.Inspect()
 	assert.NoError(t, err)
 
-	assert.Equal(t, rawOutput, inspectResult)
+	inspectBytes, err := io.ReadAll(inspectResult)
+	assert.NoError(t, err)
+
+	assert.Equal(t, rawOutput, string(inspectBytes))
 }
 
 func TestDockerContainerInspectError(t *testing.T) {
 	testError := errors.New("fake error")
 	// Mock dependencies
 	oldFunc := dockerFunc
-	dockerFunc = func(...string) (stdout, stderr []byte, err error) {
+	dockerFunc = func(...string) (stdout, stderr io.Reader, err error) {
 		err = testError
 		return stdout, stderr, err
 	}
@@ -54,14 +59,14 @@ func TestDockerContainerInspectError(t *testing.T) {
 }
 
 func TestDockerContainerExec(t *testing.T) {
-	standardOut := []byte("test standard output")
-	standardErr := []byte("test standard error")
+	standardOut := "test standard output"
+	standardErr := "test standard error"
 
 	// Mock dependencies
 	oldFunc := dockerFunc
-	dockerFunc = func(...string) (stdout, stderr []byte, err error) {
-		stdout = standardOut
-		stderr = standardErr
+	dockerFunc = func(...string) (stdout, stderr io.Reader, err error) {
+		stdout = strings.NewReader(standardOut)
+		stderr = strings.NewReader(standardErr)
 		return stdout, stderr, err
 	}
 	defer func() {
@@ -74,8 +79,14 @@ func TestDockerContainerExec(t *testing.T) {
 
 	execStdout, execStderr, err := dockerContainer.Exec("test")
 	assert.NoError(t, err)
-	assert.Equal(t, standardOut, execStdout)
-	assert.Equal(t, standardErr, execStderr)
+
+	stdoutBytes, err := io.ReadAll(execStdout)
+	assert.NoError(t, err)
+	assert.Equal(t, standardOut, string(stdoutBytes))
+
+	stderrBytes, err := io.ReadAll(execStderr)
+	assert.NoError(t, err)
+	assert.Equal(t, standardErr, string(stderrBytes))
 }
 
 func TestDockerContainerExecError(t *testing.T) {
@@ -83,7 +94,7 @@ func TestDockerContainerExecError(t *testing.T) {
 
 	// Mock dependencies
 	oldFunc := dockerFunc
-	dockerFunc = func(...string) (stdout, stderr []byte, err error) {
+	dockerFunc = func(...string) (stdout, stderr io.Reader, err error) {
 		err = testError
 		return stdout, stderr, err
 	}

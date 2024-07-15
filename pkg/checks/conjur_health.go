@@ -6,11 +6,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/container"
 	"github.com/cyberark/conjur-inspect/pkg/log"
+	"github.com/cyberark/conjur-inspect/pkg/shell"
 )
 
 // ConjurHealth collects the output of Conjur's health API (/health)
@@ -44,7 +46,6 @@ func (ch *ConjurHealth) Run(context *check.RunContext) <-chan []check.Result {
 		}
 
 		container := ch.Provider.Container(context.ContainerID)
-
 		stdout, stderr, err := container.Exec(
 			"curl", "-k", "https://localhost/health",
 		)
@@ -58,7 +59,7 @@ func (ch *ConjurHealth) Run(context *check.RunContext) <-chan []check.Result {
 					Message: fmt.Sprintf(
 						"failed to collect health data: %s (%s))",
 						err,
-						strings.TrimSpace(string(stderr)),
+						strings.TrimSpace(shell.ReadOrDefault(stderr, "N/A")),
 					),
 				},
 			}
@@ -66,13 +67,30 @@ func (ch *ConjurHealth) Run(context *check.RunContext) <-chan []check.Result {
 			return
 		}
 
+		// Read the stdout data to save and parse it
+		healthJSONBytes, err := io.ReadAll(stdout)
+		if err != nil {
+			future <- []check.Result{
+				{
+					Title:   fmt.Sprintf("Conjur Health (%s)", ch.Provider.Name()),
+					Status:  check.StatusError,
+					Value:   "N/A",
+					Message: fmt.Sprintf("failed to read health data: %s)", err.Error()),
+				},
+			}
+
+			return
+		}
+
 		// Save raw health output before parsing, in case there are parsing errors
-		outputReader := bytes.NewReader(stdout)
 		outputFileName := fmt.Sprintf(
 			"conjur-health-%s.json",
 			strings.ToLower(ch.Provider.Name()),
 		)
-		err = context.OutputStore.Save(outputFileName, outputReader)
+		_, err = context.OutputStore.Save(
+			outputFileName,
+			bytes.NewReader(healthJSONBytes),
+		)
 		if err != nil {
 			log.Warn(
 				"Failed to save %s Conjur health output: %s",
@@ -81,9 +99,9 @@ func (ch *ConjurHealth) Run(context *check.RunContext) <-chan []check.Result {
 			)
 		}
 
-		// Parse the health JSON to return the report data
+		// Parse the health JSON to return the report data.
 		conjurHealthData := &ConjurHealthData{}
-		err = json.Unmarshal(stdout, conjurHealthData)
+		err = json.Unmarshal(healthJSONBytes, conjurHealthData)
 		if err != nil {
 			future <- []check.Result{
 				{

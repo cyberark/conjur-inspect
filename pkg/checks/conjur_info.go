@@ -6,11 +6,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/container"
 	"github.com/cyberark/conjur-inspect/pkg/log"
+	"github.com/cyberark/conjur-inspect/pkg/shell"
 )
 
 // ConjurInfo collects the output of the Conjur Info API (/info)
@@ -58,7 +60,7 @@ func (inspect *ConjurInfo) Run(context *check.RunContext) <-chan []check.Result 
 					Message: fmt.Sprintf(
 						"failed to collect info data: %s (%s))",
 						err,
-						strings.TrimSpace(string(stderr)),
+						strings.TrimSpace(shell.ReadOrDefault(stderr, "N/A")),
 					),
 				},
 			}
@@ -66,13 +68,30 @@ func (inspect *ConjurInfo) Run(context *check.RunContext) <-chan []check.Result 
 			return
 		}
 
+		// Read the stdout data to save and parse it
+		infoJSONBytes, err := io.ReadAll(stdout)
+		if err != nil {
+			future <- []check.Result{
+				{
+					Title:   fmt.Sprintf("Conjur Info (%s)", inspect.Provider.Name()),
+					Status:  check.StatusError,
+					Value:   "N/A",
+					Message: fmt.Sprintf("failed to read info data: %s)", err.Error()),
+				},
+			}
+
+			return
+		}
+
 		// Save raw info output
-		outputReader := bytes.NewReader(stdout)
 		outputFileName := fmt.Sprintf(
 			"conjur-info-%s.json",
 			strings.ToLower(inspect.Provider.Name()),
 		)
-		err = context.OutputStore.Save(outputFileName, outputReader)
+		_, err = context.OutputStore.Save(
+			outputFileName,
+			bytes.NewReader(infoJSONBytes),
+		)
 		if err != nil {
 			log.Warn(
 				"Failed to save %s Conjur info output: %s",
@@ -82,7 +101,8 @@ func (inspect *ConjurInfo) Run(context *check.RunContext) <-chan []check.Result 
 		}
 
 		conjurInfoData := &ConjurInfoData{}
-		err = json.Unmarshal(stdout, conjurInfoData)
+
+		err = json.Unmarshal(infoJSONBytes, conjurInfoData)
 		if err != nil {
 			future <- []check.Result{
 				{

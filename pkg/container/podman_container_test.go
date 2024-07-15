@@ -4,17 +4,19 @@ package container
 
 import (
 	"errors"
+	"io"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPodmanContainerInspect(t *testing.T) {
-	rawOutput := []byte(`{"Test Key":"Test Value"}`)
+	rawOutput := strings.NewReader(`{"Test Key":"Test Value"}`)
 
 	// Mock dependencies
 	oldFunc := podmanFunc
-	podmanFunc = func(...string) (stdout, stderr []byte, err error) {
+	podmanFunc = func(...string) (stdout, stderr io.Reader, err error) {
 		stdout = rawOutput
 		return stdout, stderr, err
 	}
@@ -36,7 +38,7 @@ func TestPodmanContainerInspectError(t *testing.T) {
 	testError := errors.New("fake error")
 	// Mock dependencies
 	oldFunc := podmanFunc
-	podmanFunc = func(...string) (stdout, stderr []byte, err error) {
+	podmanFunc = func(...string) (stdout, stderr io.Reader, err error) {
 		err = testError
 		return stdout, stderr, err
 	}
@@ -54,12 +56,12 @@ func TestPodmanContainerInspectError(t *testing.T) {
 }
 
 func TestPodmanContainerExec(t *testing.T) {
-	standardOut := []byte("test standard output")
-	standardErr := []byte("test standard error")
+	standardOut := strings.NewReader("test standard output")
+	standardErr := strings.NewReader("test standard error")
 
 	// Mock dependencies
 	oldFunc := podmanFunc
-	podmanFunc = func(...string) (stdout, stderr []byte, err error) {
+	podmanFunc = func(...string) (stdout, stderr io.Reader, err error) {
 		stdout = standardOut
 		stderr = standardErr
 		return stdout, stderr, err
@@ -83,7 +85,7 @@ func TestPodmanContainerExecError(t *testing.T) {
 
 	// Mock dependencies
 	oldFunc := podmanFunc
-	podmanFunc = func(...string) (stdout, stderr []byte, err error) {
+	podmanFunc = func(...string) (stdout, stderr io.Reader, err error) {
 		err = testError
 		return stdout, stderr, err
 	}

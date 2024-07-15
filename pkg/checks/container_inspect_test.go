@@ -5,6 +5,7 @@ package checks
 import (
 	"errors"
 	"io"
+	"strings"
 	"testing"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
@@ -15,7 +16,7 @@ import (
 func TestContainerInspectRun(t *testing.T) {
 	testCheck := &ContainerInspect{
 		Provider: &test.ContainerProvider{
-			InspectResult: []byte("test"),
+			InspectResult: strings.NewReader("test"),
 		},
 	}
 

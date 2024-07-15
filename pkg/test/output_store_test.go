@@ -12,7 +12,7 @@ func TestOutputStore(t *testing.T) {
 	assert.NotNil(t, store)
 
 	t.Run("Save and retrieve", func(t *testing.T) {
-		err := store.Save("test.txt", bytes.NewBufferString("Hello World!"))
+		_, err := store.Save("test.txt", bytes.NewBufferString("Hello World!"))
 		assert.NoError(t, err)
 
 		items, err := store.Items()
@@ -50,7 +50,7 @@ func TestOutputStore(t *testing.T) {
 	})
 
 	t.Run("Cleanup", func(t *testing.T) {
-		err := store.Save("test.txt", bytes.NewBufferString("Hello World!"))
+		_, err := store.Save("test.txt", bytes.NewBufferString("Hello World!"))
 		assert.NoError(t, err)
 
 		err = store.Cleanup()

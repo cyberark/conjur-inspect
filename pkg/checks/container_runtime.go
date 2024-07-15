@@ -3,7 +3,6 @@
 package checks
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 
@@ -43,12 +42,11 @@ func (container *ContainerRuntime) Run(context *check.RunContext) <-chan []check
 		}
 
 		// Save raw container info output
-		outputReader := bytes.NewReader(containerInfo.RawData())
 		outputFileName := fmt.Sprintf(
 			"%s-info.json",
 			strings.ToLower(container.Provider.Name()),
 		)
-		err = context.OutputStore.Save(outputFileName, outputReader)
+		_, err = context.OutputStore.Save(outputFileName, containerInfo.RawData())
 		if err != nil {
 			log.Warn(
 				"Failed to save %s info output: %s",

@@ -3,7 +3,6 @@
 package checks
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 
@@ -53,12 +52,11 @@ func (inspect *ContainerInspect) Run(context *check.RunContext) <-chan []check.R
 		}
 
 		// Save raw container info output
-		outputReader := bytes.NewReader(inspectResult)
 		outputFileName := fmt.Sprintf(
 			"%s-inspect.json",
 			strings.ToLower(inspect.Provider.Name()),
 		)
-		err = context.OutputStore.Save(outputFileName, outputReader)
+		_, err = context.OutputStore.Save(outputFileName, inspectResult)
 		if err != nil {
 			log.Warn(
 				"Failed to save %s inspect output: %s",
