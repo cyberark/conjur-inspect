@@ -1,6 +1,10 @@
 package check
 
-import "github.com/cyberark/conjur-inspect/pkg/output"
+import (
+	"time"
+
+	"github.com/cyberark/conjur-inspect/pkg/output"
+)
 
 // StatusInfo means the result is informational only
 const StatusInfo = "INFO"
@@ -28,7 +32,9 @@ type Check interface {
 // context of a particular report run.
 type RunContext struct {
 	OutputStore output.Store
+
 	ContainerID string
+	Since       time.Duration
 }
 
 // Result is the outcome of a particular check. A check may produce multiple

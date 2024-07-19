@@ -47,7 +47,7 @@ func (sr *StandardReport) ID() string {
 }
 
 // Run starts each check and returns a report of the results
-func (sr *StandardReport) Run(containerID string) report.Result {
+func (sr *StandardReport) Run(config report.RunConfig) report.Result {
 	defer sr.outputStore.Cleanup()
 
 	result := report.Result{
@@ -69,7 +69,8 @@ func (sr *StandardReport) Run(containerID string) report.Result {
 			// Start check, this happens asynchronously
 			checkResults := <-currentCheck.Run(
 				&check.RunContext{
-					ContainerID: containerID,
+					ContainerID: config.ContainerID,
+					Since:       config.Since,
 					OutputStore: sr.outputStore,
 				},
 			)
