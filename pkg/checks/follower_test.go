@@ -10,8 +10,7 @@ import (
 func TestFollowerRun(t *testing.T) {
 	t.Setenv("MASTER_HOSTNAME", "http://example.com")
 	testCheck := &Follower{}
-	resultChan := testCheck.Run(&check.RunContext{})
-	results := <-resultChan
+	results := testCheck.Run(&check.RunContext{})
 
 	leaderReplicationPort := GetResultByTitle(results, "Leader Replication Port")
 	assert.NotNil(t, leaderReplicationPort)

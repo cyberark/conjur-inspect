@@ -35,49 +35,39 @@ func (*LatencyCheck) Describe() string {
 // Run executes the LatencyCheck by running `fio` and processing its output
 func (latencyCheck *LatencyCheck) Run(
 	context *check.RunContext,
-) <-chan []check.Result {
-	future := make(chan []check.Result)
+) []check.Result {
+	fioResult, err := latencyCheck.runFioLatencyTest(
+		context.OutputStore,
+	)
 
-	go func() {
-		fioResult, err := latencyCheck.runFioLatencyTest(
-			context.OutputStore,
-		)
-
-		if err != nil {
-			future <- []check.Result{
-				{
-					Title:   "FIO Latency",
-					Status:  check.StatusError,
-					Value:   "N/A",
-					Message: err.Error(),
-				},
-			}
-
-			return
+	if err != nil {
+		return []check.Result{
+			{
+				Title:   "FIO Latency",
+				Status:  check.StatusError,
+				Value:   "N/A",
+				Message: err.Error(),
+			},
 		}
+	}
 
-		// Make sure a job exists in the fio results
-		if len(fioResult.Jobs) < 1 {
-			future <- []check.Result{
-				{
-					Title:   "FIO Latency",
-					Status:  check.StatusError,
-					Value:   "N/A",
-					Message: "No job results returned by 'fio'",
-				},
-			}
-
-			return
+	// Make sure a job exists in the fio results
+	if len(fioResult.Jobs) < 1 {
+		return []check.Result{
+			{
+				Title:   "FIO Latency",
+				Status:  check.StatusError,
+				Value:   "N/A",
+				Message: "No job results returned by 'fio'",
+			},
 		}
+	}
 
-		future <- []check.Result{
-			fioReadLatencyResult(&fioResult.Jobs[0]),
-			fioWriteLatencyResult(&fioResult.Jobs[0]),
-			fioSyncLatencyResult(&fioResult.Jobs[0]),
-		}
-	}() // async
-
-	return future
+	return []check.Result{
+		fioReadLatencyResult(&fioResult.Jobs[0]),
+		fioWriteLatencyResult(&fioResult.Jobs[0]),
+		fioSyncLatencyResult(&fioResult.Jobs[0]),
+	}
 }
 
 func fioReadLatencyResult(jobResult *fio.JobResult) check.Result {

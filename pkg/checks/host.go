@@ -22,33 +22,25 @@ func (*Host) Describe() string {
 }
 
 // Run executes the Host inspection checks
-func (*Host) Run(context *check.RunContext) <-chan []check.Result {
-	future := make(chan []check.Result)
-
-	go func() {
-		hostInfo, err := getHostInfo()
-		if err != nil {
-			log.Debug("Unable to inspect host info: %s", err)
-			future <- []check.Result{
-				{
-					Title:  "Error",
-					Status: check.StatusError,
-					Value:  fmt.Sprintf("%s", err),
-				},
-			}
-
-			return
+func (*Host) Run(context *check.RunContext) []check.Result {
+	hostInfo, err := getHostInfo()
+	if err != nil {
+		log.Debug("Unable to inspect host info: %s", err)
+		return []check.Result{
+			{
+				Title:  "Error",
+				Status: check.StatusError,
+				Value:  fmt.Sprintf("%s", err),
+			},
 		}
+	}
 
-		future <- []check.Result{
-			hostnameResult(hostInfo),
-			uptimeResult(hostInfo),
-			osResult(hostInfo),
-			virtualizationResult(hostInfo),
-		}
-	}() // async
-
-	return future
+	return []check.Result{
+		hostnameResult(hostInfo),
+		uptimeResult(hostInfo),
+		osResult(hostInfo),
+		virtualizationResult(hostInfo),
+	}
 }
 
 func hostnameResult(hostInfo *host.InfoStat) check.Result {

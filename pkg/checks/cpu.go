@@ -18,25 +18,19 @@ func (*Cpu) Describe() string {
 }
 
 // Run executes the CPU inspection checks
-func (cpu *Cpu) Run(_context *check.RunContext) <-chan []check.Result {
-	future := make(chan []check.Result)
+func (cpu *Cpu) Run(_context *check.RunContext) []check.Result {
 
-	// TODO: Can we return avg recent utilization?
-	go func() {
-		future <- []check.Result{
-			{
-				Title:   "CPU Cores",
-				Status:  check.StatusInfo,
-				Value:   strconv.Itoa(runtime.NumCPU()),
-				Message: "",
-			},
-			{
-				Title:  "CPU Architecture",
-				Status: check.StatusInfo,
-				Value:  runtime.GOARCH,
-			},
-		}
-	}() // async
-
-	return future
+	return []check.Result{
+		{
+			Title:   "CPU Cores",
+			Status:  check.StatusInfo,
+			Value:   strconv.Itoa(runtime.NumCPU()),
+			Message: "",
+		},
+		{
+			Title:  "CPU Architecture",
+			Status: check.StatusInfo,
+			Value:  runtime.GOARCH,
+		},
+	}
 }

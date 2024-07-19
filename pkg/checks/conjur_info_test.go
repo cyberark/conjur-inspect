@@ -26,7 +26,7 @@ func TestConjurInfoRun(t *testing.T) {
 	context := test.NewRunContext("test-container-id")
 
 	// Run the function
-	results := <-conjurInfo.Run(&context)
+	results := conjurInfo.Run(&context)
 
 	// Check the results
 	expectedResults := []check.Result{
@@ -78,7 +78,7 @@ func TestConjurInfoRun_NoContainerID(t *testing.T) {
 	context := test.NewRunContext("")
 
 	// Run the function
-	results := <-conjurHealth.Run(&context)
+	results := conjurHealth.Run(&context)
 
 	// Check the results
 	expectedResults := []check.Result{}
@@ -104,7 +104,7 @@ func TestConjurInfoRun_ExecError(t *testing.T) {
 	context := test.NewRunContext("test-container-id")
 
 	// Run the function
-	results := <-conjurHealth.Run(&context)
+	results := conjurHealth.Run(&context)
 
 	// Check the results
 	expectedResults := []check.Result{
@@ -138,7 +138,7 @@ func TestConjurInfoRun_UnmarshalError(t *testing.T) {
 	context := test.NewRunContext("test-container-id")
 
 	// Run the function
-	results := <-conjurInfo.Run(&context)
+	results := conjurInfo.Run(&context)
 
 	// Check the results
 	expectedResults := []check.Result{

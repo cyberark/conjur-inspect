@@ -11,8 +11,7 @@ import (
 
 func TestMemoryRun(t *testing.T) {
 	testCheck := &Memory{}
-	resultChan := testCheck.Run(&check.RunContext{})
-	results := <-resultChan
+	results := testCheck.Run(&check.RunContext{})
 
 	memoryTotal := GetResultByTitle(results, "Memory Total")
 	assert.NotNil(t, memoryTotal, "Includes 'Memory Total'")
@@ -39,8 +38,7 @@ func TestMemoryRunError(t *testing.T) {
 	}()
 
 	testCheck := &Memory{}
-	resultChan := testCheck.Run(&check.RunContext{})
-	results := <-resultChan
+	results := testCheck.Run(&check.RunContext{})
 
 	assert.Len(t, results, 1)
 

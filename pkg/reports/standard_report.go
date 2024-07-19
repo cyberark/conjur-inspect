@@ -66,17 +66,24 @@ func (sr *StandardReport) Run(config report.RunConfig) report.Result {
 			// Update text in progress display
 			progress.Describe(fmt.Sprintf("Checking %s...", currentCheck.Describe()))
 
-			// Start check, this happens asynchronously
-			checkResults := <-currentCheck.Run(
-				&check.RunContext{
-					ContainerID: config.ContainerID,
-					Since:       config.Since,
-					OutputStore: sr.outputStore,
-				},
-			)
+			// Create a channel to receive the results of the check
+			resultsChan := make(chan []check.Result)
+
+			// Run the check asynchronously so the main thread isn't blocked. This
+			// allows the progress indicator to continue working as expected
+			go func() {
+				resultsChan <- currentCheck.Run(
+					&check.RunContext{
+						ContainerID: config.ContainerID,
+						Since:       config.Since,
+
+						OutputStore: sr.outputStore,
+					},
+				)
+			}() // async
 
 			// Add the results to the report section
-			sectionResults = append(sectionResults, checkResults...)
+			sectionResults = append(sectionResults, <-resultsChan...)
 
 			// Increment progress
 			progress.Add(1)

@@ -33,102 +33,86 @@ func (inspect *ConjurInfo) Describe() string {
 }
 
 // Run retrieves and parses the Conjur /info API endpoint
-func (inspect *ConjurInfo) Run(context *check.RunContext) <-chan []check.Result {
-	future := make(chan []check.Result)
+func (inspect *ConjurInfo) Run(context *check.RunContext) []check.Result {
+	// If there is no container ID, return
+	if strings.TrimSpace(context.ContainerID) == "" {
+		return []check.Result{}
+	}
 
-	go func() {
+	container := inspect.Provider.Container(context.ContainerID)
 
-		// If there is no container ID, return
-		if strings.TrimSpace(context.ContainerID) == "" {
-			future <- []check.Result{}
+	stdout, stderr, err := container.Exec(
+		"curl", "-k", "https://localhost/info",
+	)
 
-			return
-		}
-
-		container := inspect.Provider.Container(context.ContainerID)
-
-		stdout, stderr, err := container.Exec(
-			"curl", "-k", "https://localhost/info",
-		)
-
-		if err != nil {
-			future <- []check.Result{
-				{
-					Title:  fmt.Sprintf("Conjur Info (%s)", inspect.Provider.Name()),
-					Status: check.StatusError,
-					Value:  "N/A",
-					Message: fmt.Sprintf(
-						"failed to collect info data: %s (%s))",
-						err,
-						strings.TrimSpace(shell.ReadOrDefault(stderr, "N/A")),
-					),
-				},
-			}
-
-			return
-		}
-
-		// Read the stdout data to save and parse it
-		infoJSONBytes, err := io.ReadAll(stdout)
-		if err != nil {
-			future <- []check.Result{
-				{
-					Title:   fmt.Sprintf("Conjur Info (%s)", inspect.Provider.Name()),
-					Status:  check.StatusError,
-					Value:   "N/A",
-					Message: fmt.Sprintf("failed to read info data: %s)", err.Error()),
-				},
-			}
-
-			return
-		}
-
-		// Save raw info output
-		outputFileName := fmt.Sprintf(
-			"conjur-info-%s.json",
-			strings.ToLower(inspect.Provider.Name()),
-		)
-		_, err = context.OutputStore.Save(
-			outputFileName,
-			bytes.NewReader(infoJSONBytes),
-		)
-		if err != nil {
-			log.Warn(
-				"Failed to save %s Conjur info output: %s",
-				inspect.Provider.Name(),
-				err,
-			)
-		}
-
-		conjurInfoData := &ConjurInfoData{}
-
-		err = json.Unmarshal(infoJSONBytes, conjurInfoData)
-		if err != nil {
-			future <- []check.Result{
-				{
-					Title:   fmt.Sprintf("Conjur Info (%s)", inspect.Provider.Name()),
-					Status:  check.StatusError,
-					Value:   "N/A",
-					Message: fmt.Sprintf("failed to parse info data: %s)", err.Error()),
-				},
-			}
-
-			return
-		}
-
-		future <- []check.Result{
+	if err != nil {
+		return []check.Result{
 			{
-				Title:  fmt.Sprintf("Version (%s)", inspect.Provider.Name()),
-				Status: check.StatusInfo,
-				Value:  conjurInfoData.Version,
-			},
-			{
-				Title:  fmt.Sprintf("Release (%s)", inspect.Provider.Name()),
-				Status: check.StatusInfo,
-				Value:  conjurInfoData.Release,
+				Title:  fmt.Sprintf("Conjur Info (%s)", inspect.Provider.Name()),
+				Status: check.StatusError,
+				Value:  "N/A",
+				Message: fmt.Sprintf(
+					"failed to collect info data: %s (%s))",
+					err,
+					strings.TrimSpace(shell.ReadOrDefault(stderr, "N/A")),
+				),
 			},
 		}
-	}() // async
+	}
 
-	return future
+	// Read the stdout data to save and parse it
+	infoJSONBytes, err := io.ReadAll(stdout)
+	if err != nil {
+		return []check.Result{
+			{
+				Title:   fmt.Sprintf("Conjur Info (%s)", inspect.Provider.Name()),
+				Status:  check.StatusError,
+				Value:   "N/A",
+				Message: fmt.Sprintf("failed to read info data: %s)", err.Error()),
+			},
+		}
+	}
+
+	// Save raw info output
+	outputFileName := fmt.Sprintf(
+		"conjur-info-%s.json",
+		strings.ToLower(inspect.Provider.Name()),
+	)
+	_, err = context.OutputStore.Save(
+		outputFileName,
+		bytes.NewReader(infoJSONBytes),
+	)
+	if err != nil {
+		log.Warn(
+			"Failed to save %s Conjur info output: %s",
+			inspect.Provider.Name(),
+			err,
+		)
+	}
+
+	conjurInfoData := &ConjurInfoData{}
+	err = json.Unmarshal(infoJSONBytes, conjurInfoData)
+	if err != nil {
+		return []check.Result{
+			{
+				Title:   fmt.Sprintf("Conjur Info (%s)", inspect.Provider.Name()),
+				Status:  check.StatusError,
+				Value:   "N/A",
+				Message: fmt.Sprintf("failed to parse info data: %s)", err.Error()),
+			},
+		}
+	}
+
+	return []check.Result{
+		{
+			Title:  fmt.Sprintf("Version (%s)", inspect.Provider.Name()),
+			Status: check.StatusInfo,
+			Value:  conjurInfoData.Version,
+		},
+		{
+			Title:  fmt.Sprintf("Release (%s)", inspect.Provider.Name()),
+			Status: check.StatusInfo,
+			Value:  conjurInfoData.Release,
+		},
+	}
 }

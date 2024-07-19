@@ -23,50 +23,39 @@ func (inspect *ContainerInspect) Describe() string {
 }
 
 // Run performs the Docker inspection checks
-func (inspect *ContainerInspect) Run(context *check.RunContext) <-chan []check.Result {
-	future := make(chan []check.Result)
+func (inspect *ContainerInspect) Run(context *check.RunContext) []check.Result {
+	// If there is no container ID, return
+	if strings.TrimSpace(context.ContainerID) == "" {
+		return []check.Result{}
+	}
 
-	go func() {
+	container := inspect.Provider.Container(context.ContainerID)
 
-		// If there is no container ID, return
-		if strings.TrimSpace(context.ContainerID) == "" {
-			future <- []check.Result{}
-
-			return
+	inspectResult, err := container.Inspect()
+	if err != nil {
+		return []check.Result{
+			{
+				Title:   fmt.Sprintf("%s inspect", inspect.Provider.Name()),
+				Status:  check.StatusError,
+				Value:   "N/A",
+				Message: err.Error(),
+			},
 		}
+	}
 
-		container := inspect.Provider.Container(context.ContainerID)
-
-		inspectResult, err := container.Inspect()
-		if err != nil {
-			future <- []check.Result{
-				{
-					Title:   fmt.Sprintf("%s inspect", inspect.Provider.Name()),
-					Status:  check.StatusError,
-					Value:   "N/A",
-					Message: err.Error(),
-				},
-			}
-
-			return
-		}
-
-		// Save raw container info output
-		outputFileName := fmt.Sprintf(
-			"%s-inspect.json",
-			strings.ToLower(inspect.Provider.Name()),
+	// Save raw container info output
+	outputFileName := fmt.Sprintf(
+		"%s-inspect.json",
+		strings.ToLower(inspect.Provider.Name()),
+	)
+	_, err = context.OutputStore.Save(outputFileName, inspectResult)
+	if err != nil {
+		log.Warn(
+			"Failed to save %s inspect output: %s",
+			inspect.Provider.Name(),
+			err,
 		)
-		_, err = context.OutputStore.Save(outputFileName, inspectResult)
-		if err != nil {
-			log.Warn(
-				"Failed to save %s inspect output: %s",
-				inspect.Provider.Name(),
-				err,
-			)
-		}
+	}
 
-		future <- []check.Result{}
-	}() // async
-
-	return future
+	return []check.Result{}
 }

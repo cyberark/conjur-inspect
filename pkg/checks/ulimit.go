@@ -20,53 +20,46 @@ func (*Ulimit) Describe() string {
 }
 
 // Run performs the Ulimit collection
-func (ulimit *Ulimit) Run(context *check.RunContext) <-chan []check.Result {
-	future := make(chan []check.Result)
+func (ulimit *Ulimit) Run(context *check.RunContext) []check.Result {
+	ulimitOutput, stderr, err := executeUlimitInfoFunc()
 
-	go func() {
-		ulimitOutput, stderr, err := executeUlimitInfoFunc()
+	// In case of an error, return a check result with an error status.
+	if err != nil {
+		return []check.Result{
+			{
+				Title:   "Ulimit Error",
+				Status:  check.StatusError,
+				Value:   "N/A",
+				Message: shell.ReadOrDefault(stderr, "N/A"),
+			},
+		}
+	}
 
-		// In case of an error, return a check result with an error status.
-		if err != nil {
-			future <- []check.Result{
-				{
-					Title:   "Ulimit Error",
-					Status:  check.StatusError,
-					Value:   "N/A",
-					Message: shell.ReadOrDefault(stderr, "N/A"),
-				},
-			}
-			return
+	// A slice of all ulimit results.
+	results := []check.Result{}
+
+	// Iterate over output lines
+	scanner := bufio.NewScanner(ulimitOutput)
+	for scanner.Scan() {
+		// Extract the resource name and value
+		fields := strings.Fields(scanner.Text())
+
+		// Extract the resource name by joining all elements before the last element in fields.
+		resourceName := strings.Join(fields[:len(fields)-1], " ")
+
+		// Extract the resource value as the last element in fields.
+		resourceValue := fields[len(fields)-1]
+
+		result := check.Result{
+			Title:  resourceName,
+			Status: check.StatusInfo,
+			Value:  resourceValue,
 		}
 
-		// A slice of all ulimit results.
-		results := []check.Result{}
+		results = append(results, result)
+	}
 
-		// Iterate over output lines
-		scanner := bufio.NewScanner(ulimitOutput)
-		for scanner.Scan() {
-			// Extract the resource name and value
-			fields := strings.Fields(scanner.Text())
-
-			// Extract the resource name by joining all elements before the last element in fields.
-			resourceName := strings.Join(fields[:len(fields)-1], " ")
-
-			// Extract the resource value as the last element in fields.
-			resourceValue := fields[len(fields)-1]
-
-			result := check.Result{
-				Title:  resourceName,
-				Status: check.StatusInfo,
-				Value:  resourceValue,
-			}
-
-			results = append(results, result)
-		}
-
-		future <- results
-	}() // async
-
-	return future
+	return results
 }
 
 func executeUlimitInfo() (stdout, stderr io.Reader, err error) {

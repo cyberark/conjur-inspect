@@ -30,12 +30,11 @@ func TestContainerRuntimeRun(t *testing.T) {
 
 	testOutputStore := test.NewOutputStore()
 
-	resultChan := testCheck.Run(
+	results := testCheck.Run(
 		&check.RunContext{
 			OutputStore: testOutputStore,
 		},
 	)
-	results := <-resultChan
 
 	assert.Equal(t, 1, len(results))
 	assert.Equal(t, "Test Container Runtime Check", results[0].Title)
@@ -65,8 +64,7 @@ func TestContainerRuntimeRunError(t *testing.T) {
 		},
 	}
 
-	resultChan := testCheck.Run(&check.RunContext{})
-	results := <-resultChan
+	results := testCheck.Run(&check.RunContext{})
 
 	assert.Equal(t, 1, len(results))
 

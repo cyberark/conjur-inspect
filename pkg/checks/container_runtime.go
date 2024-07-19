@@ -23,40 +23,32 @@ func (container *ContainerRuntime) Describe() string {
 }
 
 // Run performs the Docker inspection checks
-func (container *ContainerRuntime) Run(context *check.RunContext) <-chan []check.Result {
-	future := make(chan []check.Result)
-
-	go func() {
-		containerInfo, err := container.Provider.Info()
-		if err != nil {
-			future <- []check.Result{
-				{
-					Title:   container.Provider.Name(),
-					Status:  check.StatusError,
-					Value:   "N/A",
-					Message: err.Error(),
-				},
-			}
-
-			return
+func (container *ContainerRuntime) Run(context *check.RunContext) []check.Result {
+	containerInfo, err := container.Provider.Info()
+	if err != nil {
+		return []check.Result{
+			{
+				Title:   container.Provider.Name(),
+				Status:  check.StatusError,
+				Value:   "N/A",
+				Message: err.Error(),
+			},
 		}
+	}
 
-		// Save raw container info output
-		outputFileName := fmt.Sprintf(
-			"%s-info.json",
-			strings.ToLower(container.Provider.Name()),
+	// Save raw container info output
+	outputFileName := fmt.Sprintf(
+		"%s-info.json",
+		strings.ToLower(container.Provider.Name()),
+	)
+	_, err = context.OutputStore.Save(outputFileName, containerInfo.RawData())
+	if err != nil {
+		log.Warn(
+			"Failed to save %s info output: %s",
+			container.Provider.Name(),
+			err,
 		)
-		_, err = context.OutputStore.Save(outputFileName, containerInfo.RawData())
-		if err != nil {
-			log.Warn(
-				"Failed to save %s info output: %s",
-				container.Provider.Name(),
-				err,
-			)
-		}
+	}
 
-		future <- containerInfo.Results()
-	}() // async
-
-	return future
+	return containerInfo.Results()
 }

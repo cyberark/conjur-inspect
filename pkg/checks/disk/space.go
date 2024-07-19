@@ -24,52 +24,45 @@ func (*SpaceCheck) Describe() string {
 }
 
 // Run executes the disk checks and returns their results
-func (*SpaceCheck) Run(context *check.RunContext) <-chan []check.Result {
-	future := make(chan []check.Result)
+func (*SpaceCheck) Run(context *check.RunContext) []check.Result {
 
-	go func() {
-		partitions, err := getPartitions(true)
-		// If we can't list the partitions, we exit early with the failure message
+	partitions, err := getPartitions(true)
+	// If we can't list the partitions, we exit early with the failure message
+	if err != nil {
+		log.Debug("Unable to list disk partitions: %s", err)
+		return []check.Result{
+			{
+				Title:  "Error",
+				Status: check.StatusError,
+				Value:  fmt.Sprintf("%s", err),
+			},
+		}
+	}
+
+	results := []check.Result{}
+
+	for _, partition := range partitions {
+		usage, err := getUsage(partition.Mountpoint)
 		if err != nil {
-			log.Debug("Unable to list disk partitions: %s", err)
-			future <- []check.Result{
-				{
-					Title:  "Error",
-					Status: check.StatusError,
-					Value:  fmt.Sprintf("%s", err),
-				},
-			}
-
-			return
-		}
-
-		results := []check.Result{}
-
-		for _, partition := range partitions {
-			usage, err := getUsage(partition.Mountpoint)
-			if err != nil {
-				log.Debug(
-					"Unable to collect disk usage for '%s': %s",
-					partition.Mountpoint,
-					err,
-				)
-				continue
-			}
-
-			if usage.Total == 0 {
-				continue
-			}
-
-			results = append(
-				results,
-				partitionDiskSpaceResult(partition, usage),
+			log.Debug(
+				"Unable to collect disk usage for '%s': %s",
+				partition.Mountpoint,
+				err,
 			)
+			continue
 		}
 
-		future <- results
-	}() // async
+		if usage.Total == 0 {
+			continue
+		}
 
-	return future
+		results = append(
+			results,
+			partitionDiskSpaceResult(partition, usage),
+		)
+	}
+
+	return results
 }
 
 func partitionDiskSpaceResult(

@@ -33,101 +33,86 @@ func (ch *ConjurHealth) Describe() string {
 }
 
 // Run performs the Conjur health check
-func (ch *ConjurHealth) Run(context *check.RunContext) <-chan []check.Result {
-	future := make(chan []check.Result)
+func (ch *ConjurHealth) Run(context *check.RunContext) []check.Result {
+	// If there is no container ID, return
+	if strings.TrimSpace(context.ContainerID) == "" {
+		return []check.Result{}
+	}
 
-	go func() {
+	container := ch.Provider.Container(context.ContainerID)
+	stdout, stderr, err := container.Exec(
+		"curl", "-k", "https://localhost/health",
+	)
 
-		// If there is no container ID, return
-		if strings.TrimSpace(context.ContainerID) == "" {
-			future <- []check.Result{}
-
-			return
-		}
-
-		container := ch.Provider.Container(context.ContainerID)
-		stdout, stderr, err := container.Exec(
-			"curl", "-k", "https://localhost/health",
-		)
-
-		if err != nil {
-			future <- []check.Result{
-				{
-					Title:  fmt.Sprintf("Conjur Health (%s)", ch.Provider.Name()),
-					Status: check.StatusError,
-					Value:  "N/A",
-					Message: fmt.Sprintf(
-						"failed to collect health data: %s (%s))",
-						err,
-						strings.TrimSpace(shell.ReadOrDefault(stderr, "N/A")),
-					),
-				},
-			}
-
-			return
-		}
-
-		// Read the stdout data to save and parse it
-		healthJSONBytes, err := io.ReadAll(stdout)
-		if err != nil {
-			future <- []check.Result{
-				{
-					Title:   fmt.Sprintf("Conjur Health (%s)", ch.Provider.Name()),
-					Status:  check.StatusError,
-					Value:   "N/A",
-					Message: fmt.Sprintf("failed to read health data: %s)", err.Error()),
-				},
-			}
-
-			return
-		}
-
-		// Save raw health output before parsing, in case there are parsing errors
-		outputFileName := fmt.Sprintf(
-			"conjur-health-%s.json",
-			strings.ToLower(ch.Provider.Name()),
-		)
-		_, err = context.OutputStore.Save(
-			outputFileName,
-			bytes.NewReader(healthJSONBytes),
-		)
-		if err != nil {
-			log.Warn(
-				"Failed to save %s Conjur health output: %s",
-				ch.Provider.Name(),
-				err,
-			)
-		}
-
-		// Parse the health JSON to return the report data.
-		conjurHealthData := &ConjurHealthData{}
-		err = json.Unmarshal(healthJSONBytes, conjurHealthData)
-		if err != nil {
-			future <- []check.Result{
-				{
-					Title:   fmt.Sprintf("Conjur Health (%s)", ch.Provider.Name()),
-					Status:  check.StatusError,
-					Value:   "N/A",
-					Message: fmt.Sprintf("failed to parse health data: %s)", err.Error()),
-				},
-			}
-
-			return
-		}
-
-		future <- []check.Result{
+	if err != nil {
+		return []check.Result{
 			{
-				Title:  fmt.Sprintf("Healthy (%s)", ch.Provider.Name()),
-				Status: check.StatusInfo,
-				Value:  fmt.Sprintf("%t", conjurHealthData.OK),
-			},
-			{
-				Title:  fmt.Sprintf("Degraded (%s)", ch.Provider.Name()),
-				Status: check.StatusInfo,
-				Value:  fmt.Sprintf("%t", conjurHealthData.Degraded),
+				Title:  fmt.Sprintf("Conjur Health (%s)", ch.Provider.Name()),
+				Status: check.StatusError,
+				Value:  "N/A",
+				Message: fmt.Sprintf(
+					"failed to collect health data: %s (%s))",
+					err,
+					strings.TrimSpace(shell.ReadOrDefault(stderr, "N/A")),
+				),
 			},
 		}
-	}() // async
+	}
 
-	return future
+	// Read the stdout data to save and parse it
+	healthJSONBytes, err := io.ReadAll(stdout)
+	if err != nil {
+		return []check.Result{
+			{
+				Title:   fmt.Sprintf("Conjur Health (%s)", ch.Provider.Name()),
+				Status:  check.StatusError,
+				Value:   "N/A",
+				Message: fmt.Sprintf("failed to read health data: %s)", err.Error()),
+			},
+		}
+	}
+
+	// Save raw health output before parsing, in case there are parsing errors
+	outputFileName := fmt.Sprintf(
+		"conjur-health-%s.json",
+		strings.ToLower(ch.Provider.Name()),
+	)
+	_, err = context.OutputStore.Save(
+		outputFileName,
+		bytes.NewReader(healthJSONBytes),
+	)
+	if err != nil {
+		log.Warn(
+			"Failed to save %s Conjur health output: %s",
+			ch.Provider.Name(),
+			err,
+		)
+	}
+
+	// Parse the health JSON to return the report data.
+	conjurHealthData := &ConjurHealthData{}
+	err = json.Unmarshal(healthJSONBytes, conjurHealthData)
+	if err != nil {
+		return []check.Result{
+			{
+				Title:   fmt.Sprintf("Conjur Health (%s)", ch.Provider.Name()),
+				Status:  check.StatusError,
+				Value:   "N/A",
+				Message: fmt.Sprintf("failed to parse health data: %s)", err.Error()),
+			},
+		}
+	}
+
+	return []check.Result{
+		{
+			Title:  fmt.Sprintf("Healthy (%s)", ch.Provider.Name()),
+			Status: check.StatusInfo,
+			Value:  fmt.Sprintf("%t", conjurHealthData.OK),
+		},
+		{
+			Title:  fmt.Sprintf("Degraded (%s)", ch.Provider.Name()),
+			Status: check.StatusInfo,
+			Value:  fmt.Sprintf("%t", conjurHealthData.Degraded),
+		},
+	}
 }

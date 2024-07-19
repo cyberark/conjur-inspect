@@ -21,46 +21,38 @@ func (*Memory) Describe() string {
 }
 
 // Run executes the Memory inspection checks
-func (memory *Memory) Run(context *check.RunContext) <-chan []check.Result {
-	future := make(chan []check.Result)
-
-	go func() {
-		v, err := getVirtualMemory()
-		if err != nil {
-			log.Debug("Unable to inspect memory: %s", err)
-			future <- []check.Result{
-				{
-					Title:  "Error",
-					Status: check.StatusError,
-					Value:  fmt.Sprintf("%s", err),
-				},
-			}
-
-			return
-		}
-
-		future <- []check.Result{
+func (memory *Memory) Run(context *check.RunContext) []check.Result {
+	v, err := getVirtualMemory()
+	if err != nil {
+		log.Debug("Unable to inspect memory: %s", err)
+		return []check.Result{
 			{
-				Title:  "Memory Total",
-				Status: check.StatusInfo,
-				Value:  humanize.Bytes(v.Total),
-			},
-			{
-				Title:  "Memory Free",
-				Status: check.StatusInfo,
-				Value:  humanize.Bytes(v.Free),
-			},
-			{
-				Title:  "Memory Used",
-				Status: check.StatusInfo,
-				Value: fmt.Sprintf(
-					"%s (%.1f %%)",
-					humanize.Bytes(v.Used),
-					v.UsedPercent,
-				),
+				Title:  "Error",
+				Status: check.StatusError,
+				Value:  fmt.Sprintf("%s", err),
 			},
 		}
-	}() // async
+	}
 
-	return future
+	return []check.Result{
+		{
+			Title:  "Memory Total",
+			Status: check.StatusInfo,
+			Value:  humanize.Bytes(v.Total),
+		},
+		{
+			Title:  "Memory Free",
+			Status: check.StatusInfo,
+			Value:  humanize.Bytes(v.Free),
+		},
+		{
+			Title:  "Memory Used",
+			Status: check.StatusInfo,
+			Value: fmt.Sprintf(
+				"%s (%.1f %%)",
+				humanize.Bytes(v.Used),
+				v.UsedPercent,
+			),
+		},
+	}
 }

@@ -19,21 +19,15 @@ func (*TestCheck) Describe() string {
 	return "Test"
 }
 
-func (*TestCheck) Run(context *check.RunContext) <-chan []check.Result {
-	channel := make(chan []check.Result)
-
-	go func() {
-		channel <- []check.Result{
-			{
-				Title:   "Test Check",
-				Status:  "Test Status",
-				Value:   "Test Value",
-				Message: "Test Message",
-			},
-		}
-	}()
-
-	return channel
+func (*TestCheck) Run(context *check.RunContext) []check.Result {
+	return []check.Result{
+		{
+			Title:   "Test Check",
+			Status:  "Test Status",
+			Value:   "Test Value",
+			Message: "Test Message",
+		},
+	}
 }
 
 func TestReport(t *testing.T) {

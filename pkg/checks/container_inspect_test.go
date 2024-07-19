@@ -22,13 +22,12 @@ func TestContainerInspectRun(t *testing.T) {
 
 	testOutputStore := test.NewOutputStore()
 
-	resultChan := testCheck.Run(
+	results := testCheck.Run(
 		&check.RunContext{
 			ContainerID: "test",
 			OutputStore: testOutputStore,
 		},
 	)
-	results := <-resultChan
 
 	assert.Empty(t, results)
 
@@ -54,12 +53,11 @@ func TestContainerInspectRunError(t *testing.T) {
 		},
 	}
 
-	resultChan := testCheck.Run(
+	results := testCheck.Run(
 		&check.RunContext{
 			ContainerID: "test",
 		},
 	)
-	results := <-resultChan
 
 	assert.Equal(t, 1, len(results))
 
