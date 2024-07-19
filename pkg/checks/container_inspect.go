@@ -4,11 +4,12 @@ package checks
 
 import (
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/container"
-	"github.com/cyberark/conjur-inspect/pkg/log"
+	"github.com/cyberark/conjur-inspect/pkg/output"
 )
 
 // ContainerInspect collects the output of the container runtime's
@@ -18,44 +19,47 @@ type ContainerInspect struct {
 }
 
 // Describe provides a textual description of what this check gathers info on
-func (inspect *ContainerInspect) Describe() string {
-	return fmt.Sprintf("%s inspect", inspect.Provider.Name())
+func (ci *ContainerInspect) Describe() string {
+	return fmt.Sprintf("%s inspect", ci.Provider.Name())
 }
 
 // Run performs the Docker inspection checks
-func (inspect *ContainerInspect) Run(context *check.RunContext) []check.Result {
+func (ci *ContainerInspect) Run(context *check.RunContext) []check.Result {
 	// If there is no container ID, return
 	if strings.TrimSpace(context.ContainerID) == "" {
 		return []check.Result{}
 	}
 
-	container := inspect.Provider.Container(context.ContainerID)
+	container := ci.Provider.Container(context.ContainerID)
 
 	inspectResult, err := container.Inspect()
 	if err != nil {
-		return []check.Result{
-			{
-				Title:   fmt.Sprintf("%s inspect", inspect.Provider.Name()),
-				Status:  check.StatusError,
-				Value:   "N/A",
-				Message: err.Error(),
-			},
-		}
+		return check.ErrorResult(
+			ci,
+			fmt.Errorf("failed to inspect container: %w", err),
+		)
 	}
 
-	// Save raw container info output
-	outputFileName := fmt.Sprintf(
-		"%s-inspect.json",
-		strings.ToLower(inspect.Provider.Name()),
-	)
-	_, err = context.OutputStore.Save(outputFileName, inspectResult)
+	err = ci.saveOutput(context.OutputStore, inspectResult)
 	if err != nil {
-		log.Warn(
-			"Failed to save %s inspect output: %s",
-			inspect.Provider.Name(),
-			err,
+		return check.ErrorResult(
+			ci,
+			fmt.Errorf("failed to save inspect output: %w", err),
 		)
 	}
 
 	return []check.Result{}
+}
+
+func (ci *ContainerInspect) saveOutput(
+	outputStore output.Store,
+	output io.Reader,
+) error {
+	outputFileName := fmt.Sprintf(
+		"%s-inspect.json",
+		strings.ToLower(ci.Provider.Name()),
+	)
+	_, err := outputStore.Save(outputFileName, output)
+
+	return err
 }

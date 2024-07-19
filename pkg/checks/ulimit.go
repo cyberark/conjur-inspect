@@ -2,6 +2,7 @@ package checks
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"strings"
 
@@ -25,14 +26,14 @@ func (ulimit *Ulimit) Run(context *check.RunContext) []check.Result {
 
 	// In case of an error, return a check result with an error status.
 	if err != nil {
-		return []check.Result{
-			{
-				Title:   "Ulimit Error",
-				Status:  check.StatusError,
-				Value:   "N/A",
-				Message: shell.ReadOrDefault(stderr, "N/A"),
-			},
-		}
+		return check.ErrorResult(
+			ulimit,
+			fmt.Errorf(
+				"failed to collect ulimit info: %w (%s)",
+				err,
+				shell.ReadOrDefault(stderr, "N/A"),
+			),
+		)
 	}
 
 	// A slice of all ulimit results.

@@ -64,5 +64,5 @@ func TestContainerInspectRunError(t *testing.T) {
 	assert.Equal(t, "Test Container Provider inspect", results[0].Title)
 	assert.Equal(t, check.StatusError, results[0].Status)
 	assert.Equal(t, "N/A", results[0].Value)
-	assert.Equal(t, "Test error", results[0].Message)
+	assert.Equal(t, "failed to inspect container: Test error", results[0].Message)
 }

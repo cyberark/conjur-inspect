@@ -47,8 +47,8 @@ func TestHostRunError(t *testing.T) {
 	results := testCheck.Run(&check.RunContext{})
 
 	errResult := results[0]
-	assert.Equal(t, "Error", errResult.Title)
-	assert.Equal(t, "test host failure", errResult.Value)
+	assert.Equal(t, "operating system", errResult.Title)
+	assert.Equal(t, "failed to collect host info: test host failure", errResult.Message)
 }
 
 func TestHostRunNoVirtualization(t *testing.T) {

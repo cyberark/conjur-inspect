@@ -45,3 +45,15 @@ type Result struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
 }
+
+// ErrorResult returns a single result with an error message.
+func ErrorResult(c Check, err error) []Result {
+	return []Result{
+		{
+			Title:   c.Describe(),
+			Status:  StatusError,
+			Value:   "N/A",
+			Message: err.Error(),
+		},
+	}
+}

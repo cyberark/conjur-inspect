@@ -45,31 +45,23 @@ func (ch *ConjurHealth) Run(context *check.RunContext) []check.Result {
 	)
 
 	if err != nil {
-		return []check.Result{
-			{
-				Title:  fmt.Sprintf("Conjur Health (%s)", ch.Provider.Name()),
-				Status: check.StatusError,
-				Value:  "N/A",
-				Message: fmt.Sprintf(
-					"failed to collect health data: %s (%s))",
-					err,
-					strings.TrimSpace(shell.ReadOrDefault(stderr, "N/A")),
-				),
-			},
-		}
+		return check.ErrorResult(
+			ch,
+			fmt.Errorf(
+				"failed to collect health data: %w (%s))",
+				err,
+				strings.TrimSpace(shell.ReadOrDefault(stderr, "N/A")),
+			),
+		)
 	}
 
 	// Read the stdout data to save and parse it
 	healthJSONBytes, err := io.ReadAll(stdout)
 	if err != nil {
-		return []check.Result{
-			{
-				Title:   fmt.Sprintf("Conjur Health (%s)", ch.Provider.Name()),
-				Status:  check.StatusError,
-				Value:   "N/A",
-				Message: fmt.Sprintf("failed to read health data: %s)", err.Error()),
-			},
-		}
+		return check.ErrorResult(
+			ch,
+			fmt.Errorf("failed to read health data: %w)", err),
+		)
 	}
 
 	// Save raw health output before parsing, in case there are parsing errors
@@ -93,14 +85,10 @@ func (ch *ConjurHealth) Run(context *check.RunContext) []check.Result {
 	conjurHealthData := &ConjurHealthData{}
 	err = json.Unmarshal(healthJSONBytes, conjurHealthData)
 	if err != nil {
-		return []check.Result{
-			{
-				Title:   fmt.Sprintf("Conjur Health (%s)", ch.Provider.Name()),
-				Status:  check.StatusError,
-				Value:   "N/A",
-				Message: fmt.Sprintf("failed to parse health data: %s)", err.Error()),
-			},
-		}
+		return check.ErrorResult(
+			ch,
+			fmt.Errorf("failed to parse health data: %w)", err),
+		)
 	}
 
 	return []check.Result{

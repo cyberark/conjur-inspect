@@ -43,8 +43,8 @@ func TestMemoryRunError(t *testing.T) {
 	assert.Len(t, results, 1)
 
 	errResult := results[0]
-	assert.Equal(t, "Error", errResult.Title)
-	assert.Equal(t, "test virtual memory failure", errResult.Value)
+	assert.Equal(t, "memory", errResult.Title)
+	assert.Equal(t, "failed to inspect memory: test virtual memory failure", errResult.Message)
 }
 
 func failedVirtualMemoryFunc() (*mem.VirtualMemoryStat, error) {

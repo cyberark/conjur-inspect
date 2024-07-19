@@ -18,34 +18,30 @@ type ContainerRuntime struct {
 }
 
 // Describe provides a textual description of what this check gathers info on
-func (container *ContainerRuntime) Describe() string {
-	return fmt.Sprintf("%s runtime", container.Provider.Name())
+func (cr *ContainerRuntime) Describe() string {
+	return fmt.Sprintf("%s runtime", cr.Provider.Name())
 }
 
 // Run performs the Docker inspection checks
-func (container *ContainerRuntime) Run(context *check.RunContext) []check.Result {
-	containerInfo, err := container.Provider.Info()
+func (cr *ContainerRuntime) Run(context *check.RunContext) []check.Result {
+	containerInfo, err := cr.Provider.Info()
 	if err != nil {
-		return []check.Result{
-			{
-				Title:   container.Provider.Name(),
-				Status:  check.StatusError,
-				Value:   "N/A",
-				Message: err.Error(),
-			},
-		}
+		return check.ErrorResult(
+			cr,
+			fmt.Errorf("failed to collect container runtime info: %w", err),
+		)
 	}
 
 	// Save raw container info output
 	outputFileName := fmt.Sprintf(
 		"%s-info.json",
-		strings.ToLower(container.Provider.Name()),
+		strings.ToLower(cr.Provider.Name()),
 	)
 	_, err = context.OutputStore.Save(outputFileName, containerInfo.RawData())
 	if err != nil {
 		log.Warn(
 			"Failed to save %s info output: %s",
-			container.Provider.Name(),
+			cr.Provider.Name(),
 			err,
 		)
 	}

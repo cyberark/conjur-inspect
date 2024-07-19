@@ -47,8 +47,8 @@ func TestPartitionListError(t *testing.T) {
 	assert.Len(t, results, 1)
 
 	errResult := results[0]
-	assert.Equal(t, "Error", errResult.Title)
-	assert.Equal(t, "test partitions failure", errResult.Value)
+	assert.Equal(t, "disk capacity", errResult.Title)
+	assert.Equal(t, "unable to list disk partitions: test partitions failure", errResult.Message)
 }
 
 func TestDiskUsageError(t *testing.T) {

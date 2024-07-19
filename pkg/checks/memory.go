@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
-	"github.com/cyberark/conjur-inspect/pkg/log"
 	"github.com/dustin/go-humanize"
 	"github.com/shirou/gopsutil/v3/mem"
 )
@@ -24,14 +23,10 @@ func (*Memory) Describe() string {
 func (memory *Memory) Run(context *check.RunContext) []check.Result {
 	v, err := getVirtualMemory()
 	if err != nil {
-		log.Debug("Unable to inspect memory: %s", err)
-		return []check.Result{
-			{
-				Title:  "Error",
-				Status: check.StatusError,
-				Value:  fmt.Sprintf("%s", err),
-			},
-		}
+		return check.ErrorResult(
+			memory,
+			fmt.Errorf("failed to inspect memory: %w", err),
+		)
 	}
 
 	return []check.Result{

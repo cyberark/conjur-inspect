@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
-	"github.com/cyberark/conjur-inspect/pkg/log"
 	"github.com/hako/durafmt"
 	"github.com/shirou/gopsutil/v3/host"
 )
@@ -22,17 +21,13 @@ func (*Host) Describe() string {
 }
 
 // Run executes the Host inspection checks
-func (*Host) Run(context *check.RunContext) []check.Result {
+func (h *Host) Run(context *check.RunContext) []check.Result {
 	hostInfo, err := getHostInfo()
 	if err != nil {
-		log.Debug("Unable to inspect host info: %s", err)
-		return []check.Result{
-			{
-				Title:  "Error",
-				Status: check.StatusError,
-				Value:  fmt.Sprintf("%s", err),
-			},
-		}
+		return check.ErrorResult(
+			h,
+			fmt.Errorf("failed to collect host info: %w", err),
+		)
 	}
 
 	return []check.Result{

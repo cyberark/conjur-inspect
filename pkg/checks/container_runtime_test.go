@@ -68,8 +68,8 @@ func TestContainerRuntimeRunError(t *testing.T) {
 
 	assert.Equal(t, 1, len(results))
 
-	assert.Equal(t, "Test Container Provider", results[0].Title)
+	assert.Equal(t, "Test Container Provider runtime", results[0].Title)
 	assert.Equal(t, check.StatusError, results[0].Status)
 	assert.Equal(t, "N/A", results[0].Value)
-	assert.Equal(t, "Test error", results[0].Message)
+	assert.Equal(t, "failed to collect container runtime info: Test error", results[0].Message)
 }

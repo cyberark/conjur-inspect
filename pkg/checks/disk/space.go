@@ -24,19 +24,14 @@ func (*SpaceCheck) Describe() string {
 }
 
 // Run executes the disk checks and returns their results
-func (*SpaceCheck) Run(context *check.RunContext) []check.Result {
-
+func (sc *SpaceCheck) Run(context *check.RunContext) []check.Result {
 	partitions, err := getPartitions(true)
 	// If we can't list the partitions, we exit early with the failure message
 	if err != nil {
-		log.Debug("Unable to list disk partitions: %s", err)
-		return []check.Result{
-			{
-				Title:  "Error",
-				Status: check.StatusError,
-				Value:  fmt.Sprintf("%s", err),
-			},
-		}
+		return check.ErrorResult(
+			sc,
+			fmt.Errorf("unable to list disk partitions: %w", err),
+		)
 	}
 
 	results := []check.Result{}

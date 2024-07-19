@@ -1,6 +1,7 @@
 package checks
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -25,18 +26,14 @@ type LeaderPort struct {
 }
 
 // Run executes the check
-func (follower *Follower) Run(context *check.RunContext) []check.Result {
+func (f *Follower) Run(context *check.RunContext) []check.Result {
 	hostname := os.Getenv("MASTER_HOSTNAME")
 
 	if hostname == "" {
-		return []check.Result{
-			{
-				Title:   "Leader Hostname",
-				Status:  check.StatusError,
-				Value:   "N/A",
-				Message: "Leader hostname is not set. Set the 'MASTER_HOSTNAME' environment variable to run this check",
-			},
-		}
+		return check.ErrorResult(
+			f,
+			errors.New("Leader hostname is not set. Set the 'MASTER_HOSTNAME' environment variable to run this check"),
+		)
 	}
 
 	// Initialize ports
