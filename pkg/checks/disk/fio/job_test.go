@@ -1,7 +1,7 @@
 package fio
 
 import (
-	"fmt"
+	"errors"
 	"io"
 	"strings"
 	"testing"
@@ -40,7 +40,7 @@ func TestJobExec(t *testing.T) {
 
 func TestJobExecCommandError(t *testing.T) {
 	originalFunc := executeFioFunc
-	executeFioFunc = mockExecuteFioFunc("", "", fmt.Errorf("test error"))
+	executeFioFunc = mockExecuteFioFunc("", "", errors.New("test error"))
 	defer func() {
 		executeFioFunc = originalFunc
 	}()

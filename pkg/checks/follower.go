@@ -99,7 +99,7 @@ func checkPort(host string, leaderPort *LeaderPort) (*LeaderPort, error) {
 
 	conn, err := net.Dial("tcp", url)
 	if err != nil {
-		return leaderPort, fmt.Errorf("connection falied on port: %s", leaderPort.Port)
+		return leaderPort, fmt.Errorf("connection failed on port: %s", leaderPort.Port)
 	}
 
 	conn.Close()

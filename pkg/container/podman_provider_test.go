@@ -3,7 +3,7 @@
 package container
 
 import (
-	"fmt"
+	"errors"
 	"io"
 	"strings"
 	"testing"
@@ -90,7 +90,7 @@ func TestPodmanProviderInfoError(t *testing.T) {
 	// Mock executePodmanInfoFunc to return an error
 	originalFunc := executePodmanInfoFunc
 	executePodmanInfoFunc = func() (stdout, stderr io.Reader, err error) {
-		return stdout, stderr, fmt.Errorf("fake error")
+		return stdout, stderr, errors.New("fake error")
 	}
 	defer func() {
 		executePodmanInfoFunc = originalFunc

@@ -50,7 +50,7 @@ func (job *Job) Exec() (*Result, error) {
 	// finishes.
 	cleanup, err := usingJobDirectory(job.Name)
 	if err != nil {
-		return nil, fmt.Errorf("unable to create test directory: %s", err)
+		return nil, fmt.Errorf("unable to create test directory: %w", err)
 	}
 	defer cleanup()
 
@@ -65,12 +65,12 @@ func (job *Job) Exec() (*Result, error) {
 			log.Debug(string(stderrStr))
 		}
 
-		return nil, fmt.Errorf("unable to execute 'fio' job: %s", err)
+		return nil, fmt.Errorf("unable to execute 'fio' job: %w", err)
 	}
 
 	stdoutBytes, err := io.ReadAll(stdout)
 	if err != nil {
-		return nil, fmt.Errorf("unable to read 'fio' output: %s", err)
+		return nil, fmt.Errorf("unable to read 'fio' output: %w", err)
 	}
 
 	// If there is a configured result listener, notify it of the result output
@@ -82,7 +82,7 @@ func (job *Job) Exec() (*Result, error) {
 	jsonResult := Result{}
 	err = json.Unmarshal(stdoutBytes, &jsonResult)
 	if err != nil {
-		return nil, fmt.Errorf("unable to parse 'fio' output: %s", err)
+		return nil, fmt.Errorf("unable to parse 'fio' output: %w", err)
 	}
 
 	return &jsonResult, nil
