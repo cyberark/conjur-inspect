@@ -7,6 +7,7 @@ import (
 	"io"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -110,4 +111,51 @@ func TestDockerContainerExecError(t *testing.T) {
 	assert.Error(t, testError, err)
 	assert.Nil(t, stdout)
 	assert.Nil(t, stderr)
+}
+
+func TestDockerContainerLogs(t *testing.T) {
+	logOut := "test logs"
+
+	// Mock dependencies
+	oldFunc := dockerCombinedOutputFunc
+	dockerCombinedOutputFunc = func(...string) (output io.Reader, err error) {
+		output = strings.NewReader(logOut)
+		return output, err
+	}
+	defer func() {
+		dockerCombinedOutputFunc = oldFunc
+	}()
+
+	dockerContainer := &DockerContainer{
+		ContainerID: "test-container",
+	}
+
+	output, err := dockerContainer.Logs(time.Duration(0))
+	assert.NoError(t, err)
+
+	outputBytes, err := io.ReadAll(output)
+	assert.NoError(t, err)
+	assert.Equal(t, logOut, string(outputBytes))
+}
+
+func TestDockerContainerLogsError(t *testing.T) {
+	testError := errors.New("fake error")
+
+	// Mock dependencies
+	oldFunc := dockerCombinedOutputFunc
+	dockerCombinedOutputFunc = func(...string) (output io.Reader, err error) {
+		err = testError
+		return output, err
+	}
+	defer func() {
+		dockerCombinedOutputFunc = oldFunc
+	}()
+
+	dockerContainer := &DockerContainer{
+		ContainerID: "test-container",
+	}
+
+	output, err := dockerContainer.Logs(time.Duration(0))
+	assert.Error(t, testError, err)
+	assert.Nil(t, output)
 }

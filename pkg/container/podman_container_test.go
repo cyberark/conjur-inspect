@@ -7,6 +7,7 @@ import (
 	"io"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -101,4 +102,51 @@ func TestPodmanContainerExecError(t *testing.T) {
 	assert.Error(t, testError, err)
 	assert.Nil(t, stdout)
 	assert.Nil(t, stderr)
+}
+
+func TestPodmanContainerLogs(t *testing.T) {
+	logOut := "test logs"
+
+	// Mock dependencies
+	oldFunc := podmanCombinedOutputFunc
+	podmanCombinedOutputFunc = func(...string) (output io.Reader, err error) {
+		output = strings.NewReader(logOut)
+		return output, err
+	}
+	defer func() {
+		podmanCombinedOutputFunc = oldFunc
+	}()
+
+	podmanContainer := &PodmanContainer{
+		ContainerID: "test-container",
+	}
+
+	output, err := podmanContainer.Logs(time.Duration(0))
+	assert.NoError(t, err)
+
+	outputBytes, err := io.ReadAll(output)
+	assert.NoError(t, err)
+	assert.Equal(t, logOut, string(outputBytes))
+}
+
+func TestPodmanContainerLogsError(t *testing.T) {
+	testError := errors.New("fake error")
+
+	// Mock dependencies
+	oldFunc := podmanCombinedOutputFunc
+	podmanCombinedOutputFunc = func(...string) (output io.Reader, err error) {
+		err = testError
+		return output, err
+	}
+	defer func() {
+		podmanCombinedOutputFunc = oldFunc
+	}()
+
+	podmanContainer := &PodmanContainer{
+		ContainerID: "test-container",
+	}
+
+	output, err := podmanContainer.Logs(time.Duration(0))
+	assert.Error(t, testError, err)
+	assert.Nil(t, output)
 }

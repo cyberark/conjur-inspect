@@ -4,6 +4,7 @@ package container
 
 import (
 	"io"
+	"time"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
 )
@@ -21,6 +22,7 @@ type Container interface {
 	ID() string
 	Inspect() (io.Reader, error)
 	Exec(command ...string) (stdout, stderr io.Reader, err error)
+	Logs(since time.Duration) (io.Reader, error)
 }
 
 // ContainerProviderInfo is an interface for the results of
