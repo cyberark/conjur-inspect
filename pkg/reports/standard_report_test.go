@@ -19,27 +19,23 @@ func (*TestCheck) Describe() string {
 	return "Test"
 }
 
-func (*TestCheck) Run(context *check.RunContext) <-chan []check.Result {
-	channel := make(chan []check.Result)
-
-	go func() {
-		channel <- []check.Result{
-			{
-				Title:   "Test Check",
-				Status:  "Test Status",
-				Value:   "Test Value",
-				Message: "Test Message",
-			},
-		}
-	}()
-
-	return channel
+func (*TestCheck) Run(*check.RunContext) []check.Result {
+	return []check.Result{
+		{
+			Title:   "Test Check",
+			Status:  "Test Status",
+			Value:   "Test Value",
+			Message: "Test Message",
+		},
+	}
 }
 
 func TestReport(t *testing.T) {
 	testReport, outputStore, outputArchive := newTestReport()
 
-	testReportResult := testReport.Run("")
+	testReportResult := testReport.Run(report.RunConfig{
+		ContainerID: "",
+	})
 
 	// Assert that the report has result sections
 	assert.NotEmpty(t, testReportResult.Sections)
@@ -102,7 +98,9 @@ func TestReport(t *testing.T) {
 func TestJSONReport(t *testing.T) {
 	testReport, _, _ := newTestReport()
 
-	testReportResult := testReport.Run("")
+	testReportResult := testReport.Run(report.RunConfig{
+		ContainerID: "",
+	})
 
 	assert.NotEmpty(t, testReportResult.Sections)
 

@@ -6,11 +6,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/container"
 	"github.com/cyberark/conjur-inspect/pkg/log"
+	"github.com/cyberark/conjur-inspect/pkg/shell"
 )
 
 // ConjurInfo collects the output of the Conjur Info API (/info)
@@ -26,89 +28,79 @@ type ConjurInfoData struct {
 }
 
 // Describe provides a textual description of what this check gathers info on
-func (inspect *ConjurInfo) Describe() string {
-	return fmt.Sprintf("Conjur Info (%s)", inspect.Provider.Name())
+func (ci *ConjurInfo) Describe() string {
+	return fmt.Sprintf("Conjur Info (%s)", ci.Provider.Name())
 }
 
 // Run retrieves and parses the Conjur /info API endpoint
-func (inspect *ConjurInfo) Run(context *check.RunContext) <-chan []check.Result {
-	future := make(chan []check.Result)
+func (ci *ConjurInfo) Run(runContext *check.RunContext) []check.Result {
+	// If there is no container ID, return
+	if strings.TrimSpace(runContext.ContainerID) == "" {
+		return []check.Result{}
+	}
 
-	go func() {
+	container := ci.Provider.Container(runContext.ContainerID)
 
-		// If there is no container ID, return
-		if strings.TrimSpace(context.ContainerID) == "" {
-			future <- []check.Result{}
+	stdout, stderr, err := container.Exec(
+		"curl", "-k", "https://localhost/info",
+	)
 
-			return
-		}
-
-		container := inspect.Provider.Container(context.ContainerID)
-
-		stdout, stderr, err := container.Exec(
-			"curl", "-k", "https://localhost/info",
-		)
-
-		if err != nil {
-			future <- []check.Result{
-				{
-					Title:  fmt.Sprintf("Conjur Info (%s)", inspect.Provider.Name()),
-					Status: check.StatusError,
-					Value:  "N/A",
-					Message: fmt.Sprintf(
-						"failed to collect info data: %s (%s))",
-						err,
-						strings.TrimSpace(string(stderr)),
-					),
-				},
-			}
-
-			return
-		}
-
-		// Save raw info output
-		outputReader := bytes.NewReader(stdout)
-		outputFileName := fmt.Sprintf(
-			"conjur-info-%s.json",
-			strings.ToLower(inspect.Provider.Name()),
-		)
-		err = context.OutputStore.Save(outputFileName, outputReader)
-		if err != nil {
-			log.Warn(
-				"Failed to save %s Conjur info output: %s",
-				inspect.Provider.Name(),
+	if err != nil {
+		return check.ErrorResult(
+			ci,
+			fmt.Errorf(
+				"failed to collect info data: %w (%s))",
 				err,
-			)
-		}
+				strings.TrimSpace(shell.ReadOrDefault(stderr, "N/A")),
+			),
+		)
+	}
 
-		conjurInfoData := &ConjurInfoData{}
-		err = json.Unmarshal(stdout, conjurInfoData)
-		if err != nil {
-			future <- []check.Result{
-				{
-					Title:   fmt.Sprintf("Conjur Info (%s)", inspect.Provider.Name()),
-					Status:  check.StatusError,
-					Value:   "N/A",
-					Message: fmt.Sprintf("failed to parse info data: %s)", err.Error()),
-				},
-			}
+	// Read the stdout data to save and parse it
+	infoJSONBytes, err := io.ReadAll(stdout)
+	if err != nil {
+		return check.ErrorResult(
+			ci,
+			fmt.Errorf("failed to read info data: %w)", err),
+		)
+	}
 
-			return
-		}
+	// Save raw info output
+	outputFileName := fmt.Sprintf(
+		"conjur-info-%s.json",
+		strings.ToLower(ci.Provider.Name()),
+	)
+	_, err = runContext.OutputStore.Save(
+		outputFileName,
+		bytes.NewReader(infoJSONBytes),
+	)
+	if err != nil {
+		log.Warn(
+			"Failed to save %s Conjur info output: %s",
+			ci.Provider.Name(),
+			err,
+		)
+	}
 
-		future <- []check.Result{
-			{
-				Title:  fmt.Sprintf("Version (%s)", inspect.Provider.Name()),
-				Status: check.StatusInfo,
-				Value:  conjurInfoData.Version,
-			},
-			{
-				Title:  fmt.Sprintf("Release (%s)", inspect.Provider.Name()),
-				Status: check.StatusInfo,
-				Value:  conjurInfoData.Release,
-			},
-		}
-	}() // async
+	conjurInfoData := &ConjurInfoData{}
+	err = json.Unmarshal(infoJSONBytes, conjurInfoData)
+	if err != nil {
+		return check.ErrorResult(
+			ci,
+			fmt.Errorf("failed to parse info data: %w)", err),
+		)
+	}
 
-	return future
+	return []check.Result{
+		{
+			Title:  fmt.Sprintf("Version (%s)", ci.Provider.Name()),
+			Status: check.StatusInfo,
+			Value:  conjurInfoData.Version,
+		},
+		{
+			Title:  fmt.Sprintf("Release (%s)", ci.Provider.Name()),
+			Status: check.StatusInfo,
+			Value:  conjurInfoData.Release,
+		},
+	}
 }

@@ -3,7 +3,9 @@
 package container
 
 import (
-	"fmt"
+	"errors"
+	"io"
+	"strings"
 	"testing"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
@@ -11,11 +13,13 @@ import (
 )
 
 func TestPodmanProviderInfo(t *testing.T) {
-	rawOutput := []byte(`{"version": {"version": "2.2.1"}, "store": {"graphDriverName": "overlay", "graphRoot": "/var/lib/containers/storage", "runRoot": "/run/user/0", "volumePath": "/var/lib/containers/storage/volumes"}}`)
+	rawOutput := strings.NewReader(
+		`{"version": {"version": "2.2.1"}, "store": {"graphDriverName": "overlay", "graphRoot": "/var/lib/containers/storage", "runRoot": "/run/user/0", "volumePath": "/var/lib/containers/storage/volumes"}}`,
+	)
 
 	// Mock executePodmanInfoFunc to return expected output
 	originalFunc := executePodmanInfoFunc
-	executePodmanInfoFunc = func() (stdout, stderr []byte, err error) {
+	executePodmanInfoFunc = func() (stdout, stderr io.Reader, err error) {
 		stdout = rawOutput
 		return stdout, stderr, err
 	}
@@ -66,8 +70,8 @@ func TestPodmanProviderInfo(t *testing.T) {
 func TestPodmanProviderInfoParseError(t *testing.T) {
 	// Mock dependencies
 	oldFunc := executeDockerInfoFunc
-	executePodmanInfoFunc = func() (stdout, stderr []byte, err error) {
-		stdout = []byte(`invalid json`)
+	executePodmanInfoFunc = func() (stdout, stderr io.Reader, err error) {
+		stdout = strings.NewReader(`invalid json`)
 		return stdout, stderr, err
 	}
 	defer func() {
@@ -85,8 +89,8 @@ func TestPodmanProviderInfoParseError(t *testing.T) {
 func TestPodmanProviderInfoError(t *testing.T) {
 	// Mock executePodmanInfoFunc to return an error
 	originalFunc := executePodmanInfoFunc
-	executePodmanInfoFunc = func() (stdout, stderr []byte, err error) {
-		return stdout, stderr, fmt.Errorf("fake error")
+	executePodmanInfoFunc = func() (stdout, stderr io.Reader, err error) {
+		return stdout, stderr, errors.New("fake error")
 	}
 	defer func() {
 		executePodmanInfoFunc = originalFunc

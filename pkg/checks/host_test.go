@@ -12,8 +12,7 @@ import (
 
 func TestHostRun(t *testing.T) {
 	testCheck := &Host{}
-	resultChan := testCheck.Run(&check.RunContext{})
-	results := <-resultChan
+	results := testCheck.Run(&check.RunContext{})
 
 	hostname := GetResultByTitle(results, "Hostname")
 	assert.NotNil(t, hostname, "Includes 'Hostname'")
@@ -45,12 +44,11 @@ func TestHostRunError(t *testing.T) {
 	}()
 
 	testCheck := &Host{}
-	resultChan := testCheck.Run(&check.RunContext{})
-	results := <-resultChan
+	results := testCheck.Run(&check.RunContext{})
 
 	errResult := results[0]
-	assert.Equal(t, "Error", errResult.Title)
-	assert.Equal(t, "test host failure", errResult.Value)
+	assert.Equal(t, "operating system", errResult.Title)
+	assert.Equal(t, "failed to collect host info: test host failure", errResult.Message)
 }
 
 func TestHostRunNoVirtualization(t *testing.T) {
@@ -62,8 +60,7 @@ func TestHostRunNoVirtualization(t *testing.T) {
 	}()
 
 	testCheck := &Host{}
-	resultChan := testCheck.Run(&check.RunContext{})
-	results := <-resultChan
+	results := testCheck.Run(&check.RunContext{})
 
 	virtualization := GetResultByTitle(results, "Virtualization")
 	assert.NotNil(t, virtualization)

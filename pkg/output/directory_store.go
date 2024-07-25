@@ -20,17 +20,21 @@ func NewDirectoryStore(directory string) *DirectoryStore {
 }
 
 // Save stores a given output to the directory as a file
-func (dirStore *DirectoryStore) Save(name string, reader io.Reader) error {
+func (dirStore *DirectoryStore) Save(name string, reader io.Reader) (StoreItem, error) {
 	path := path.Join(dirStore.directory, name)
 
 	file, err := os.Create(path)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer file.Close()
 
 	_, err = io.Copy(file, reader)
-	return err
+	if err != nil {
+		return nil, err
+	}
+
+	return &DirectoryStoreItem{path: path}, nil
 }
 
 // Items returns the collection of outputs store in this directory

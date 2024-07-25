@@ -47,7 +47,7 @@ func (sr *StandardReport) ID() string {
 }
 
 // Run starts each check and returns a report of the results
-func (sr *StandardReport) Run(containerID string) report.Result {
+func (sr *StandardReport) Run(config report.RunConfig) report.Result {
 	defer sr.outputStore.Cleanup()
 
 	result := report.Result{
@@ -66,16 +66,24 @@ func (sr *StandardReport) Run(containerID string) report.Result {
 			// Update text in progress display
 			progress.Describe(fmt.Sprintf("Checking %s...", currentCheck.Describe()))
 
-			// Start check, this happens asynchronously
-			checkResults := <-currentCheck.Run(
-				&check.RunContext{
-					ContainerID: containerID,
-					OutputStore: sr.outputStore,
-				},
-			)
+			// Create a channel to receive the results of the check
+			resultsChan := make(chan []check.Result)
+
+			// Run the check asynchronously so the main thread isn't blocked. This
+			// allows the progress indicator to continue working as expected
+			go func() {
+				resultsChan <- currentCheck.Run(
+					&check.RunContext{
+						ContainerID: config.ContainerID,
+						Since:       config.Since,
+
+						OutputStore: sr.outputStore,
+					},
+				)
+			}() // async
 
 			// Add the results to the report section
-			sectionResults = append(sectionResults, checkResults...)
+			sectionResults = append(sectionResults, <-resultsChan...)
 
 			// Increment progress
 			progress.Add(1)
@@ -120,7 +128,7 @@ func (sr *StandardReport) archiveReport(result *report.Result) error {
 	}
 
 	// Save the report to the output store
-	err = sr.outputStore.Save("conjur-inspect.json", &buffer)
+	_, err = sr.outputStore.Save("conjur-inspect.json", &buffer)
 	if err != nil {
 		return err
 	}

@@ -1,13 +1,16 @@
 package cmd
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"time"
 
 	"github.com/cyberark/conjur-inspect/pkg/formatting"
 	"github.com/cyberark/conjur-inspect/pkg/log"
+	"github.com/cyberark/conjur-inspect/pkg/report"
 	"github.com/cyberark/conjur-inspect/pkg/version"
+
 	"github.com/spf13/cobra"
 )
 
@@ -16,6 +19,10 @@ var defaultReportConstructor = NewDefaultReport
 func newRootCommand() *cobra.Command {
 	var debug bool
 	var jsonOutput bool
+
+	// Defines the time window this inspection is concerned with. Checks may use
+	// this value to focus or expand their scope to the desired time window.
+	var since string
 
 	var containerID string
 	var rawDataDir string
@@ -29,13 +36,22 @@ func newRootCommand() *cobra.Command {
 				log.EnableDebugMode()
 			}
 
-			report, err := defaultReportConstructor(reportID, rawDataDir)
+			// Parse the duration string
+			sinceDuration, err := time.ParseDuration(since)
 			if err != nil {
-				return err
+				return fmt.Errorf("invalid value for '--since': %w", err)
+			}
+
+			commandReport, err := defaultReportConstructor(reportID, rawDataDir)
+			if err != nil {
+				return fmt.Errorf("unable to initialize report: %w", err)
 			}
 
 			log.Debug("Running report...")
-			result := report.Run(containerID)
+			result := commandReport.Run(report.RunConfig{
+				ContainerID: containerID,
+				Since:       sinceDuration,
+			})
 
 			// Determine which output format we'll use
 			var writer formatting.Writer
@@ -75,14 +91,24 @@ func newRootCommand() *cobra.Command {
 		"debug logging output",
 	)
 
-	// Create json flag for the conjur-inspect command to output a report.
-	// Usage: conjur-inspect --json or -j
+	// Create container ID flag for the conjur-inspect command to specify a
+	// container to inspect.
 	rootCmd.PersistentFlags().StringVarP(
 		&containerID,
 		"container-id",
 		"", // No shorthand
 		"", // No default
 		"Conjur Enterprise container ID or name to inspect",
+	)
+
+	// Create since flag for the conjur-inspect command to specify a time window
+	// for the inspection.
+	rootCmd.PersistentFlags().StringVarP(
+		&since,
+		"since",
+		"",    // No shorthand
+		"24h", // Default is the past day
+		"Time window for the inspection",
 	)
 
 	// Create json flag for the conjur-inspect command to output a report.

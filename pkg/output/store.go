@@ -7,7 +7,7 @@ import (
 
 // Store represent an object that can save raw outputs, referencing them by name.
 type Store interface {
-	Save(name string, reader io.Reader) error
+	Save(name string, reader io.Reader) (StoreItem, error)
 	Items() ([]StoreItem, error)
 	Cleanup() error
 }

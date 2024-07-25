@@ -1,6 +1,10 @@
 package check
 
-import "github.com/cyberark/conjur-inspect/pkg/output"
+import (
+	"time"
+
+	"github.com/cyberark/conjur-inspect/pkg/output"
+)
 
 // StatusInfo means the result is informational only
 const StatusInfo = "INFO"
@@ -21,14 +25,16 @@ const StatusError = "ERROR"
 // etc.) that returns one or more result.
 type Check interface {
 	Describe() string
-	Run(context *RunContext) <-chan []Result
+	Run(*RunContext) []Result
 }
 
 // RunContext is container of other services available to checks within the
 // context of a particular report run.
 type RunContext struct {
 	OutputStore output.Store
+
 	ContainerID string
+	Since       time.Duration
 }
 
 // Result is the outcome of a particular check. A check may produce multiple
@@ -38,4 +44,16 @@ type Result struct {
 	Value   string `json:"value"`
 	Status  string `json:"status"`
 	Message string `json:"message"`
+}
+
+// ErrorResult returns a single result with an error message.
+func ErrorResult(c Check, err error) []Result {
+	return []Result{
+		{
+			Title:   c.Describe(),
+			Status:  StatusError,
+			Value:   "N/A",
+			Message: err.Error(),
+		},
+	}
 }

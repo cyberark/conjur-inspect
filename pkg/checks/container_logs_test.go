@@ -13,10 +13,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestContainerInspectRun(t *testing.T) {
-	testCheck := &ContainerInspect{
+func TestContainerLogsRun(t *testing.T) {
+	testCheck := &ContainerLogs{
 		Provider: &test.ContainerProvider{
-			InspectResult: strings.NewReader("test"),
+			LogsOutput: strings.NewReader("test"),
 		},
 	}
 
@@ -38,7 +38,7 @@ func TestContainerInspectRun(t *testing.T) {
 
 	itemInfo, err := outputStoreItems[0].Info()
 	assert.NoError(t, err)
-	assert.Equal(t, "test container provider-inspect.json", itemInfo.Name())
+	assert.Equal(t, "test container provider-container.log", itemInfo.Name())
 
 	reader, cleanup, err := outputStoreItems[0].Open()
 	assert.NoError(t, err)
@@ -50,10 +50,10 @@ func TestContainerInspectRun(t *testing.T) {
 	assert.Equal(t, "test", string(output))
 }
 
-func TestContainerInspectRunError(t *testing.T) {
-	testCheck := &ContainerInspect{
+func TestContainerLogsRunError(t *testing.T) {
+	testCheck := &ContainerLogs{
 		Provider: &test.ContainerProvider{
-			InspectError: errors.New("Test error"),
+			LogsError: errors.New("Test error"),
 		},
 	}
 
@@ -65,8 +65,30 @@ func TestContainerInspectRunError(t *testing.T) {
 
 	assert.Equal(t, 1, len(results))
 
-	assert.Equal(t, "Test Container Provider inspect", results[0].Title)
+	assert.Equal(t, "Test Container Provider logs", results[0].Title)
 	assert.Equal(t, check.StatusError, results[0].Status)
 	assert.Equal(t, "N/A", results[0].Value)
-	assert.Equal(t, "failed to inspect container: Test error", results[0].Message)
+	assert.Equal(t, "failed to collect container logs: Test error", results[0].Message)
+}
+
+func TestContainerLogsNoContainerID(t *testing.T) {
+	testCheck := &ContainerLogs{
+		Provider: &test.ContainerProvider{},
+	}
+
+	testOutputStore := test.NewOutputStore()
+
+	results := testCheck.Run(
+		&check.RunContext{
+			ContainerID: "",
+			OutputStore: testOutputStore,
+		},
+	)
+
+	assert.Empty(t, results)
+
+	outputStoreItems, err := testOutputStore.Items()
+	assert.NoError(t, err)
+
+	assert.Equal(t, 0, len(outputStoreItems))
 }

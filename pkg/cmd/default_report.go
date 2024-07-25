@@ -98,6 +98,14 @@ func defaultReportSections() []report.Section {
 				&checks.ContainerInspect{
 					Provider: &container.PodmanProvider{},
 				},
+
+				// Container logs
+				&checks.ContainerLogs{
+					Provider: &container.DockerProvider{},
+				},
+				&checks.ContainerLogs{
+					Provider: &container.PodmanProvider{},
+				},
 			},
 		},
 		{

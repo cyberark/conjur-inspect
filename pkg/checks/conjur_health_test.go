@@ -3,6 +3,7 @@ package checks
 import (
 	"errors"
 	"io"
+	"strings"
 	"testing"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
@@ -11,10 +12,10 @@ import (
 )
 
 func TestConjurHealthRun(t *testing.T) {
-	healthJSON := []byte(`{"ok": true, "degraded": false}`)
+	healthJSON := `{"ok": true, "degraded": false}`
 
 	containerProvider := &test.ContainerProvider{
-		ExecStdout: healthJSON,
+		ExecStdout: strings.NewReader(healthJSON),
 	}
 
 	// Create the ConjurHealth instance
@@ -22,10 +23,10 @@ func TestConjurHealthRun(t *testing.T) {
 		Provider: containerProvider,
 	}
 
-	context := test.NewRunContext("test-container-id")
+	runContext := test.NewRunContext("test-container-id")
 
 	// Run the function
-	results := <-conjurHealth.Run(&context)
+	results := conjurHealth.Run(&runContext)
 
 	// Check the results
 	expectedResults := []check.Result{
@@ -43,7 +44,7 @@ func TestConjurHealthRun(t *testing.T) {
 	assert.Equal(t, expectedResults, results)
 
 	// Check the output store
-	outputStoreItems, err := context.OutputStore.Items()
+	outputStoreItems, err := runContext.OutputStore.Items()
 	assert.NoError(t, err)
 	assert.Len(t, outputStoreItems, 1)
 
@@ -63,7 +64,7 @@ func TestConjurHealthRun(t *testing.T) {
 
 	outputStoreItemData, err := io.ReadAll(outputStoreItemReader)
 	assert.NoError(t, err)
-	assert.Equal(t, healthJSON, outputStoreItemData)
+	assert.Equal(t, healthJSON, string(outputStoreItemData))
 }
 
 func TestConjurHealthRun_NoContainerID(t *testing.T) {
@@ -74,24 +75,24 @@ func TestConjurHealthRun_NoContainerID(t *testing.T) {
 		Provider: containerProvider,
 	}
 
-	context := test.NewRunContext("")
+	runContext := test.NewRunContext("")
 
 	// Run the function
-	results := <-conjurHealth.Run(&context)
+	results := conjurHealth.Run(&runContext)
 
 	// Check the results
 	expectedResults := []check.Result{}
 	assert.Equal(t, expectedResults, results)
 
 	// Check the output store
-	outputStoreItems, err := context.OutputStore.Items()
+	outputStoreItems, err := runContext.OutputStore.Items()
 	assert.NoError(t, err)
 	assert.Empty(t, outputStoreItems)
 }
 
 func TestConjurHealthRun_ExecError(t *testing.T) {
 	containerProvider := &test.ContainerProvider{
-		ExecStderr: []byte("test stderr"),
+		ExecStderr: strings.NewReader("test stderr"),
 		ExecError:  errors.New("test error"),
 	}
 
@@ -100,10 +101,10 @@ func TestConjurHealthRun_ExecError(t *testing.T) {
 		Provider: containerProvider,
 	}
 
-	context := test.NewRunContext("test-container-id")
+	runContext := test.NewRunContext("test-container-id")
 
 	// Run the function
-	results := <-conjurHealth.Run(&context)
+	results := conjurHealth.Run(&runContext)
 
 	// Check the results
 	expectedResults := []check.Result{
@@ -117,16 +118,16 @@ func TestConjurHealthRun_ExecError(t *testing.T) {
 	assert.Equal(t, expectedResults, results)
 
 	// Check the output store
-	outputStoreItems, err := context.OutputStore.Items()
+	outputStoreItems, err := runContext.OutputStore.Items()
 	assert.NoError(t, err)
 	assert.Empty(t, outputStoreItems)
 }
 
 func TestConjurHealthRun_UnmarshalError(t *testing.T) {
-	healthJSON := []byte(`{"ok": "invalid", "degraded": false}`)
+	healthJSON := `{"ok": "invalid", "degraded": false}`
 
 	containerProvider := &test.ContainerProvider{
-		ExecStdout: healthJSON,
+		ExecStdout: strings.NewReader(healthJSON),
 	}
 
 	// Create the ConjurHealth instance
@@ -134,10 +135,10 @@ func TestConjurHealthRun_UnmarshalError(t *testing.T) {
 		Provider: containerProvider,
 	}
 
-	context := test.NewRunContext("test-container-id")
+	runContext := test.NewRunContext("test-container-id")
 
 	// Run the function
-	results := <-conjurHealth.Run(&context)
+	results := conjurHealth.Run(&runContext)
 
 	// Check the results
 	expectedResults := []check.Result{
@@ -152,7 +153,7 @@ func TestConjurHealthRun_UnmarshalError(t *testing.T) {
 
 	// Check the output store. The raw output should be saved even with a
 	// parse error.
-	outputStoreItems, err := context.OutputStore.Items()
+	outputStoreItems, err := runContext.OutputStore.Items()
 	assert.NoError(t, err)
 	assert.Len(t, outputStoreItems, 1)
 
@@ -172,5 +173,5 @@ func TestConjurHealthRun_UnmarshalError(t *testing.T) {
 
 	outputStoreItemData, err := io.ReadAll(outputStoreItemReader)
 	assert.NoError(t, err)
-	assert.Equal(t, healthJSON, outputStoreItemData)
+	assert.Equal(t, healthJSON, string(outputStoreItemData))
 }

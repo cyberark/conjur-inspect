@@ -2,6 +2,9 @@
 package test
 
 import (
+	"io"
+	"time"
+
 	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/container"
 )
@@ -10,21 +13,24 @@ import (
 // for testing
 type ContainerProvider struct {
 	InspectError  error
-	InspectResult []byte
+	InspectResult io.Reader
 
 	InfoError   error
-	InfoRawData []byte
+	InfoRawData io.Reader
 	InfoResults []check.Result
 
 	ExecError  error
-	ExecStdout []byte
-	ExecStderr []byte
+	ExecStdout io.Reader
+	ExecStderr io.Reader
+
+	LogsOutput io.Reader
+	LogsError  error
 }
 
 // ContainerProviderInfo is a mock implementation of the ContainerProviderInfo
 // interface for testing
 type ContainerProviderInfo struct {
-	InfoRawData []byte
+	InfoRawData io.Reader
 	InfoResults []check.Result
 }
 
@@ -33,73 +39,84 @@ type Container struct {
 	ContainerID string
 
 	InspectError  error
-	InspectResult []byte
+	InspectResult io.Reader
 
 	ExecError  error
-	ExecStdout []byte
-	ExecStderr []byte
+	ExecStdout io.Reader
+	ExecStderr io.Reader
+
+	LogsOutput io.Reader
+	LogsError  error
 }
 
 // Name returns the name of the container provider
-func (provider *ContainerProvider) Name() string {
+func (*ContainerProvider) Name() string {
 	return "Test Container Provider"
 }
 
 // Info returns the container provider info
-func (provider *ContainerProvider) Info() (container.ContainerProviderInfo, error) {
-	if provider.InfoError != nil {
-		return nil, provider.InfoError
+func (cp *ContainerProvider) Info() (container.ContainerProviderInfo, error) {
+	if cp.InfoError != nil {
+		return nil, cp.InfoError
 	}
 
 	return &ContainerProviderInfo{
-		InfoRawData: provider.InfoRawData,
-		InfoResults: provider.InfoResults,
+		InfoRawData: cp.InfoRawData,
+		InfoResults: cp.InfoResults,
 	}, nil
 }
 
 // Container returns a container instance for the given ID
-func (provider *ContainerProvider) Container(
+func (cp *ContainerProvider) Container(
 	containerID string,
 ) container.Container {
 	return &Container{
 		ContainerID: containerID,
 
-		InspectError:  provider.InspectError,
-		InspectResult: provider.InspectResult,
+		InspectError:  cp.InspectError,
+		InspectResult: cp.InspectResult,
 
-		ExecError:  provider.ExecError,
-		ExecStdout: provider.ExecStdout,
-		ExecStderr: provider.ExecStderr,
+		ExecError:  cp.ExecError,
+		ExecStdout: cp.ExecStdout,
+		ExecStderr: cp.ExecStderr,
+
+		LogsOutput: cp.LogsOutput,
+		LogsError:  cp.LogsError,
 	}
 }
 
 // Results returns the check results
-func (providerInfo *ContainerProviderInfo) Results() []check.Result {
-	return providerInfo.InfoResults
+func (cpi *ContainerProviderInfo) Results() []check.Result {
+	return cpi.InfoResults
 }
 
 // RawData returns the raw data
-func (providerInfo *ContainerProviderInfo) RawData() []byte {
-	return providerInfo.InfoRawData
+func (cpi *ContainerProviderInfo) RawData() io.Reader {
+	return cpi.InfoRawData
 }
 
 // ID returns the container ID
-func (container *Container) ID() string {
-	return container.ContainerID
+func (c *Container) ID() string {
+	return c.ContainerID
 }
 
 // Inspect returns the JSON output of the mock `inspect` command
-func (container *Container) Inspect() ([]byte, error) {
-	if container.InspectError != nil {
-		return nil, container.InspectError
+func (c *Container) Inspect() (io.Reader, error) {
+	if c.InspectError != nil {
+		return nil, c.InspectError
 	}
 
-	return container.InspectResult, nil
+	return c.InspectResult, nil
 }
 
 // Exec returns the JSON output of the mock `exec` command
-func (container *Container) Exec(
+func (c *Container) Exec(
 	command ...string,
-) (stdout, stderr []byte, err error) {
-	return container.ExecStdout, container.ExecStderr, container.ExecError
+) (stdout, stderr io.Reader, err error) {
+	return c.ExecStdout, c.ExecStderr, c.ExecError
+}
+
+// Logs returns the output of the mock `logs` command
+func (c *Container) Logs(since time.Duration) (io.Reader, error) {
+	return c.LogsOutput, c.LogsError
 }

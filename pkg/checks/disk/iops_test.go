@@ -29,8 +29,7 @@ func TestIopsCheck(t *testing.T) {
 	testCheck := &IopsCheck{
 		fioNewJob: newSuccessfulIopsFioJob,
 	}
-	resultChan := testCheck.Run(&check.RunContext{})
-	results := <-resultChan
+	results := testCheck.Run(&check.RunContext{})
 
 	assert.Equal(
 		t,
@@ -47,8 +46,7 @@ func TestIopsCheckWithPoorPerformance(t *testing.T) {
 	testCheck := &IopsCheck{
 		fioNewJob: newPoorIopsPerformanceFioJob,
 	}
-	resultChan := testCheck.Run(&check.RunContext{})
-	results := <-resultChan
+	results := testCheck.Run(&check.RunContext{})
 
 	assert.Equal(
 		t,
@@ -65,8 +63,7 @@ func TestIopsWithError(t *testing.T) {
 	testCheck := &IopsCheck{
 		fioNewJob: newErrorFioJob,
 	}
-	resultChan := testCheck.Run(&check.RunContext{})
-	results := <-resultChan
+	results := testCheck.Run(&check.RunContext{})
 
 	// Expect only the error result
 	assert.Equal(t, 1, len(results))
@@ -81,8 +78,7 @@ func TestIopsWithNoJobs(t *testing.T) {
 	testCheck := &IopsCheck{
 		fioNewJob: newEmptyFioJob,
 	}
-	resultChan := testCheck.Run(&check.RunContext{})
-	results := <-resultChan
+	results := testCheck.Run(&check.RunContext{})
 
 	// Expect only the error result
 	assert.Equal(t, 1, len(results))
@@ -104,8 +100,7 @@ func TestIopsWithWorkingDirectoryError(t *testing.T) {
 	testCheck := &IopsCheck{
 		fioNewJob: newSuccessfulIopsFioJob,
 	}
-	resultChan := testCheck.Run(&check.RunContext{})
-	results := <-resultChan
+	results := testCheck.Run(&check.RunContext{})
 
 	assert.Equal(
 		t,

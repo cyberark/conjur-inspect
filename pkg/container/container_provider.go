@@ -2,7 +2,12 @@
 // (e.g. Docker, Podman)
 package container
 
-import "github.com/cyberark/conjur-inspect/pkg/check"
+import (
+	"io"
+	"time"
+
+	"github.com/cyberark/conjur-inspect/pkg/check"
+)
 
 // ContainerProvider is an interface for a concrete container
 // engine (e.g. Docker, Podman)
@@ -15,8 +20,9 @@ type ContainerProvider interface {
 // Container is an interface for a container instance
 type Container interface {
 	ID() string
-	Inspect() ([]byte, error)
-	Exec(command ...string) (stdout, stderr []byte, err error)
+	Inspect() (io.Reader, error)
+	Exec(command ...string) (stdout, stderr io.Reader, err error)
+	Logs(since time.Duration) (io.Reader, error)
 }
 
 // ContainerProviderInfo is an interface for the results of
@@ -24,5 +30,5 @@ type Container interface {
 // data, and specific reporting results for that runtime
 type ContainerProviderInfo interface {
 	Results() []check.Result
-	RawData() []byte
+	RawData() io.Reader
 }

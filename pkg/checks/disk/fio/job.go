@@ -3,6 +3,7 @@ package fio
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/cyberark/conjur-inspect/pkg/log"
@@ -11,7 +12,7 @@ import (
 
 const fioExecutable = "fio"
 
-var executeFioFunc func(args ...string) (stdout, stderr []byte, err error) = executeFio
+var executeFioFunc func(args ...string) (stdout, stderr io.Reader, err error) = executeFio
 
 // Executable represents an operation that can produce an fio result and
 // emit raw output data.
@@ -49,28 +50,39 @@ func (job *Job) Exec() (*Result, error) {
 	// finishes.
 	cleanup, err := usingJobDirectory(job.Name)
 	if err != nil {
-		return nil, fmt.Errorf("unable to create test directory: %s", err)
+		return nil, fmt.Errorf("unable to create test directory: %w", err)
 	}
 	defer cleanup()
 
 	// Run 'fio' command
-	output, stderr, err := executeFioFunc(job.Args...)
+	stdout, stderr, err := executeFioFunc(job.Args...)
 	if err != nil {
 		log.Debug("Unable to execute 'fio' job:")
-		log.Debug(string(stderr))
-		return nil, fmt.Errorf("unable to execute 'fio' job: %s", err)
+
+		// If we can read the standard error from the command, log it
+		stderrStr, stderrErr := io.ReadAll(stderr)
+		if stderrErr == nil {
+			log.Debug(string(stderrStr))
+		}
+
+		return nil, fmt.Errorf("unable to execute 'fio' job: %w", err)
+	}
+
+	stdoutBytes, err := io.ReadAll(stdout)
+	if err != nil {
+		return nil, fmt.Errorf("unable to read 'fio' output: %w", err)
 	}
 
 	// If there is a configured result listener, notify it of the result output
 	if job.rawOutputCallback != nil {
-		job.rawOutputCallback(output)
+		job.rawOutputCallback(stdoutBytes)
 	}
 
 	// Parse the result JSON
 	jsonResult := Result{}
-	err = json.Unmarshal(output, &jsonResult)
+	err = json.Unmarshal(stdoutBytes, &jsonResult)
 	if err != nil {
-		return nil, fmt.Errorf("unable to parse 'fio' output: %s", err)
+		return nil, fmt.Errorf("unable to parse 'fio' output: %w", err)
 	}
 
 	return &jsonResult, nil
@@ -96,6 +108,6 @@ func usingJobDirectory(jobName string) (func(), error) {
 	}, nil
 }
 
-func executeFio(args ...string) (stdout, stderr []byte, err error) {
+func executeFio(args ...string) (stdout, stderr io.Reader, err error) {
 	return shell.NewCommandWrapper(fioExecutable, args...).Run()
 }

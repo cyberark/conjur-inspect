@@ -2,12 +2,16 @@
 // (e.g. Docker, Podman)
 package container
 
-import "github.com/cyberark/conjur-inspect/pkg/check"
+import (
+	"io"
+
+	"github.com/cyberark/conjur-inspect/pkg/check"
+)
 
 // DockerProviderInfo is the concrete implementation of ContainerProviderInfo
 // for Docker
 type DockerProviderInfo struct {
-	rawData []byte
+	rawData io.Reader
 	info    *DockerInfo
 }
 
@@ -29,7 +33,7 @@ func (info *DockerProviderInfo) Results() []check.Result {
 }
 
 // RawData returns the raw JSON output from `docker info`
-func (info *DockerProviderInfo) RawData() []byte {
+func (info *DockerProviderInfo) RawData() io.Reader {
 	return info.rawData
 }
 

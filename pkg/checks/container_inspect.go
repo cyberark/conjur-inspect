@@ -3,13 +3,13 @@
 package checks
 
 import (
-	"bytes"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
 	"github.com/cyberark/conjur-inspect/pkg/container"
-	"github.com/cyberark/conjur-inspect/pkg/log"
+	"github.com/cyberark/conjur-inspect/pkg/output"
 )
 
 // ContainerInspect collects the output of the container runtime's
@@ -19,56 +19,47 @@ type ContainerInspect struct {
 }
 
 // Describe provides a textual description of what this check gathers info on
-func (inspect *ContainerInspect) Describe() string {
-	return fmt.Sprintf("%s inspect", inspect.Provider.Name())
+func (ci *ContainerInspect) Describe() string {
+	return fmt.Sprintf("%s inspect", ci.Provider.Name())
 }
 
 // Run performs the Docker inspection checks
-func (inspect *ContainerInspect) Run(context *check.RunContext) <-chan []check.Result {
-	future := make(chan []check.Result)
+func (ci *ContainerInspect) Run(runContext *check.RunContext) []check.Result {
+	// If there is no container ID, return
+	if strings.TrimSpace(runContext.ContainerID) == "" {
+		return []check.Result{}
+	}
 
-	go func() {
+	container := ci.Provider.Container(runContext.ContainerID)
 
-		// If there is no container ID, return
-		if strings.TrimSpace(context.ContainerID) == "" {
-			future <- []check.Result{}
-
-			return
-		}
-
-		container := inspect.Provider.Container(context.ContainerID)
-
-		inspectResult, err := container.Inspect()
-		if err != nil {
-			future <- []check.Result{
-				{
-					Title:   fmt.Sprintf("%s inspect", inspect.Provider.Name()),
-					Status:  check.StatusError,
-					Value:   "N/A",
-					Message: err.Error(),
-				},
-			}
-
-			return
-		}
-
-		// Save raw container info output
-		outputReader := bytes.NewReader(inspectResult)
-		outputFileName := fmt.Sprintf(
-			"%s-inspect.json",
-			strings.ToLower(inspect.Provider.Name()),
+	inspectResult, err := container.Inspect()
+	if err != nil {
+		return check.ErrorResult(
+			ci,
+			fmt.Errorf("failed to inspect container: %w", err),
 		)
-		err = context.OutputStore.Save(outputFileName, outputReader)
-		if err != nil {
-			log.Warn(
-				"Failed to save %s inspect output: %s",
-				inspect.Provider.Name(),
-				err,
-			)
-		}
+	}
 
-		future <- []check.Result{}
-	}() // async
+	err = ci.saveOutput(runContext.OutputStore, inspectResult)
+	if err != nil {
+		return check.ErrorResult(
+			ci,
+			fmt.Errorf("failed to save inspect output: %w", err),
+		)
+	}
 
-	return future
+	return []check.Result{}
+}
+
+func (ci *ContainerInspect) saveOutput(
+	outputStore output.Store,
+	output io.Reader,
+) error {
+	outputFileName := fmt.Sprintf(
+		"%s-inspect.json",
+		strings.ToLower(ci.Provider.Name()),
+	)
+	_, err := outputStore.Save(outputFileName, output)
+
+	return err
 }

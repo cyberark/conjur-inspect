@@ -4,13 +4,16 @@ package container
 
 import (
 	"fmt"
+	"io"
 	"strings"
+	"time"
 
 	"github.com/cyberark/conjur-inspect/pkg/shell"
 )
 
 // Function variable for dependency injection
 var dockerFunc = docker
+var dockerCombinedOutputFunc = dockerCombinedOutput
 
 // DockerContainer is a concrete implementation of the Container interface
 type DockerContainer struct {
@@ -18,26 +21,26 @@ type DockerContainer struct {
 }
 
 // ID returns the container ID
-func (container *DockerContainer) ID() string {
-	return container.ContainerID
+func (dc *DockerContainer) ID() string {
+	return dc.ContainerID
 }
 
 // Inspect returns the JSON output of the `docker inspect` command
-func (container *DockerContainer) Inspect() ([]byte, error) {
+func (dc *DockerContainer) Inspect() (io.Reader, error) {
 	stdout, stderr, err := dockerFunc(
 		"inspect",
 		"--format",
 		"json",
 		"--size",
-		container.ContainerID,
+		dc.ContainerID,
 	)
 
 	if err != nil {
 		return nil, fmt.Errorf(
 			"failed to inspect Podman container %s: %w (%s)",
-			container.ContainerID,
+			dc.ContainerID,
 			err,
-			strings.TrimSpace(string(stderr)),
+			strings.TrimSpace(shell.ReadOrDefault(stderr, "N/A")),
 		)
 	}
 
@@ -45,15 +48,27 @@ func (container *DockerContainer) Inspect() ([]byte, error) {
 }
 
 // Exec runs a command inside the container
-func (container *DockerContainer) Exec(
+func (dc *DockerContainer) Exec(
 	command ...string,
-) (stdout, stderr []byte, err error) {
-	args := append([]string{"exec", container.ContainerID}, command...)
+) (stdout, stderr io.Reader, err error) {
+	args := append([]string{"exec", dc.ContainerID}, command...)
 	return dockerFunc(args...)
+}
+
+// Logs returns the logs of the container
+func (dc *DockerContainer) Logs(since time.Duration) (io.Reader, error) {
+	args := []string{"logs", fmt.Sprintf("--since=%s", since), dc.ContainerID}
+	return dockerCombinedOutputFunc(args...)
 }
 
 func docker(
 	command ...string,
-) (stdout, stderr []byte, err error) {
+) (stdout, stderr io.Reader, err error) {
 	return shell.NewCommandWrapper("docker", command...).Run()
+}
+
+func dockerCombinedOutput(
+	command ...string,
+) (io.Reader, error) {
+	return shell.NewCommandWrapper("docker", command...).RunCombinedOutput()
 }

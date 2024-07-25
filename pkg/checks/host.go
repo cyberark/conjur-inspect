@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
-	"github.com/cyberark/conjur-inspect/pkg/log"
 	"github.com/hako/durafmt"
 	"github.com/shirou/gopsutil/v3/host"
 )
@@ -22,33 +21,21 @@ func (*Host) Describe() string {
 }
 
 // Run executes the Host inspection checks
-func (*Host) Run(context *check.RunContext) <-chan []check.Result {
-	future := make(chan []check.Result)
+func (h *Host) Run(*check.RunContext) []check.Result {
+	hostInfo, err := getHostInfo()
+	if err != nil {
+		return check.ErrorResult(
+			h,
+			fmt.Errorf("failed to collect host info: %w", err),
+		)
+	}
 
-	go func() {
-		hostInfo, err := getHostInfo()
-		if err != nil {
-			log.Debug("Unable to inspect host info: %s", err)
-			future <- []check.Result{
-				{
-					Title:  "Error",
-					Status: check.StatusError,
-					Value:  fmt.Sprintf("%s", err),
-				},
-			}
-
-			return
-		}
-
-		future <- []check.Result{
-			hostnameResult(hostInfo),
-			uptimeResult(hostInfo),
-			osResult(hostInfo),
-			virtualizationResult(hostInfo),
-		}
-	}() // async
-
-	return future
+	return []check.Result{
+		hostnameResult(hostInfo),
+		uptimeResult(hostInfo),
+		osResult(hostInfo),
+		virtualizationResult(hostInfo),
+	}
 }
 
 func hostnameResult(hostInfo *host.InfoStat) check.Result {

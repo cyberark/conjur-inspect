@@ -11,8 +11,7 @@ import (
 
 func TestMemoryRun(t *testing.T) {
 	testCheck := &Memory{}
-	resultChan := testCheck.Run(&check.RunContext{})
-	results := <-resultChan
+	results := testCheck.Run(&check.RunContext{})
 
 	memoryTotal := GetResultByTitle(results, "Memory Total")
 	assert.NotNil(t, memoryTotal, "Includes 'Memory Total'")
@@ -39,14 +38,13 @@ func TestMemoryRunError(t *testing.T) {
 	}()
 
 	testCheck := &Memory{}
-	resultChan := testCheck.Run(&check.RunContext{})
-	results := <-resultChan
+	results := testCheck.Run(&check.RunContext{})
 
 	assert.Len(t, results, 1)
 
 	errResult := results[0]
-	assert.Equal(t, "Error", errResult.Title)
-	assert.Equal(t, "test virtual memory failure", errResult.Value)
+	assert.Equal(t, "memory", errResult.Title)
+	assert.Equal(t, "failed to inspect memory: test virtual memory failure", errResult.Message)
 }
 
 func failedVirtualMemoryFunc() (*mem.VirtualMemoryStat, error) {

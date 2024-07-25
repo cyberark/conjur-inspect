@@ -4,17 +4,20 @@ package container
 
 import (
 	"errors"
+	"io"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPodmanContainerInspect(t *testing.T) {
-	rawOutput := []byte(`{"Test Key":"Test Value"}`)
+	rawOutput := strings.NewReader(`{"Test Key":"Test Value"}`)
 
 	// Mock dependencies
 	oldFunc := podmanFunc
-	podmanFunc = func(...string) (stdout, stderr []byte, err error) {
+	podmanFunc = func(...string) (stdout, stderr io.Reader, err error) {
 		stdout = rawOutput
 		return stdout, stderr, err
 	}
@@ -36,7 +39,7 @@ func TestPodmanContainerInspectError(t *testing.T) {
 	testError := errors.New("fake error")
 	// Mock dependencies
 	oldFunc := podmanFunc
-	podmanFunc = func(...string) (stdout, stderr []byte, err error) {
+	podmanFunc = func(...string) (stdout, stderr io.Reader, err error) {
 		err = testError
 		return stdout, stderr, err
 	}
@@ -54,12 +57,12 @@ func TestPodmanContainerInspectError(t *testing.T) {
 }
 
 func TestPodmanContainerExec(t *testing.T) {
-	standardOut := []byte("test standard output")
-	standardErr := []byte("test standard error")
+	standardOut := strings.NewReader("test standard output")
+	standardErr := strings.NewReader("test standard error")
 
 	// Mock dependencies
 	oldFunc := podmanFunc
-	podmanFunc = func(...string) (stdout, stderr []byte, err error) {
+	podmanFunc = func(...string) (stdout, stderr io.Reader, err error) {
 		stdout = standardOut
 		stderr = standardErr
 		return stdout, stderr, err
@@ -83,7 +86,7 @@ func TestPodmanContainerExecError(t *testing.T) {
 
 	// Mock dependencies
 	oldFunc := podmanFunc
-	podmanFunc = func(...string) (stdout, stderr []byte, err error) {
+	podmanFunc = func(...string) (stdout, stderr io.Reader, err error) {
 		err = testError
 		return stdout, stderr, err
 	}
@@ -99,4 +102,51 @@ func TestPodmanContainerExecError(t *testing.T) {
 	assert.Error(t, testError, err)
 	assert.Nil(t, stdout)
 	assert.Nil(t, stderr)
+}
+
+func TestPodmanContainerLogs(t *testing.T) {
+	logOut := "test logs"
+
+	// Mock dependencies
+	oldFunc := podmanCombinedOutputFunc
+	podmanCombinedOutputFunc = func(...string) (output io.Reader, err error) {
+		output = strings.NewReader(logOut)
+		return output, err
+	}
+	defer func() {
+		podmanCombinedOutputFunc = oldFunc
+	}()
+
+	podmanContainer := &PodmanContainer{
+		ContainerID: "test-container",
+	}
+
+	output, err := podmanContainer.Logs(time.Duration(0))
+	assert.NoError(t, err)
+
+	outputBytes, err := io.ReadAll(output)
+	assert.NoError(t, err)
+	assert.Equal(t, logOut, string(outputBytes))
+}
+
+func TestPodmanContainerLogsError(t *testing.T) {
+	testError := errors.New("fake error")
+
+	// Mock dependencies
+	oldFunc := podmanCombinedOutputFunc
+	podmanCombinedOutputFunc = func(...string) (output io.Reader, err error) {
+		err = testError
+		return output, err
+	}
+	defer func() {
+		podmanCombinedOutputFunc = oldFunc
+	}()
+
+	podmanContainer := &PodmanContainer{
+		ContainerID: "test-container",
+	}
+
+	output, err := podmanContainer.Logs(time.Duration(0))
+	assert.Error(t, testError, err)
+	assert.Nil(t, output)
 }

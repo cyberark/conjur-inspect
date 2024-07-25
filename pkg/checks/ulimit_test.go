@@ -1,6 +1,8 @@
 package checks
 
 import (
+	"io"
+	"strings"
 	"testing"
 
 	"github.com/cyberark/conjur-inspect/pkg/test"
@@ -11,8 +13,10 @@ import (
 func TestUlimitRun(t *testing.T) {
 	// Mock dependencies
 	oldFunc := executeUlimitInfoFunc
-	executeUlimitInfoFunc = func() (stderr, stdout []byte, err error) {
-		stdout = []byte("core file size      (blocks, -c) 0\npipe size      (512 bytes, -p) 1\nopen files      (-n) 6140\n")
+	executeUlimitInfoFunc = func() (stderr, stdout io.Reader, err error) {
+		stdout = strings.NewReader(
+			"core file size      (blocks, -c) 0\npipe size      (512 bytes, -p) 1\nopen files      (-n) 6140\n",
+		)
 		return stdout, stderr, err
 	}
 	defer func() {
@@ -21,8 +25,8 @@ func TestUlimitRun(t *testing.T) {
 
 	// Run the check
 	ulimit := &Ulimit{}
-	context := test.NewRunContext("")
-	results := <-ulimit.Run(&context)
+	runContext := test.NewRunContext("")
+	results := ulimit.Run(&runContext)
 
 	coreFileSize := GetResultByTitle(results, "core file size (blocks, -c)")
 	require.NotNil(t, coreFileSize, "Includes 'core file size (blocks, -c)'")

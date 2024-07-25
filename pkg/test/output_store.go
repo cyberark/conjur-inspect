@@ -31,19 +31,21 @@ func NewOutputStore() *OutputStore {
 }
 
 // Save stores a given output to the directory as a file
-func (store *OutputStore) Save(name string, reader io.Reader) error {
+func (store *OutputStore) Save(name string, reader io.Reader) (output.StoreItem, error) {
 	buf := new(bytes.Buffer)
 	_, err := buf.ReadFrom(reader)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	store.items[name] = OutputStoreItem{
+	newItem := OutputStoreItem{
 		name: name,
 		data: buf.Bytes(),
 	}
 
-	return nil
+	store.items[name] = newItem
+
+	return &newItem, nil
 }
 
 // Items returns the collection of outputs store in this directory

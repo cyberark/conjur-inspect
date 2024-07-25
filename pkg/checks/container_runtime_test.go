@@ -5,6 +5,7 @@ package checks
 import (
 	"errors"
 	"io"
+	"strings"
 	"testing"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
@@ -15,7 +16,7 @@ import (
 func TestContainerRuntimeRun(t *testing.T) {
 	testCheck := &ContainerRuntime{
 		Provider: &test.ContainerProvider{
-			InfoRawData: []byte("test info"),
+			InfoRawData: strings.NewReader("test info"),
 			InfoResults: []check.Result{
 				{
 					Title:   "Test Container Runtime Check",
@@ -29,12 +30,11 @@ func TestContainerRuntimeRun(t *testing.T) {
 
 	testOutputStore := test.NewOutputStore()
 
-	resultChan := testCheck.Run(
+	results := testCheck.Run(
 		&check.RunContext{
 			OutputStore: testOutputStore,
 		},
 	)
-	results := <-resultChan
 
 	assert.Equal(t, 1, len(results))
 	assert.Equal(t, "Test Container Runtime Check", results[0].Title)
@@ -64,13 +64,12 @@ func TestContainerRuntimeRunError(t *testing.T) {
 		},
 	}
 
-	resultChan := testCheck.Run(&check.RunContext{})
-	results := <-resultChan
+	results := testCheck.Run(&check.RunContext{})
 
 	assert.Equal(t, 1, len(results))
 
-	assert.Equal(t, "Test Container Provider", results[0].Title)
+	assert.Equal(t, "Test Container Provider runtime", results[0].Title)
 	assert.Equal(t, check.StatusError, results[0].Status)
 	assert.Equal(t, "N/A", results[0].Value)
-	assert.Equal(t, "Test error", results[0].Message)
+	assert.Equal(t, "failed to collect container runtime info: Test error", results[0].Message)
 }

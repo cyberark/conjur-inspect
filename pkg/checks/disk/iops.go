@@ -38,50 +38,39 @@ func (*IopsCheck) Describe() string {
 
 // Run executes the IopsCheck by running `fio` and processing its output
 func (iopsCheck *IopsCheck) Run(
-	context *check.RunContext,
-) <-chan []check.Result {
-	future := make(chan []check.Result)
+	runContext *check.RunContext,
+) []check.Result {
+	fioResult, err := iopsCheck.runFioIopsTest(
+		runContext.OutputStore,
+	)
 
-	go func() {
-
-		fioResult, err := iopsCheck.runFioIopsTest(
-			context.OutputStore,
-		)
-
-		if err != nil {
-			future <- []check.Result{
-				{
-					Title:   "FIO IOPs",
-					Status:  check.StatusError,
-					Value:   "N/A",
-					Message: err.Error(),
-				},
-			}
-
-			return
+	if err != nil {
+		return []check.Result{
+			{
+				Title:   "FIO IOPs",
+				Status:  check.StatusError,
+				Value:   "N/A",
+				Message: err.Error(),
+			},
 		}
+	}
 
-		// Make sure a job exists in the fio results
-		if len(fioResult.Jobs) < 1 {
-			future <- []check.Result{
-				{
-					Title:   "FIO IOPs",
-					Status:  check.StatusError,
-					Value:   "N/A",
-					Message: "No job results returned by 'fio'",
-				},
-			}
-
-			return
+	// Make sure a job exists in the fio results
+	if len(fioResult.Jobs) < 1 {
+		return []check.Result{
+			{
+				Title:   "FIO IOPs",
+				Status:  check.StatusError,
+				Value:   "N/A",
+				Message: "No job results returned by 'fio'",
+			},
 		}
+	}
 
-		future <- []check.Result{
-			fioReadIopsResult(&fioResult.Jobs[0]),
-			fioWriteIopsResult(&fioResult.Jobs[0]),
-		}
-	}() // async
-
-	return future
+	return []check.Result{
+		fioReadIopsResult(&fioResult.Jobs[0]),
+		fioWriteIopsResult(&fioResult.Jobs[0]),
+	}
 }
 
 func fioReadIopsResult(job *fio.JobResult) check.Result {
