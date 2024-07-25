@@ -24,7 +24,7 @@ func (*SpaceCheck) Describe() string {
 }
 
 // Run executes the disk checks and returns their results
-func (sc *SpaceCheck) Run(context *check.RunContext) []check.Result {
+func (sc *SpaceCheck) Run(*check.RunContext) []check.Result {
 	partitions, err := getPartitions(true)
 	// If we can't list the partitions, we exit early with the failure message
 	if err != nil {

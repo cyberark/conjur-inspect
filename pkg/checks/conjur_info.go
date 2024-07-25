@@ -33,13 +33,13 @@ func (ci *ConjurInfo) Describe() string {
 }
 
 // Run retrieves and parses the Conjur /info API endpoint
-func (ci *ConjurInfo) Run(context *check.RunContext) []check.Result {
+func (ci *ConjurInfo) Run(runContext *check.RunContext) []check.Result {
 	// If there is no container ID, return
-	if strings.TrimSpace(context.ContainerID) == "" {
+	if strings.TrimSpace(runContext.ContainerID) == "" {
 		return []check.Result{}
 	}
 
-	container := ci.Provider.Container(context.ContainerID)
+	container := ci.Provider.Container(runContext.ContainerID)
 
 	stdout, stderr, err := container.Exec(
 		"curl", "-k", "https://localhost/info",
@@ -70,7 +70,7 @@ func (ci *ConjurInfo) Run(context *check.RunContext) []check.Result {
 		"conjur-info-%s.json",
 		strings.ToLower(ci.Provider.Name()),
 	)
-	_, err = context.OutputStore.Save(
+	_, err = runContext.OutputStore.Save(
 		outputFileName,
 		bytes.NewReader(infoJSONBytes),
 	)

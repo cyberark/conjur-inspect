@@ -20,7 +20,7 @@ func (*Memory) Describe() string {
 }
 
 // Run executes the Memory inspection checks
-func (memory *Memory) Run(context *check.RunContext) []check.Result {
+func (memory *Memory) Run(*check.RunContext) []check.Result {
 	v, err := getVirtualMemory()
 	if err != nil {
 		return check.ErrorResult(

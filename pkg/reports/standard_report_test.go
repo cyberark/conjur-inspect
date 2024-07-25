@@ -19,7 +19,7 @@ func (*TestCheck) Describe() string {
 	return "Test"
 }
 
-func (*TestCheck) Run(context *check.RunContext) []check.Result {
+func (*TestCheck) Run(*check.RunContext) []check.Result {
 	return []check.Result{
 		{
 			Title:   "Test Check",

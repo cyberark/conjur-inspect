@@ -23,15 +23,15 @@ func (cl *ContainerLogs) Describe() string {
 }
 
 // Run performs the Docker inspection checks
-func (cl *ContainerLogs) Run(context *check.RunContext) []check.Result {
+func (cl *ContainerLogs) Run(runContext *check.RunContext) []check.Result {
 	// If there is no container ID, return
-	if strings.TrimSpace(context.ContainerID) == "" {
+	if strings.TrimSpace(runContext.ContainerID) == "" {
 		return []check.Result{}
 	}
 
-	container := cl.Provider.Container(context.ContainerID)
+	container := cl.Provider.Container(runContext.ContainerID)
 
-	inspectResult, err := container.Logs(context.Since)
+	inspectResult, err := container.Logs(runContext.Since)
 	if err != nil {
 		return check.ErrorResult(
 			cl,
@@ -44,7 +44,7 @@ func (cl *ContainerLogs) Run(context *check.RunContext) []check.Result {
 		"%s-container.log",
 		strings.ToLower(cl.Provider.Name()),
 	)
-	_, err = context.OutputStore.Save(outputFileName, inspectResult)
+	_, err = runContext.OutputStore.Save(outputFileName, inspectResult)
 	if err != nil {
 		log.Warn(
 			"Failed to save %s container logs: %s",

@@ -33,13 +33,13 @@ func (ch *ConjurHealth) Describe() string {
 }
 
 // Run performs the Conjur health check
-func (ch *ConjurHealth) Run(context *check.RunContext) []check.Result {
+func (ch *ConjurHealth) Run(runContext *check.RunContext) []check.Result {
 	// If there is no container ID, return
-	if strings.TrimSpace(context.ContainerID) == "" {
+	if strings.TrimSpace(runContext.ContainerID) == "" {
 		return []check.Result{}
 	}
 
-	container := ch.Provider.Container(context.ContainerID)
+	container := ch.Provider.Container(runContext.ContainerID)
 	stdout, stderr, err := container.Exec(
 		"curl", "-k", "https://localhost/health",
 	)
@@ -69,7 +69,7 @@ func (ch *ConjurHealth) Run(context *check.RunContext) []check.Result {
 		"conjur-health-%s.json",
 		strings.ToLower(ch.Provider.Name()),
 	)
-	_, err = context.OutputStore.Save(
+	_, err = runContext.OutputStore.Save(
 		outputFileName,
 		bytes.NewReader(healthJSONBytes),
 	)

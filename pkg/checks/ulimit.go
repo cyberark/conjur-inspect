@@ -21,7 +21,7 @@ func (*Ulimit) Describe() string {
 }
 
 // Run performs the Ulimit collection
-func (ulimit *Ulimit) Run(context *check.RunContext) []check.Result {
+func (ulimit *Ulimit) Run(*check.RunContext) []check.Result {
 	ulimitOutput, stderr, err := executeUlimitInfoFunc()
 
 	// In case of an error, return a check result with an error status.

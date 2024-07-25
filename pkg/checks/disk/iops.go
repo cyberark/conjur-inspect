@@ -38,10 +38,10 @@ func (*IopsCheck) Describe() string {
 
 // Run executes the IopsCheck by running `fio` and processing its output
 func (iopsCheck *IopsCheck) Run(
-	context *check.RunContext,
+	runContext *check.RunContext,
 ) []check.Result {
 	fioResult, err := iopsCheck.runFioIopsTest(
-		context.OutputStore,
+		runContext.OutputStore,
 	)
 
 	if err != nil {

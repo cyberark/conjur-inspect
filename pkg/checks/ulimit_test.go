@@ -25,8 +25,8 @@ func TestUlimitRun(t *testing.T) {
 
 	// Run the check
 	ulimit := &Ulimit{}
-	context := test.NewRunContext("")
-	results := ulimit.Run(&context)
+	runContext := test.NewRunContext("")
+	results := ulimit.Run(&runContext)
 
 	coreFileSize := GetResultByTitle(results, "core file size (blocks, -c)")
 	require.NotNil(t, coreFileSize, "Includes 'core file size (blocks, -c)'")

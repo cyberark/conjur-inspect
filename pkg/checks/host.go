@@ -21,7 +21,7 @@ func (*Host) Describe() string {
 }
 
 // Run executes the Host inspection checks
-func (h *Host) Run(context *check.RunContext) []check.Result {
+func (h *Host) Run(*check.RunContext) []check.Result {
 	hostInfo, err := getHostInfo()
 	if err != nil {
 		return check.ErrorResult(

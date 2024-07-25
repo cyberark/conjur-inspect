@@ -34,10 +34,10 @@ func (*LatencyCheck) Describe() string {
 
 // Run executes the LatencyCheck by running `fio` and processing its output
 func (latencyCheck *LatencyCheck) Run(
-	context *check.RunContext,
+	runContext *check.RunContext,
 ) []check.Result {
 	fioResult, err := latencyCheck.runFioLatencyTest(
-		context.OutputStore,
+		runContext.OutputStore,
 	)
 
 	if err != nil {

@@ -24,13 +24,13 @@ func (ci *ContainerInspect) Describe() string {
 }
 
 // Run performs the Docker inspection checks
-func (ci *ContainerInspect) Run(context *check.RunContext) []check.Result {
+func (ci *ContainerInspect) Run(runContext *check.RunContext) []check.Result {
 	// If there is no container ID, return
-	if strings.TrimSpace(context.ContainerID) == "" {
+	if strings.TrimSpace(runContext.ContainerID) == "" {
 		return []check.Result{}
 	}
 
-	container := ci.Provider.Container(context.ContainerID)
+	container := ci.Provider.Container(runContext.ContainerID)
 
 	inspectResult, err := container.Inspect()
 	if err != nil {
@@ -40,7 +40,7 @@ func (ci *ContainerInspect) Run(context *check.RunContext) []check.Result {
 		)
 	}
 
-	err = ci.saveOutput(context.OutputStore, inspectResult)
+	err = ci.saveOutput(runContext.OutputStore, inspectResult)
 	if err != nil {
 		return check.ErrorResult(
 			ci,

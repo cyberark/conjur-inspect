@@ -23,10 +23,10 @@ func TestConjurInfoRun(t *testing.T) {
 		Provider: containerProvider,
 	}
 
-	context := test.NewRunContext("test-container-id")
+	runContext := test.NewRunContext("test-container-id")
 
 	// Run the function
-	results := conjurInfo.Run(&context)
+	results := conjurInfo.Run(&runContext)
 
 	// Check the results
 	expectedResults := []check.Result{
@@ -44,7 +44,7 @@ func TestConjurInfoRun(t *testing.T) {
 	assert.Equal(t, expectedResults, results)
 
 	// Check the output store
-	outputStoreItems, err := context.OutputStore.Items()
+	outputStoreItems, err := runContext.OutputStore.Items()
 	assert.NoError(t, err)
 	assert.Len(t, outputStoreItems, 1)
 
@@ -75,17 +75,17 @@ func TestConjurInfoRun_NoContainerID(t *testing.T) {
 		Provider: containerProvider,
 	}
 
-	context := test.NewRunContext("")
+	runContext := test.NewRunContext("")
 
 	// Run the function
-	results := conjurHealth.Run(&context)
+	results := conjurHealth.Run(&runContext)
 
 	// Check the results
 	expectedResults := []check.Result{}
 	assert.Equal(t, expectedResults, results)
 
 	// Check the output store
-	outputStoreItems, err := context.OutputStore.Items()
+	outputStoreItems, err := runContext.OutputStore.Items()
 	assert.NoError(t, err)
 	assert.Empty(t, outputStoreItems)
 }
@@ -101,10 +101,10 @@ func TestConjurInfoRun_ExecError(t *testing.T) {
 		Provider: containerProvider,
 	}
 
-	context := test.NewRunContext("test-container-id")
+	runContext := test.NewRunContext("test-container-id")
 
 	// Run the function
-	results := conjurHealth.Run(&context)
+	results := conjurHealth.Run(&runContext)
 
 	// Check the results
 	expectedResults := []check.Result{
@@ -118,7 +118,7 @@ func TestConjurInfoRun_ExecError(t *testing.T) {
 	assert.Equal(t, expectedResults, results)
 
 	// Check the output store
-	outputStoreItems, err := context.OutputStore.Items()
+	outputStoreItems, err := runContext.OutputStore.Items()
 	assert.NoError(t, err)
 	assert.Empty(t, outputStoreItems)
 }
@@ -135,10 +135,10 @@ func TestConjurInfoRun_UnmarshalError(t *testing.T) {
 		Provider: containerProvider,
 	}
 
-	context := test.NewRunContext("test-container-id")
+	runContext := test.NewRunContext("test-container-id")
 
 	// Run the function
-	results := conjurInfo.Run(&context)
+	results := conjurInfo.Run(&runContext)
 
 	// Check the results
 	expectedResults := []check.Result{
@@ -153,7 +153,7 @@ func TestConjurInfoRun_UnmarshalError(t *testing.T) {
 
 	// Check the output store. The raw output should be saved even with a
 	// parse error.
-	outputStoreItems, err := context.OutputStore.Items()
+	outputStoreItems, err := runContext.OutputStore.Items()
 	assert.NoError(t, err)
 	assert.Len(t, outputStoreItems, 1)
 

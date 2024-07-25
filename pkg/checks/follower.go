@@ -26,7 +26,7 @@ type LeaderPort struct {
 }
 
 // Run executes the check
-func (f *Follower) Run(context *check.RunContext) []check.Result {
+func (f *Follower) Run(*check.RunContext) []check.Result {
 	hostname := os.Getenv("MASTER_HOSTNAME")
 
 	if hostname == "" {

@@ -23,7 +23,7 @@ func (cr *ContainerRuntime) Describe() string {
 }
 
 // Run performs the Docker inspection checks
-func (cr *ContainerRuntime) Run(context *check.RunContext) []check.Result {
+func (cr *ContainerRuntime) Run(runContext *check.RunContext) []check.Result {
 	containerInfo, err := cr.Provider.Info()
 	if err != nil {
 		return check.ErrorResult(
@@ -37,7 +37,7 @@ func (cr *ContainerRuntime) Run(context *check.RunContext) []check.Result {
 		"%s-info.json",
 		strings.ToLower(cr.Provider.Name()),
 	)
-	_, err = context.OutputStore.Save(outputFileName, containerInfo.RawData())
+	_, err = runContext.OutputStore.Save(outputFileName, containerInfo.RawData())
 	if err != nil {
 		log.Warn(
 			"Failed to save %s info output: %s",

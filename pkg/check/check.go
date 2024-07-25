@@ -25,7 +25,7 @@ const StatusError = "ERROR"
 // etc.) that returns one or more result.
 type Check interface {
 	Describe() string
-	Run(context *RunContext) []Result
+	Run(*RunContext) []Result
 }
 
 // RunContext is container of other services available to checks within the
