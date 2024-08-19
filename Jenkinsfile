@@ -87,7 +87,6 @@ pipeline {
       }
     }
 
-
     stage('Run Unit Tests') {
       steps {
         script {
@@ -172,6 +171,12 @@ pipeline {
             INFRAPOOL_EXECUTORV2_AGENT_0.agentSh """export PATH="${toolsDirectory}/bin:${PATH}" && go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --main "cmd/conjur-inspect/" --output "${billOfMaterialsDirectory}/go-app-bom.json" """
             // Create Go module SBOM
             INFRAPOOL_EXECUTORV2_AGENT_0.agentSh """export PATH="${toolsDirectory}/bin:${PATH}" && go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --output "${billOfMaterialsDirectory}/go-mod-bom.json" """
+
+            // Add goreleaser artifacts to release
+            INFRAPOOL_EXECUTORV2_AGENT_0.agentSh """cp dist/*.tar.gz "${assetDirectory}" """
+            INFRAPOOL_EXECUTORV2_AGENT_0.agentSh """cp dist/*.rpm "${assetDirectory}" """
+            INFRAPOOL_EXECUTORV2_AGENT_0.agentSh """cp dist/*.deb "${assetDirectory}" """
+            INFRAPOOL_EXECUTORV2_AGENT_0.agentSh """cp "dist/SHA256SUMS.txt" "${assetDirectory}" """
           }
         }
       }
