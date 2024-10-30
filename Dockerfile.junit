@@ -1,5 +1,5 @@
 FROM golang:1.21-alpine
-LABEL MAINTAINER CyberArk Software Ltd.
+LABEL MAINTAINER="CyberArk Software Ltd."
 LABEL id="conjur-inspect-junit-processor"
 
 WORKDIR /test
