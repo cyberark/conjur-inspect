@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
+## [0.4.1] - 2024-10-24
+
+### Added
+- Updated documentation for installing from Conjur Enterprise Appliance image
+  and using the `--container-id` argument.
+
 ## [0.4.0] - 2024-04-24
 
 ### Added
