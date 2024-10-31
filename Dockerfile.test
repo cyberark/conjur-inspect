@@ -1,5 +1,5 @@
-FROM golang:1.21-alpine
-LABEL MAINTAINER CyberArk Software Ltd.
+FROM golang:1.22-alpine
+LABEL MAINTAINER="CyberArk Software Ltd."
 LABEL id="conjur-inspect-test-runner"
 
 # On CyberArk dev laptops, golang module dependencies are downloaded with a

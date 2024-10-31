@@ -15,26 +15,68 @@ our certification levels, see
 
 ## Getting Started
 
+### Obtaining install package
+
+The latest Conjur Inspect install package may either be downloaded from
+[Releases](https://github.com/cyberark/conjur-inspect/releases) or copied
+from a Conjur Enterprise Appliance container image (version 13.5 or later)
+with the following commands:
+
+1. First, create a container instance using the Conjur Enterprise Appliance
+   image. This doesn't need to be a configured Conjur instance, only a running
+   container using the image:
+
+   ```sh
+   docker run -d --name conjur registry.tld/conjur-appliance:<version>
+   ```
+
+2. List the available Conjur Inspect install packages with the command:
+
+   ```sh
+   docker exec -it conjur ls -la /opt/conjur/conjur-inspect
+   ```
+
+   This will output a file listing similar to:
+
+   ```sh
+   -rw-r--r-- 1 root   root   32989 Oct 22 14:19 conjur-inspect_0.4.0_linux_386.tar.gz
+   -rw-r--r-- 1 root   root   32991 Oct 22 14:19 conjur-inspect_0.4.0_linux_amd64.tar.gz
+   -rw-r--r-- 1 root   root   32991 Oct 22 14:19 conjur-inspect_0.4.0_linux_arm64.tar.gz
+   ```
+
+3. Select the correct file based on your host system architecture and copy it
+   to the host with the command:
+
+   ```sh
+   docker cp conjur:/opt/conjur/conjur-inspect/conjur-inspect_0.4.0_linux_amd64.tar.gz .
+   ```
+
+4. Remove the temporary Conjur container with the command:
+
+   ```sh
+   docker rm -f conjur
+   ```
+
 ### Installing
 
-To install Conjur Inspect, download the latest version for your system
-architecture from [Releases](https://github.com/cyberark/conjur-inspect/releases)
-to your target host machine. This is the machine or VM where the Conjur
-Enterprise container will run.
+To install Conjur Inspect, copy the install package for your system
+architecture to your target host machine. This is the machine or VM where the
+Conjur Enterprise container will run.
 
 Extract the tool from the gzip archive:
+
 ```sh-session
-$ tar -xvf conjur-inspect-0.3.0_amd64.tgz
+$ tar -xvf conjur-inspect-0.4.0_amd64.tgz
 ```
 
 Or install it from one of the system packages:
 
-```
-yum install conjur-inspect_0.3.0_amd64.rpm
+```sh
+yum install conjur-inspect_0.4.0_amd64.rpm
 ```
 
-```
-apt install conjur-inspect_0.3.0_386.deb
+```sh
+apt install conjur-inspect_0.4.0_386.deb
 ```
 
 ### Running
@@ -42,7 +84,7 @@ apt install conjur-inspect_0.3.0_386.deb
 Run Conjur Inspect with the following command as the same system user that will
 run the Conjur container:
 
-```
+```sh-session
 $ conjur-inspect
 ```
 
@@ -99,8 +141,18 @@ INFO - core file size (blocks, -c): 0
 
 Available options and flags may be view by running:
 
-```
+```sh
 conjur-inspect --help
+```
+
+## Gathering container specific inspection data
+
+To gather inspection data for a Conjur Enterprise container that is already
+running, include the `--container-id` argument with either the container name
+or ID. For example:
+
+```sh
+conjur-inspect --container-id conjur
 ```
 
 ## Raw data report
