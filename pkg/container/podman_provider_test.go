@@ -24,7 +24,7 @@ func TestPodmanProviderInfo(t *testing.T) {
 		return stdout, stderr, err
 	}
 	defer func() {
-		executeDockerInfoFunc = originalFunc
+		executePodmanInfoFunc = originalFunc
 	}()
 
 	// Get the info
@@ -69,7 +69,7 @@ func TestPodmanProviderInfo(t *testing.T) {
 
 func TestPodmanProviderInfoParseError(t *testing.T) {
 	// Mock dependencies
-	oldFunc := executeDockerInfoFunc
+	oldFunc := executePodmanInfoFunc
 	executePodmanInfoFunc = func() (stdout, stderr io.Reader, err error) {
 		stdout = strings.NewReader(`invalid json`)
 		return stdout, stderr, err

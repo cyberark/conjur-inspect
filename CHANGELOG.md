@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
+## [0.4.2] - 2025-03-25
+
+### Fixed
+- Podman Info raw output is now correctly stored in the inspect report archive.
+
 ## [0.4.1] - 2024-10-24
 
 ### Added

@@ -34,16 +34,21 @@ func (*PodmanProvider) Info() (ContainerProviderInfo, error) {
 		)
 	}
 
+	// Read the stdout into a byte slice
+	stdoutBytes, err := io.ReadAll(stdout)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read Podman info output: %w", err)
+	}
+
 	// Parse the JSON output
 	podmanInfo := &PodmanInfo{}
-	jsonDecoder := json.NewDecoder(stdout)
-	err = jsonDecoder.Decode(podmanInfo)
+	err = json.Unmarshal(stdoutBytes, podmanInfo)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse Podman info output: %w", err)
 	}
 
 	podmanProviderInfo := &PodmanProviderInfo{
-		rawData: stdout,
+		rawData: stdoutBytes,
 		info:    podmanInfo,
 	}
 
