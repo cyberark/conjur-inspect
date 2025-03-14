@@ -106,6 +106,22 @@ func defaultReportSections() []report.Section {
 				&checks.ContainerLogs{
 					Provider: &container.PodmanProvider{},
 				},
+
+				// Container config
+				&checks.ConjurConfig{
+					Provider: &container.DockerProvider{},
+				},
+				&checks.ConjurConfig{
+					Provider: &container.PodmanProvider{},
+				},
+
+				// Container config
+				&checks.ConjurConfigPermissions{
+					Provider: &container.DockerProvider{},
+				},
+				&checks.ConjurConfigPermissions{
+					Provider: &container.PodmanProvider{},
+				},
 			},
 		},
 		{

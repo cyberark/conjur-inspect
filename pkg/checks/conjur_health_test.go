@@ -15,7 +15,11 @@ func TestConjurHealthRun(t *testing.T) {
 	healthJSON := `{"ok": true, "degraded": false}`
 
 	containerProvider := &test.ContainerProvider{
-		ExecStdout: strings.NewReader(healthJSON),
+		ExecResponses: map[string]test.ExecResponse{
+			"curl -k https://localhost/health": test.ExecResponse{
+				Stdout: strings.NewReader(healthJSON),
+			},
+		},
 	}
 
 	// Create the ConjurHealth instance
@@ -92,8 +96,12 @@ func TestConjurHealthRun_NoContainerID(t *testing.T) {
 
 func TestConjurHealthRun_ExecError(t *testing.T) {
 	containerProvider := &test.ContainerProvider{
-		ExecStderr: strings.NewReader("test stderr"),
-		ExecError:  errors.New("test error"),
+		ExecResponses: map[string]test.ExecResponse{
+			"curl -k https://localhost/health": test.ExecResponse{
+				Stderr: strings.NewReader("test stderr"),
+				Error: errors.New("test error"),
+			},
+		},
 	}
 
 	// Create the ConjurHealth instance
@@ -127,7 +135,11 @@ func TestConjurHealthRun_UnmarshalError(t *testing.T) {
 	healthJSON := `{"ok": "invalid", "degraded": false}`
 
 	containerProvider := &test.ContainerProvider{
-		ExecStdout: strings.NewReader(healthJSON),
+		ExecResponses: map[string]test.ExecResponse{
+			"curl -k https://localhost/health": test.ExecResponse{
+				Stdout: strings.NewReader(healthJSON),
+			},
+		},
 	}
 
 	// Create the ConjurHealth instance
