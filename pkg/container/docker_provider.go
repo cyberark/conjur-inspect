@@ -35,10 +35,15 @@ func (*DockerProvider) Info() (ContainerProviderInfo, error) {
 		)
 	}
 
+	// Read the stdout into a byte slice
+	stdoutBytes, err := io.ReadAll(stdout)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read Docker info output: %w", err)
+	}
+
 	// Parse the JSON output
 	dockerInfo := &DockerInfo{}
-	jsonDecoder := json.NewDecoder(stdout)
-	err = jsonDecoder.Decode(dockerInfo)
+	err = json.Unmarshal(stdoutBytes, dockerInfo)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse Docker info output: %w", err)
 	}
@@ -52,7 +57,7 @@ func (*DockerProvider) Info() (ContainerProviderInfo, error) {
 	}
 
 	dockerProviderInfo := &DockerProviderInfo{
-		rawData: stdout,
+		rawData: stdoutBytes,
 		info:    dockerInfo,
 	}
 

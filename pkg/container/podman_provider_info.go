@@ -3,6 +3,7 @@
 package container
 
 import (
+	"bytes"
 	"io"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
@@ -11,7 +12,7 @@ import (
 // PodmanProviderInfo is the concrete implementation of ContainerProviderInfo
 // for Podman
 type PodmanProviderInfo struct {
-	rawData io.Reader
+	rawData []byte
 	info    *PodmanInfo
 }
 
@@ -47,7 +48,7 @@ func (info *PodmanProviderInfo) Results() []check.Result {
 
 // RawData returns the raw JSON output from `podman info`
 func (info *PodmanProviderInfo) RawData() io.Reader {
-	return info.rawData
+	return bytes.NewReader(info.rawData)
 }
 
 func podmanVersionResult(podmanInfo *PodmanInfo) check.Result {

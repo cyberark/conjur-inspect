@@ -15,7 +15,11 @@ func TestConjurInfoRun(t *testing.T) {
 	infoJSON := `{"version": "1.2.3", "release": "4.5.6"}`
 
 	containerProvider := &test.ContainerProvider{
-		ExecStdout: strings.NewReader(infoJSON),
+		ExecResponses: map[string]test.ExecResponse{
+			"curl -k https://localhost/info": test.ExecResponse{
+				Stdout: strings.NewReader(infoJSON),
+			},
+		},
 	}
 
 	// Create the ConjurInfo instance
@@ -92,8 +96,12 @@ func TestConjurInfoRun_NoContainerID(t *testing.T) {
 
 func TestConjurInfoRun_ExecError(t *testing.T) {
 	containerProvider := &test.ContainerProvider{
-		ExecStderr: strings.NewReader("test stderr"),
-		ExecError:  errors.New("test error"),
+		ExecResponses: map[string]test.ExecResponse{
+			"curl -k https://localhost/info": test.ExecResponse{
+				Stderr: strings.NewReader("test stderr"),
+				Error:  errors.New("test error"),
+			},
+		},
 	}
 
 	// Create the ConjurHealth instance
@@ -127,7 +135,11 @@ func TestConjurInfoRun_UnmarshalError(t *testing.T) {
 	infoJSON := `{"version": 1, "release": false}`
 
 	containerProvider := &test.ContainerProvider{
-		ExecStdout: strings.NewReader(infoJSON),
+		ExecResponses: map[string]test.ExecResponse{
+			"curl -k https://localhost/info": test.ExecResponse{
+				Stdout: strings.NewReader(infoJSON),
+			},
+		},
 	}
 
 	// Create the ConjurHealth instance

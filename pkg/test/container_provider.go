@@ -2,7 +2,9 @@
 package test
 
 import (
+	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
@@ -19,9 +21,7 @@ type ContainerProvider struct {
 	InfoRawData io.Reader
 	InfoResults []check.Result
 
-	ExecError  error
-	ExecStdout io.Reader
-	ExecStderr io.Reader
+	ExecResponses map[string]ExecResponse
 
 	LogsOutput io.Reader
 	LogsError  error
@@ -41,9 +41,7 @@ type Container struct {
 	InspectError  error
 	InspectResult io.Reader
 
-	ExecError  error
-	ExecStdout io.Reader
-	ExecStderr io.Reader
+	ExecResponses map[string]ExecResponse
 
 	LogsOutput io.Reader
 	LogsError  error
@@ -76,13 +74,19 @@ func (cp *ContainerProvider) Container(
 		InspectError:  cp.InspectError,
 		InspectResult: cp.InspectResult,
 
-		ExecError:  cp.ExecError,
-		ExecStdout: cp.ExecStdout,
-		ExecStderr: cp.ExecStderr,
+		ExecResponses: cp.ExecResponses,
 
 		LogsOutput: cp.LogsOutput,
 		LogsError:  cp.LogsError,
 	}
+}
+
+// ExecResponse allows for mocking responses to multiple exec calls against a
+// container.
+type ExecResponse struct {
+	Error error
+	Stdout io.Reader
+	Stderr io.Reader
 }
 
 // Results returns the check results
@@ -113,7 +117,17 @@ func (c *Container) Inspect() (io.Reader, error) {
 func (c *Container) Exec(
 	command ...string,
 ) (stdout, stderr io.Reader, err error) {
-	return c.ExecStdout, c.ExecStderr, c.ExecError
+
+	commandString := strings.Join(command, " ")
+
+	response, exists := c.ExecResponses[commandString]
+
+	// Return an error if there is no configured response for the given command
+	if !exists {
+		return nil, nil, fmt.Errorf("no exec response for: %s", commandString)
+	}
+
+	return response.Stdout, response.Stderr, response.Error
 }
 
 // Logs returns the output of the mock `logs` command

@@ -3,6 +3,7 @@
 package container
 
 import (
+	"bytes"
 	"errors"
 	"io"
 	"strings"
@@ -13,12 +14,14 @@ import (
 )
 
 func TestDockerProviderInfo(t *testing.T) {
-	rawOutput := strings.NewReader(`{"ServerVersion":"20.10.7","Driver":"overlay2","DockerRootDir":"/var/lib/docker"}`)
+	rawOutput := []byte(
+		`{"ServerVersion":"20.10.7","Driver":"overlay2","DockerRootDir":"/var/lib/docker"}`,
+	)
 
 	// Mock dependencies
 	oldFunc := executeDockerInfoFunc
 	executeDockerInfoFunc = func() (stdout, stderr io.Reader, err error) {
-		stdout = rawOutput
+		stdout = bytes.NewReader(rawOutput)
 		return stdout, stderr, err
 	}
 	defer func() {
@@ -51,7 +54,9 @@ func TestDockerProviderInfo(t *testing.T) {
 	}
 	assert.Equal(t, expected, dockerInfo.Results())
 
-	assert.Equal(t, rawOutput, dockerInfo.RawData())
+	dockerInfoBytes, err := io.ReadAll(dockerInfo.RawData())
+	assert.NoError(t, err)
+	assert.Equal(t, rawOutput, dockerInfoBytes)
 }
 
 func TestDockerProviderInfoParseError(t *testing.T) {

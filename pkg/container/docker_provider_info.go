@@ -3,6 +3,7 @@
 package container
 
 import (
+	"bytes"
 	"io"
 
 	"github.com/cyberark/conjur-inspect/pkg/check"
@@ -11,7 +12,7 @@ import (
 // DockerProviderInfo is the concrete implementation of ContainerProviderInfo
 // for Docker
 type DockerProviderInfo struct {
-	rawData io.Reader
+	rawData []byte
 	info    *DockerInfo
 }
 
@@ -34,7 +35,7 @@ func (info *DockerProviderInfo) Results() []check.Result {
 
 // RawData returns the raw JSON output from `docker info`
 func (info *DockerProviderInfo) RawData() io.Reader {
-	return info.rawData
+	return bytes.NewReader(info.rawData)
 }
 
 func dockerVersionResult(dockerInfo *DockerInfo) check.Result {
