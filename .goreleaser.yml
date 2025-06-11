@@ -1,4 +1,6 @@
 ---
+version: 2
+
 project_name: conjur-inspect
 
 before:
@@ -78,4 +80,4 @@ release:
 # Changelog management and publishing is handled by Jenkins-based release
 # automation
 changelog:
-  skip: true
+  disable: true
