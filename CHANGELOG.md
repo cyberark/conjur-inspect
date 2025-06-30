@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Podman Info raw output is now correctly stored in the inspect report archive.
 
+### Security
+- Upgrade Go to 1.24.4 and Goreleaser to 2.10.2
+
 ## [0.4.1] - 2024-10-24
 
 ### Added

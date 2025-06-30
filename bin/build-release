@@ -17,7 +17,7 @@ VERSION="${VERSION/-*/}"
 # BUILD_NUMBER is provided by Jenkins, we use '0' for local builds.
 BUILD_NUMBER="${BUILD_NUMBER:-0}"
 
-GORELEASER_IMAGE="goreleaser/goreleaser:v1.26.2"
+GORELEASER_IMAGE="goreleaser/goreleaser:v2.10.2"
 
 main() {
   build_release
