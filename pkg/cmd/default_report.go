@@ -145,6 +145,18 @@ func defaultReportSections() []report.Section {
 			},
 		},
 		{
+			Title: "Etcd",
+			Checks: []check.Check{
+				// Etcd Perf
+				&checks.EtcdPerfCheck{
+					Provider: &container.DockerProvider{},
+				},
+				&checks.EtcdPerfCheck{
+					Provider: &container.PodmanProvider{},
+				},
+			},
+		},
+		{
 			Title: "Ulimits",
 			Checks: []check.Check{
 				&checks.Ulimit{},
