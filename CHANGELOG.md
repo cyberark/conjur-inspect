@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 - Conjur configuration files are now included in the inspect report. CNJR-8738
+- Added etcd performance check for the specified container-id. CNJR-3168
 
 ### Fixed
 - Podman Info raw output is now correctly stored in the inspect report archive.
