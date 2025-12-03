@@ -122,6 +122,14 @@ func defaultReportSections() []report.Section {
 				&checks.ConjurConfigPermissions{
 					Provider: &container.PodmanProvider{},
 				},
+
+				// Runit services
+				&checks.RunItServices{
+					Provider: &container.DockerProvider{},
+				},
+				&checks.RunItServices{
+					Provider: &container.PodmanProvider{},
+				},
 			},
 		},
 		{
