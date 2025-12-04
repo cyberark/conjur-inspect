@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   report. CNJR-11977
 - Command history check that records the recent command history from the host
   machine to the inspect report. CNJR-11976
+- Container command history check that records the recent command history from
+  inside a container to the inspect report. CNJR-11978
 
 ## [0.4.2] - 2025-03-25
 
