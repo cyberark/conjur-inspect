@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   machine to the inspect report. CNJR-11976
 - Container command history check that records the recent command history from
   inside a container to the inspect report. CNJR-11978
+- Etcd cluster members check that captures the current cluster members
+  (as reported by `evoke cluster member list`) in the inspect report. CNJR-11979
 
 ## [0.4.2] - 2025-03-25
 

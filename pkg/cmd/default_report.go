@@ -171,6 +171,14 @@ func defaultReportSections() []report.Section {
 				&checks.EtcdPerfCheck{
 					Provider: &container.PodmanProvider{},
 				},
+
+				// Etcd Cluster Members
+				&checks.EtcdClusterMembers{
+					Provider: &container.DockerProvider{},
+				},
+				&checks.EtcdClusterMembers{
+					Provider: &container.PodmanProvider{},
+				},
 			},
 		},
 		{
