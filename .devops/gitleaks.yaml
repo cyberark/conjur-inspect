@@ -1,0 +1,5 @@
+config:
+  exclusions:
+    # These tests include mock secrets to test the command history sanitizing
+    - "pkg/checks/command_history_test.go"
+    - "pkg/checks/sanitize/sanitizer_test.go"

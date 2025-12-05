@@ -6,13 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-### Added
-- Runit services status check that records service statuses to the inspect
-  report. CNJR-11977
-
 ### Changed
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
+
+## [0.5.0] - 2025-12-04
+
+### Added
+- Runit services status check that records service statuses to the inspect
+  report. CNJR-11977
+- Command history check that records the recent command history from the host
+  machine to the inspect report. CNJR-11976
 
 ## [0.4.2] - 2025-03-25
 

@@ -72,6 +72,7 @@ func defaultReportSections() []report.Section {
 			Title: "Host",
 			Checks: []check.Check{
 				&checks.Host{},
+				&checks.CommandHistory{},
 			},
 		},
 		{
