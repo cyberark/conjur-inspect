@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   (as reported by `evoke cluster member list`) in the inspect report. CNJR-11979
 - Ruby thread dump check that captures thread dumps from Ruby processes running
   in the container. CNJR-8736
+- Container processes check that records the process list from inside the
+  container to the inspect report. CNJR-4619
 
 ## [0.4.2] - 2025-03-25
 
