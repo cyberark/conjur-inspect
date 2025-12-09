@@ -159,6 +159,14 @@ func defaultReportSections() []report.Section {
 				&checks.ConjurInfo{
 					Provider: &container.PodmanProvider{},
 				},
+
+				// Ruby thread dumps
+				&checks.RubyThreadDump{
+					Provider: &container.DockerProvider{},
+				},
+				&checks.RubyThreadDump{
+					Provider: &container.PodmanProvider{},
+				},
 			},
 		},
 		{
