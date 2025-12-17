@@ -29,6 +29,18 @@ func (psa *PgStatActivity) Run(runContext *check.RunContext) []check.Result {
 		return []check.Result{}
 	}
 
+	// Check if the container runtime is available
+	runtimeKey := strings.ToLower(psa.Provider.Name())
+	if !IsRuntimeAvailable(runContext, runtimeKey) {
+		if runContext.VerboseErrors {
+			return check.ErrorResult(
+				psa,
+				fmt.Errorf("container runtime not available"),
+			)
+		}
+		return []check.Result{}
+	}
+
 	containerInstance := psa.Provider.Container(runContext.ContainerID)
 
 	// Execute psql command to get pg_stat_activity as the conjur user

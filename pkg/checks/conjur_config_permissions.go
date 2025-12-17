@@ -31,6 +31,18 @@ func (ccp *ConjurConfigPermissions) Run(runContext *check.RunContext) []check.Re
 		return []check.Result{}
 	}
 
+	// Check if the container runtime is available
+	runtimeKey := strings.ToLower(ccp.Provider.Name())
+	if !IsRuntimeAvailable(runContext, runtimeKey) {
+		if runContext.VerboseErrors {
+			return check.ErrorResult(
+				ccp,
+				fmt.Errorf("container runtime not available"),
+			)
+		}
+		return []check.Result{}
+	}
+
 	container := ccp.Provider.Container(runContext.ContainerID)
 
 	results := []check.Result{}

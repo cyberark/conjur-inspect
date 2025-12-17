@@ -29,6 +29,18 @@ func (cp *ContainerProcesses) Run(runContext *check.RunContext) []check.Result {
 		return []check.Result{}
 	}
 
+	// Check if the container runtime is available
+	runtimeKey := strings.ToLower(cp.Provider.Name())
+	if !IsRuntimeAvailable(runContext, runtimeKey) {
+		if runContext.VerboseErrors {
+			return check.ErrorResult(
+				cp,
+				fmt.Errorf("container runtime not available"),
+			)
+		}
+		return []check.Result{}
+	}
+
 	containerInstance := cp.Provider.Container(runContext.ContainerID)
 
 	// Execute ps command to get process list with tree view

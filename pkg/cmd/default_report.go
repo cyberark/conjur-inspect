@@ -84,6 +84,9 @@ func defaultReportSections() []report.Section {
 		{
 			Title: "Container",
 			Checks: []check.Check{
+				// Check container runtime availability first to cache the results
+				&checks.ContainerAvailability{},
+
 				// Runtime
 				&checks.ContainerRuntime{
 					Provider: &container.DockerProvider{},

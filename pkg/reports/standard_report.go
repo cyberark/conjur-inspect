@@ -58,6 +58,9 @@ func (sr *StandardReport) Run(config report.RunConfig) report.Result {
 	// Initialize the progress indicator
 	progress := newProgress(sr.checkCount(), os.Stderr)
 
+	// Initialize the container runtime availability cache for the entire report run
+	containerRuntimeAvailability := make(map[string]check.RuntimeAvailability)
+
 	for i, section := range sr.sections {
 
 		sectionResults := []check.Result{}
@@ -74,10 +77,11 @@ func (sr *StandardReport) Run(config report.RunConfig) report.Result {
 			go func() {
 				resultsChan <- currentCheck.Run(
 					&check.RunContext{
-						ContainerID: config.ContainerID,
-						Since:       config.Since,
-
-						OutputStore: sr.outputStore,
+						ContainerID:                  config.ContainerID,
+						Since:                        config.Since,
+						OutputStore:                  sr.outputStore,
+						ContainerRuntimeAvailability: containerRuntimeAvailability,
+						VerboseErrors:                config.VerboseErrors,
 					},
 				)
 			}() // async

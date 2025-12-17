@@ -35,6 +35,18 @@ func (ecm *EtcdClusterMembers) Run(runContext *check.RunContext) []check.Result 
 		return []check.Result{}
 	}
 
+	// Check if the container runtime is available
+	runtimeKey := strings.ToLower(ecm.Provider.Name())
+	if !IsRuntimeAvailable(runContext, runtimeKey) {
+		if runContext.VerboseErrors {
+			return check.ErrorResult(
+				ecm,
+				fmt.Errorf("container runtime not available"),
+			)
+		}
+		return []check.Result{}
+	}
+
 	container := ecm.Provider.Container(runContext.ContainerID)
 
 	// Check if node is enrolled in a cluster

@@ -28,6 +28,18 @@ func (rs *RunItServices) Run(runContext *check.RunContext) []check.Result {
 		return []check.Result{}
 	}
 
+	// Check if the container runtime is available
+	runtimeKey := strings.ToLower(rs.Provider.Name())
+	if !IsRuntimeAvailable(runContext, runtimeKey) {
+		if runContext.VerboseErrors {
+			return check.ErrorResult(
+				rs,
+				fmt.Errorf("container runtime not available"),
+			)
+		}
+		return []check.Result{}
+	}
+
 	container := rs.Provider.Container(runContext.ContainerID)
 
 	// Execute sv status command with shell globbing

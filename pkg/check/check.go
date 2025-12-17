@@ -35,6 +35,19 @@ type RunContext struct {
 
 	ContainerID string
 	Since       time.Duration
+
+	// ContainerRuntimeAvailability caches the availability status of container runtimes
+	// Maps provider names (e.g., "docker", "podman") to availability status and error
+	ContainerRuntimeAvailability map[string]RuntimeAvailability
+
+	// VerboseErrors controls whether to report errors for unavailable container runtimes
+	VerboseErrors bool
+}
+
+// RuntimeAvailability represents the availability status of a container runtime
+type RuntimeAvailability struct {
+	Available bool
+	Error     error // Error encountered when checking availability (e.g., executable not found)
 }
 
 // Result is the outcome of a particular check. A check may produce multiple

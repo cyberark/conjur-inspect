@@ -29,6 +29,18 @@ func (rtd *RubyThreadDump) Run(runContext *check.RunContext) []check.Result {
 		return []check.Result{}
 	}
 
+	// Check if the container runtime is available
+	runtimeKey := strings.ToLower(rtd.Provider.Name())
+	if !IsRuntimeAvailable(runContext, runtimeKey) {
+		if runContext.VerboseErrors {
+			return check.ErrorResult(
+				rtd,
+				fmt.Errorf("container runtime not available"),
+			)
+		}
+		return []check.Result{}
+	}
+
 	containerInstance := rtd.Provider.Container(runContext.ContainerID)
 
 	// Discover Ruby process PIDs

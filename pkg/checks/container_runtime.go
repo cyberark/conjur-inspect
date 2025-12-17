@@ -24,6 +24,18 @@ func (cr *ContainerRuntime) Describe() string {
 
 // Run performs the Docker inspection checks
 func (cr *ContainerRuntime) Run(runContext *check.RunContext) []check.Result {
+	// Check if the container runtime is available
+	runtimeKey := strings.ToLower(cr.Provider.Name())
+	if !IsRuntimeAvailable(runContext, runtimeKey) {
+		if runContext.VerboseErrors {
+			return check.ErrorResult(
+				cr,
+				fmt.Errorf("container runtime not available"),
+			)
+		}
+		return []check.Result{}
+	}
+
 	containerInfo, err := cr.Provider.Info()
 	if err != nil {
 		return check.ErrorResult(
