@@ -175,6 +175,14 @@ func defaultReportSections() []report.Section {
 				&checks.RubyThreadDump{
 					Provider: &container.PodmanProvider{},
 				},
+
+				// PostgreSQL pg_stat_activity
+				&checks.PgStatActivity{
+					Provider: &container.DockerProvider{},
+				},
+				&checks.PgStatActivity{
+					Provider: &container.PodmanProvider{},
+				},
 			},
 		},
 		{

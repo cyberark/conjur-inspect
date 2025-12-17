@@ -83,7 +83,7 @@ func TestConjurConfig_Run_FileReadError(t *testing.T) {
 	provider := &test.ContainerProvider{
 		ExecResponses: map[string]test.ExecResponse{
 			"cat /etc/conjur/config/conjur.yml": {
-				Error: errors.New("file not found"),
+				Error:  errors.New("file not found"),
 				Stderr: strings.NewReader("permission denied"),
 			},
 		},

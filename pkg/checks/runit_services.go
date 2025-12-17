@@ -18,7 +18,7 @@ type RunItServices struct {
 
 // Describe provides a textual description of what this check gathers info on
 func (rs *RunItServices) Describe() string {
-		return fmt.Sprintf("Runit Services (%s)", rs.Provider.Name())
+	return fmt.Sprintf("Runit Services (%s)", rs.Provider.Name())
 }
 
 // Run performs the runit services status check

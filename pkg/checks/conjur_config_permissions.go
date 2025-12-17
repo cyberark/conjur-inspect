@@ -53,9 +53,9 @@ func (ccp *ConjurConfigPermissions) collectConjurConfigPermissions(
 
 	if err != nil {
 		return &check.Result{
-			Title:   ccp.Describe(),
-			Status:  check.StatusError,
-			Value:   "N/A",
+			Title:  ccp.Describe(),
+			Status: check.StatusError,
+			Value:  "N/A",
 			Message: fmt.Sprintf(
 				"failed to collect Conjur config permissions: %s (%s))",
 				err,

@@ -49,6 +49,10 @@ func (m *mockContainer) Exec(args ...string) (io.Reader, io.Reader, error) {
 	}
 	return res.stdout, res.stderr, res.err
 }
+func (m *mockContainer) ExecAsUser(user string, args ...string) (io.Reader, io.Reader, error) {
+	// For tests, treat ExecAsUser the same as Exec
+	return m.Exec(args...)
+}
 func (m *mockContainer) Logs(since time.Duration) (io.Reader, error) { return nil, nil }
 
 // helper to build SUT and run context
@@ -170,7 +174,7 @@ func TestEtcdPerfCheck_parse(t *testing.T) {
 			},
 		},
 		{
-			name: "MultipleFailIndicators",
+			name:  "MultipleFailIndicators",
 			input: "PASS: ok\r\nSlowest request took too long: slow details here\r\nStddev too high: stddev details here\r\nFAIL: failure",
 			expect: exp{
 				len:      4,

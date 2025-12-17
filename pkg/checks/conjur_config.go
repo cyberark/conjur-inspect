@@ -75,9 +75,9 @@ func (cc *ConjurConfig) collectConfigFile(
 
 	if err != nil {
 		return &check.Result{
-			Title:   cc.Describe(),
-			Status:  check.StatusError,
-			Value:   "N/A",
+			Title:  cc.Describe(),
+			Status: check.StatusError,
+			Value:  "N/A",
 			Message: fmt.Sprintf(
 				"failed to collect '%s' : %s (%s))",
 				path,
