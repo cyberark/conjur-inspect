@@ -86,6 +86,9 @@ func (cc *ConjurConfig) collectConfigFile(
 	)
 
 	if err != nil {
+		if !runContext.VerboseErrors {
+			return nil
+		}
 		return &check.Result{
 			Title:  cc.Describe(),
 			Status: check.StatusError,

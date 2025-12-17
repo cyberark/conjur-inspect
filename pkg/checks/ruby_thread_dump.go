@@ -48,14 +48,24 @@ func (rtd *RubyThreadDump) Run(runContext *check.RunContext) []check.Result {
 		"sh", "-c", "pgrep -f ruby || true",
 	)
 	if err != nil {
-		log.Warn("failed to discover Ruby processes: %s", err)
+		if runContext.VerboseErrors {
+			return check.ErrorResult(
+				rtd,
+				fmt.Errorf("failed to discover Ruby processes: %w", err),
+			)
+		}
 		return []check.Result{}
 	}
 
 	// Read the PIDs from stdout
 	pidsBytes, err := io.ReadAll(stdout)
 	if err != nil {
-		log.Warn("failed to read Ruby PIDs: %s", err)
+		if runContext.VerboseErrors {
+			return check.ErrorResult(
+				rtd,
+				fmt.Errorf("failed to read Ruby PIDs: %w", err),
+			)
+		}
 		return []check.Result{}
 	}
 
@@ -77,16 +87,20 @@ func (rtd *RubyThreadDump) Run(runContext *check.RunContext) []check.Result {
 	log.Debug("found %d Ruby process(es): %s", len(pids), strings.Join(pids, ", "))
 
 	// Collect thread dump for each PID
+	results := []check.Result{}
 	for _, pid := range pids {
 		pid = strings.TrimSpace(pid)
 		if pid == "" {
 			continue
 		}
 
-		rtd.collectThreadDump(containerInstance, pid, runContext)
+		result := rtd.collectThreadDump(containerInstance, pid, runContext)
+		if result != nil {
+			results = append(results, *result)
+		}
 	}
 
-	return []check.Result{}
+	return results
 }
 
 // collectThreadDump sends SIGCONT to a Ruby process, waits for sigdump to write,
@@ -95,7 +109,7 @@ func (rtd *RubyThreadDump) collectThreadDump(
 	containerInstance container.Container,
 	pid string,
 	runContext *check.RunContext,
-) {
+) *check.Result {
 	// Single atomic command: send signal, wait, read file, cleanup
 	dumpPath := fmt.Sprintf("/tmp/sigdump-%s.log", pid)
 	command := fmt.Sprintf(
@@ -105,15 +119,29 @@ func (rtd *RubyThreadDump) collectThreadDump(
 
 	stdout, stderr, err := containerInstance.Exec("sh", "-c", command)
 	if err != nil {
-		log.Warn("failed to collect thread dump for PID %s: %s", pid, err)
-		return
+		if runContext.VerboseErrors {
+			return &check.Result{
+				Title:   rtd.Describe(),
+				Status:  check.StatusError,
+				Value:   "N/A",
+				Message: fmt.Sprintf("failed to collect thread dump for PID %s: %s", pid, err),
+			}
+		}
+		return nil
 	}
 
 	// Read the thread dump from stdout
 	dumpBytes, err := io.ReadAll(stdout)
 	if err != nil {
-		log.Warn("failed to read thread dump for PID %s: %s", pid, err)
-		return
+		if runContext.VerboseErrors {
+			return &check.Result{
+				Title:   rtd.Describe(),
+				Status:  check.StatusError,
+				Value:   "N/A",
+				Message: fmt.Sprintf("failed to read thread dump for PID %s: %s", pid, err),
+			}
+		}
+		return nil
 	}
 
 	// Read any stderr for logging
@@ -124,8 +152,15 @@ func (rtd *RubyThreadDump) collectThreadDump(
 
 	// Check if we got any output
 	if len(dumpBytes) == 0 {
-		log.Warn("no thread dump output for PID %s (sigdump may not be installed or enabled)", pid)
-		return
+		if runContext.VerboseErrors {
+			return &check.Result{
+				Title:   rtd.Describe(),
+				Status:  check.StatusError,
+				Value:   "N/A",
+				Message: fmt.Sprintf("no thread dump output for PID %s (sigdump may not be installed or enabled)", pid),
+			}
+		}
+		return nil
 	}
 
 	// Save thread dump to output store
@@ -135,9 +170,17 @@ func (rtd *RubyThreadDump) collectThreadDump(
 		strings.NewReader(string(dumpBytes)),
 	)
 	if err != nil {
-		log.Warn("failed to save thread dump for PID %s: %s", pid, err)
-		return
+		if runContext.VerboseErrors {
+			return &check.Result{
+				Title:   rtd.Describe(),
+				Status:  check.StatusError,
+				Value:   "N/A",
+				Message: fmt.Sprintf("failed to save thread dump for PID %s: %s", pid, err),
+			}
+		}
+		return nil
 	}
 
 	log.Debug("successfully collected thread dump for PID %s", pid)
+	return nil
 }

@@ -45,14 +45,17 @@ func (iopsCheck *IopsCheck) Run(
 	)
 
 	if err != nil {
-		return []check.Result{
-			{
-				Title:   "FIO IOPs",
-				Status:  check.StatusError,
-				Value:   "N/A",
-				Message: err.Error(),
-			},
+		if runContext.VerboseErrors {
+			return []check.Result{
+				{
+					Title:   "FIO IOPs",
+					Status:  check.StatusError,
+					Value:   "N/A",
+					Message: err.Error(),
+				},
+			}
 		}
+		return []check.Result{}
 	}
 
 	// Make sure a job exists in the fio results

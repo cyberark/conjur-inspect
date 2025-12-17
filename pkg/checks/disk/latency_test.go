@@ -42,7 +42,7 @@ func TestLatencyWithError(t *testing.T) {
 	testCheck := &LatencyCheck{
 		fioNewJob: newErrorFioJob,
 	}
-	results := testCheck.Run(&check.RunContext{})
+	results := testCheck.Run(&check.RunContext{VerboseErrors: true})
 
 	// Expect only the error result
 	assert.Equal(t, 1, len(results))
@@ -51,6 +51,31 @@ func TestLatencyWithError(t *testing.T) {
 	assert.Equal(t, check.StatusError, results[0].Status)
 	assert.Equal(t, "N/A", results[0].Value)
 	assert.Equal(t, "test error", results[0].Message)
+}
+
+func TestLatencyWithErrorVerboseErrors(t *testing.T) {
+	testCheck := &LatencyCheck{
+		fioNewJob: newErrorFioJob,
+	}
+	results := testCheck.Run(&check.RunContext{VerboseErrors: true})
+
+	// Expect only the error result
+	assert.Equal(t, 1, len(results))
+
+	assert.Equal(t, "FIO Latency", results[0].Title)
+	assert.Equal(t, check.StatusError, results[0].Status)
+	assert.Equal(t, "N/A", results[0].Value)
+	assert.Equal(t, "test error", results[0].Message)
+}
+
+func TestLatencyWithErrorNoVerboseErrors(t *testing.T) {
+	testCheck := &LatencyCheck{
+		fioNewJob: newErrorFioJob,
+	}
+	results := testCheck.Run(&check.RunContext{VerboseErrors: false})
+
+	// Expect no results when VerboseErrors is false
+	assert.Equal(t, 0, len(results))
 }
 
 func TestLatencyWithNoJobs(t *testing.T) {

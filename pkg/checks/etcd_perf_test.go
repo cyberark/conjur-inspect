@@ -94,6 +94,7 @@ func TestEtcdPerfCheck_Run_ValidationError(t *testing.T) {
 		"echo": {err: errors.New("fail")},
 	}
 	sut, runCtx := newEtcdPerfCheck(execMap, "mock")
+	runCtx.VerboseErrors = true
 	results := sut.Run(runCtx)
 	assert.Len(t, results, 1)
 	assert.Equal(t, check.StatusError, results[0].Status)
@@ -104,6 +105,7 @@ func TestEtcdPerfCheck_Run_NoContainerId(t *testing.T) {
 		"echo": {err: errors.New("fail")},
 	}
 	sut, runCtx := newEtcdPerfCheck(execMap, "")
+	runCtx.VerboseErrors = true
 	results := sut.Run(runCtx)
 	assert.Len(t, results, 1)
 	assert.Equal(t, check.StatusError, results[0].Status)
@@ -118,10 +120,25 @@ func TestEtcdPerfCheck_Run_ServiceRunning(t *testing.T) {
 		"sv status conjur": {stdout: strings.NewReader("run: conjur")},
 	}
 	sut, runCtx := newEtcdPerfCheck(execMap, "mock")
+	runCtx.VerboseErrors = true
 	results := sut.Run(runCtx)
 	assert.Len(t, results, 1)
 	assert.Equal(t, check.StatusError, results[0].Status)
 	assert.Contains(t, results[0].Message, "service is running")
+}
+
+func TestEtcdPerfCheck_Run_ServiceRunningNoVerboseErrors(t *testing.T) {
+	execMap := map[string]mockExecResult{
+		"echo":             {},
+		"which etcd":       {},
+		"which etcdctl":    {},
+		"sv status conjur": {stdout: strings.NewReader("run: conjur")},
+	}
+	sut, runCtx := newEtcdPerfCheck(execMap, "mock")
+	runCtx.VerboseErrors = false
+	results := sut.Run(runCtx)
+	// Should return empty since the validation error is suppressed
+	assert.Len(t, results, 0)
 }
 
 func TestEtcdPerfCheck_parse(t *testing.T) {

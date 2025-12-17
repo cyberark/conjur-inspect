@@ -92,11 +92,32 @@ func TestConjurConfig_Run_FileReadError(t *testing.T) {
 	cc := &ConjurConfig{Provider: provider}
 
 	runContext := test.NewRunContext("test-container")
+	runContext.VerboseErrors = true
 	results := cc.Run(&runContext)
 
 	assert.NotEmpty(t, results)
 	assert.Equal(t, check.StatusError, results[0].Status)
 	assert.Contains(t, results[0].Message, "failed to collect")
+}
+
+func TestConjurConfig_Run_FileReadErrorNoVerboseErrors(t *testing.T) {
+	provider := &test.ContainerProvider{
+		ExecResponses: map[string]test.ExecResponse{
+			"cat /etc/conjur/config/conjur.yml": {
+				Error:  errors.New("file not found"),
+				Stderr: strings.NewReader("permission denied"),
+			},
+		},
+	}
+
+	cc := &ConjurConfig{Provider: provider}
+
+	runContext := test.NewRunContext("test-container")
+	runContext.VerboseErrors = false
+	results := cc.Run(&runContext)
+
+	// Expect no results when VerboseErrors is false
+	assert.Empty(t, results)
 }
 
 func TestConjurConfig_Run_ReadAllError(t *testing.T) {

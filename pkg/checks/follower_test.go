@@ -27,3 +27,23 @@ func TestFollowerRun(t *testing.T) {
 	assert.NotEmpty(t, leaderAuditPort.Status)
 	assert.NotEmpty(t, leaderAuditPort.Value)
 }
+
+func TestFollowerRunWithoutMasterHostnameVerboseErrors(t *testing.T) {
+	t.Setenv("MASTER_HOSTNAME", "")
+	testCheck := &Follower{}
+	results := testCheck.Run(&check.RunContext{VerboseErrors: true})
+
+	assert.NotEmpty(t, results)
+	assert.Equal(t, check.StatusError, results[0].Status)
+	assert.Equal(t, "N/A", results[0].Value)
+	assert.Contains(t, results[0].Message, "Leader hostname is not set")
+	assert.Contains(t, results[0].Message, "MASTER_HOSTNAME")
+}
+
+func TestFollowerRunWithoutMasterHostnameNoVerboseErrors(t *testing.T) {
+	t.Setenv("MASTER_HOSTNAME", "")
+	testCheck := &Follower{}
+	results := testCheck.Run(&check.RunContext{VerboseErrors: false})
+
+	assert.Empty(t, results)
+}

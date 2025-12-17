@@ -63,7 +63,7 @@ func TestIopsWithError(t *testing.T) {
 	testCheck := &IopsCheck{
 		fioNewJob: newErrorFioJob,
 	}
-	results := testCheck.Run(&check.RunContext{})
+	results := testCheck.Run(&check.RunContext{VerboseErrors: true})
 
 	// Expect only the error result
 	assert.Equal(t, 1, len(results))
@@ -72,6 +72,31 @@ func TestIopsWithError(t *testing.T) {
 	assert.Equal(t, check.StatusError, results[0].Status)
 	assert.Equal(t, "N/A", results[0].Value)
 	assert.Equal(t, "test error", results[0].Message)
+}
+
+func TestIopsWithErrorVerboseErrors(t *testing.T) {
+	testCheck := &IopsCheck{
+		fioNewJob: newErrorFioJob,
+	}
+	results := testCheck.Run(&check.RunContext{VerboseErrors: true})
+
+	// Expect only the error result
+	assert.Equal(t, 1, len(results))
+
+	assert.Equal(t, "FIO IOPs", results[0].Title)
+	assert.Equal(t, check.StatusError, results[0].Status)
+	assert.Equal(t, "N/A", results[0].Value)
+	assert.Equal(t, "test error", results[0].Message)
+}
+
+func TestIopsWithErrorNoVerboseErrors(t *testing.T) {
+	testCheck := &IopsCheck{
+		fioNewJob: newErrorFioJob,
+	}
+	results := testCheck.Run(&check.RunContext{VerboseErrors: false})
+
+	// Expect no results when VerboseErrors is false
+	assert.Equal(t, 0, len(results))
 }
 
 func TestIopsWithNoJobs(t *testing.T) {

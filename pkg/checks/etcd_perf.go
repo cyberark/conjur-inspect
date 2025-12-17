@@ -56,8 +56,12 @@ func (c EtcdPerfCheck) Run(runContext *check.RunContext) []check.Result {
 	c.etcdLogFileName = fmt.Sprintf("%s-etcdLog-%s.log", logFilePrefix, providerSuffix)
 
 	// Verify that action is valid
-	if err := c.validateAction(); len(err) != 0 {
-		return err
+	validationErrors := c.validateAction()
+	if len(validationErrors) != 0 {
+		if runContext.VerboseErrors {
+			return validationErrors
+		}
+		return []check.Result{}
 	}
 
 	// start etcd
