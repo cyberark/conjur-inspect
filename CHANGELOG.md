@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   container to the inspect report. CNJR-4619
 - Resource usage check that captures the `top` command output from inside
   the container to the inspect report. CNJR-4618
+- Capture the `/etc/hosts` file from the container and the host. CNJR-7305
 
 ## [0.4.2] - 2025-03-25
 

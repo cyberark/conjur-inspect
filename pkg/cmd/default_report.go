@@ -73,6 +73,7 @@ func defaultReportSections() []report.Section {
 			Checks: []check.Check{
 				&checks.Host{},
 				&checks.CommandHistory{},
+				&checks.HostEtcHosts{},
 			},
 		},
 		{
@@ -156,6 +157,14 @@ func defaultReportSections() []report.Section {
 					Provider: &container.DockerProvider{},
 				},
 				&checks.RunItServices{
+					Provider: &container.PodmanProvider{},
+				},
+
+				// Container /etc/hosts
+				&checks.ContainerEtcHosts{
+					Provider: &container.DockerProvider{},
+				},
+				&checks.ContainerEtcHosts{
 					Provider: &container.PodmanProvider{},
 				},
 			},
