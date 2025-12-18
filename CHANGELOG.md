@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   in the container. CNJR-8736
 - Container processes check that records the process list from inside the
   container to the inspect report. CNJR-4619
+- Resource usage check that captures the `top` command output from inside
+  the container to the inspect report. CNJR-4618
 
 ## [0.4.2] - 2025-03-25
 

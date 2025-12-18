@@ -127,6 +127,14 @@ func defaultReportSections() []report.Section {
 					Provider: &container.PodmanProvider{},
 				},
 
+				// Container top
+				&checks.ContainerTop{
+					Provider: &container.DockerProvider{},
+				},
+				&checks.ContainerTop{
+					Provider: &container.PodmanProvider{},
+				},
+
 				// Container config
 				&checks.ConjurConfig{
 					Provider: &container.DockerProvider{},
