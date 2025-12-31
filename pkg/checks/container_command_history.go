@@ -30,6 +30,18 @@ func (cch *ContainerCommandHistory) Run(runContext *check.RunContext) []check.Re
 		return []check.Result{}
 	}
 
+	// Check if the container runtime is available
+	runtimeKey := strings.ToLower(cch.Provider.Name())
+	if !IsRuntimeAvailable(runContext, runtimeKey) {
+		if runContext.VerboseErrors {
+			return check.ErrorResult(
+				cch,
+				fmt.Errorf("container runtime not available"),
+			)
+		}
+		return []check.Result{}
+	}
+
 	containerInstance := cch.Provider.Container(runContext.ContainerID)
 
 	// Execute tail command to get last 100 lines of bash history

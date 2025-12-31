@@ -34,6 +34,18 @@ func (cc *ConjurConfig) Run(runContext *check.RunContext) []check.Result {
 		return []check.Result{}
 	}
 
+	// Check if the container runtime is available
+	runtimeKey := strings.ToLower(cc.Provider.Name())
+	if !IsRuntimeAvailable(runContext, runtimeKey) {
+		if runContext.VerboseErrors {
+			return check.ErrorResult(
+				cc,
+				fmt.Errorf("container runtime not available"),
+			)
+		}
+		return []check.Result{}
+	}
+
 	container := cc.Provider.Container(runContext.ContainerID)
 
 	configPaths := []string{
@@ -74,10 +86,13 @@ func (cc *ConjurConfig) collectConfigFile(
 	)
 
 	if err != nil {
+		if !runContext.VerboseErrors {
+			return nil
+		}
 		return &check.Result{
-			Title:   cc.Describe(),
-			Status:  check.StatusError,
-			Value:   "N/A",
+			Title:  cc.Describe(),
+			Status: check.StatusError,
+			Value:  "N/A",
 			Message: fmt.Sprintf(
 				"failed to collect '%s' : %s (%s))",
 				path,

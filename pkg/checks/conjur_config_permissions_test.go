@@ -60,7 +60,7 @@ func TestConjurConfigPermissions_Run_ExecError(t *testing.T) {
 	provider := &test.ContainerProvider{
 		ExecResponses: map[string]test.ExecResponse{
 			"ls -la /etc/conjur/config": {
-				Error: errors.New("file not found"),
+				Error:  errors.New("file not found"),
 				Stderr: strings.NewReader("permission denied"),
 			},
 		},
@@ -75,7 +75,6 @@ func TestConjurConfigPermissions_Run_ExecError(t *testing.T) {
 	assert.Equal(t, check.StatusError, results[0].Status)
 	assert.Contains(t, results[0].Message, "failed to collect")
 }
-
 
 func TestConjurConfigPermissions_Run_ReadAllError(t *testing.T) {
 	// Save original readAllFunc to restore after test

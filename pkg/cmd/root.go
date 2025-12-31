@@ -19,6 +19,7 @@ var defaultReportConstructor = NewDefaultReport
 func newRootCommand() *cobra.Command {
 	var debug bool
 	var jsonOutput bool
+	var verboseErrors bool
 
 	// Defines the time window this inspection is concerned with. Checks may use
 	// this value to focus or expand their scope to the desired time window.
@@ -49,8 +50,9 @@ func newRootCommand() *cobra.Command {
 
 			log.Debug("Running report...")
 			result := commandReport.Run(report.RunConfig{
-				ContainerID: containerID,
-				Since:       sinceDuration,
+				ContainerID:   containerID,
+				Since:         sinceDuration,
+				VerboseErrors: verboseErrors,
 			})
 
 			// Determine which output format we'll use
@@ -138,6 +140,14 @@ func newRootCommand() *cobra.Command {
 		// https://pkg.go.dev/time#pkg-constants
 		time.Now().Format("2006-01-02-15-04-05"), // Default is the current timestamp
 		"Correlation identifier used for the raw data archive and report output",
+	)
+
+	rootCmd.PersistentFlags().BoolVarP(
+		&verboseErrors,
+		"verbose-errors",
+		"",
+		false,
+		"Display all errors for unavailable container runtimes",
 	)
 
 	// TODO: Ability to adjust requirement criteria (PASS, WARN, FAIL checks)

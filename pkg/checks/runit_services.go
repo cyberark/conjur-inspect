@@ -18,13 +18,25 @@ type RunItServices struct {
 
 // Describe provides a textual description of what this check gathers info on
 func (rs *RunItServices) Describe() string {
-		return fmt.Sprintf("Runit Services (%s)", rs.Provider.Name())
+	return fmt.Sprintf("Runit Services (%s)", rs.Provider.Name())
 }
 
 // Run performs the runit services status check
 func (rs *RunItServices) Run(runContext *check.RunContext) []check.Result {
 	// If there is no container ID, return
 	if strings.TrimSpace(runContext.ContainerID) == "" {
+		return []check.Result{}
+	}
+
+	// Check if the container runtime is available
+	runtimeKey := strings.ToLower(rs.Provider.Name())
+	if !IsRuntimeAvailable(runContext, runtimeKey) {
+		if runContext.VerboseErrors {
+			return check.ErrorResult(
+				rs,
+				fmt.Errorf("container runtime not available"),
+			)
+		}
 		return []check.Result{}
 	}
 

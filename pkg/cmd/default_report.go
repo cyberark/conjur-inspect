@@ -84,6 +84,9 @@ func defaultReportSections() []report.Section {
 		{
 			Title: "Container",
 			Checks: []check.Check{
+				// Check container runtime availability first to cache the results
+				&checks.ContainerAvailability{},
+
 				// Runtime
 				&checks.ContainerRuntime{
 					Provider: &container.DockerProvider{},
@@ -113,6 +116,14 @@ func defaultReportSections() []report.Section {
 					Provider: &container.DockerProvider{},
 				},
 				&checks.ContainerCommandHistory{
+					Provider: &container.PodmanProvider{},
+				},
+
+				// Container processes
+				&checks.ContainerProcesses{
+					Provider: &container.DockerProvider{},
+				},
+				&checks.ContainerProcesses{
 					Provider: &container.PodmanProvider{},
 				},
 
@@ -157,6 +168,22 @@ func defaultReportSections() []report.Section {
 					Provider: &container.DockerProvider{},
 				},
 				&checks.ConjurInfo{
+					Provider: &container.PodmanProvider{},
+				},
+
+				// Ruby thread dumps
+				&checks.RubyThreadDump{
+					Provider: &container.DockerProvider{},
+				},
+				&checks.RubyThreadDump{
+					Provider: &container.PodmanProvider{},
+				},
+
+				// PostgreSQL pg_stat_activity
+				&checks.PgStatActivity{
+					Provider: &container.DockerProvider{},
+				},
+				&checks.PgStatActivity{
 					Provider: &container.PodmanProvider{},
 				},
 			},

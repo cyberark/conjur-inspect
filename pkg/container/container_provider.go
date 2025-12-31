@@ -22,6 +22,7 @@ type Container interface {
 	ID() string
 	Inspect() (io.Reader, error)
 	Exec(command ...string) (stdout, stderr io.Reader, err error)
+	ExecAsUser(user string, command ...string) (stdout, stderr io.Reader, err error)
 	Logs(since time.Duration) (io.Reader, error)
 }
 

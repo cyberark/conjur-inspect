@@ -21,7 +21,8 @@ type ContainerProvider struct {
 	InfoRawData io.Reader
 	InfoResults []check.Result
 
-	ExecResponses map[string]ExecResponse
+	ExecResponses       map[string]ExecResponse
+	ExecAsUserResponses map[string]ExecResponse
 
 	LogsOutput io.Reader
 	LogsError  error
@@ -41,7 +42,8 @@ type Container struct {
 	InspectError  error
 	InspectResult io.Reader
 
-	ExecResponses map[string]ExecResponse
+	ExecResponses       map[string]ExecResponse
+	ExecAsUserResponses map[string]ExecResponse
 
 	LogsOutput io.Reader
 	LogsError  error
@@ -74,7 +76,8 @@ func (cp *ContainerProvider) Container(
 		InspectError:  cp.InspectError,
 		InspectResult: cp.InspectResult,
 
-		ExecResponses: cp.ExecResponses,
+		ExecResponses:       cp.ExecResponses,
+		ExecAsUserResponses: cp.ExecAsUserResponses,
 
 		LogsOutput: cp.LogsOutput,
 		LogsError:  cp.LogsError,
@@ -84,7 +87,7 @@ func (cp *ContainerProvider) Container(
 // ExecResponse allows for mocking responses to multiple exec calls against a
 // container.
 type ExecResponse struct {
-	Error error
+	Error  error
 	Stdout io.Reader
 	Stderr io.Reader
 }
@@ -125,6 +128,26 @@ func (c *Container) Exec(
 	// Return an error if there is no configured response for the given command
 	if !exists {
 		return nil, nil, fmt.Errorf("no exec response for: %s", commandString)
+	}
+
+	return response.Stdout, response.Stderr, response.Error
+}
+
+// ExecAsUser returns the JSON output of the mock `exec` command as a specific user
+func (c *Container) ExecAsUser(
+	user string,
+	command ...string,
+) (stdout, stderr io.Reader, err error) {
+
+	// Build the command string with user prefix for lookup
+	commandParts := append([]string{user}, command...)
+	commandString := strings.Join(commandParts, " ")
+
+	response, exists := c.ExecAsUserResponses[commandString]
+
+	// Return an error if there is no configured response for the given command
+	if !exists {
+		return nil, nil, fmt.Errorf("no exec as user response for: %s", commandString)
 	}
 
 	return response.Stdout, response.Stderr, response.Error

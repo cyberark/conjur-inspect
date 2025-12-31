@@ -55,6 +55,15 @@ func (dc *DockerContainer) Exec(
 	return dockerFunc(args...)
 }
 
+// ExecAsUser runs a command inside the container as a specific user
+func (dc *DockerContainer) ExecAsUser(
+	user string,
+	command ...string,
+) (stdout, stderr io.Reader, err error) {
+	args := append([]string{"exec", "--user", user, dc.ContainerID}, command...)
+	return dockerFunc(args...)
+}
+
 // Logs returns the logs of the container
 func (dc *DockerContainer) Logs(since time.Duration) (io.Reader, error) {
 	args := []string{"logs", fmt.Sprintf("--since=%s", since), dc.ContainerID}

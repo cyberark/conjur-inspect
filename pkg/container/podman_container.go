@@ -57,6 +57,15 @@ func (pc *PodmanContainer) Exec(
 	return podmanFunc(args...)
 }
 
+// ExecAsUser runs a command inside the container as a specific user
+func (pc *PodmanContainer) ExecAsUser(
+	user string,
+	command ...string,
+) (stdout, stderr io.Reader, err error) {
+	args := append([]string{"exec", "--user", user, pc.ContainerID}, command...)
+	return podmanFunc(args...)
+}
+
 // Logs returns the logs of the container
 func (pc *PodmanContainer) Logs(since time.Duration) (io.Reader, error) {
 	args := []string{"logs", fmt.Sprintf("--since=%s", since), pc.ContainerID}

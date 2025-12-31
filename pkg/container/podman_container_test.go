@@ -150,3 +150,55 @@ func TestPodmanContainerLogsError(t *testing.T) {
 	assert.Error(t, testError, err)
 	assert.Nil(t, output)
 }
+func TestPodmanContainerExecAsUser(t *testing.T) {
+	standardOut := strings.NewReader("test standard output")
+	standardErr := strings.NewReader("test standard error")
+	capturedArgs := []string{}
+
+	// Mock dependencies
+	oldFunc := podmanFunc
+	podmanFunc = func(args ...string) (stdout, stderr io.Reader, err error) {
+		capturedArgs = args
+		stdout = standardOut
+		stderr = standardErr
+		return stdout, stderr, err
+	}
+	defer func() {
+		podmanFunc = oldFunc
+	}()
+
+	podmanContainer := &PodmanContainer{
+		ContainerID: "test-container",
+	}
+
+	execStdout, execStderr, err := podmanContainer.ExecAsUser("conjur", "psql", "-c", "SELECT 1")
+	assert.NoError(t, err)
+	assert.Equal(t, standardOut, execStdout)
+	assert.Equal(t, standardErr, execStderr)
+
+	// Verify that --user flag was passed
+	assert.Equal(t, []string{"exec", "--user", "conjur", "test-container", "psql", "-c", "SELECT 1"}, capturedArgs)
+}
+
+func TestPodmanContainerExecAsUserError(t *testing.T) {
+	testError := errors.New("fake error")
+
+	// Mock dependencies
+	oldFunc := podmanFunc
+	podmanFunc = func(...string) (stdout, stderr io.Reader, err error) {
+		err = testError
+		return stdout, stderr, err
+	}
+	defer func() {
+		podmanFunc = oldFunc
+	}()
+
+	podmanContainer := &PodmanContainer{
+		ContainerID: "test-container",
+	}
+
+	stdout, stderr, err := podmanContainer.ExecAsUser("conjur", "psql", "-c", "SELECT 1")
+	assert.Error(t, testError, err)
+	assert.Nil(t, stdout)
+	assert.Nil(t, stderr)
+}

@@ -10,6 +10,7 @@ type Report interface {
 
 // RunConfig contains the report run parameters
 type RunConfig struct {
-	ContainerID string
-	Since       time.Duration
+	ContainerID   string
+	Since         time.Duration
+	VerboseErrors bool
 }

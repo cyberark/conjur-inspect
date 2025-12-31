@@ -36,6 +36,18 @@ func (c EtcdPerfCheck) Describe() string {
 
 // Run executes the etcdctl check perf command in the container and returns results.
 func (c EtcdPerfCheck) Run(runContext *check.RunContext) []check.Result {
+	// Check if the container runtime is available
+	runtimeKey := strings.ToLower(c.Provider.Name())
+	if !IsRuntimeAvailable(runContext, runtimeKey) {
+		if runContext.VerboseErrors {
+			return check.ErrorResult(
+				c,
+				fmt.Errorf("container runtime not available"),
+			)
+		}
+		return []check.Result{}
+	}
+
 	// store RunContext so we are not passing it to methods
 	c.RunContext = runContext
 	providerSuffix := strings.ToLower(c.Provider.Name())
@@ -44,8 +56,12 @@ func (c EtcdPerfCheck) Run(runContext *check.RunContext) []check.Result {
 	c.etcdLogFileName = fmt.Sprintf("%s-etcdLog-%s.log", logFilePrefix, providerSuffix)
 
 	// Verify that action is valid
-	if err := c.validateAction(); len(err) != 0 {
-		return err
+	validationErrors := c.validateAction()
+	if len(validationErrors) != 0 {
+		if runContext.VerboseErrors {
+			return validationErrors
+		}
+		return []check.Result{}
 	}
 
 	// start etcd

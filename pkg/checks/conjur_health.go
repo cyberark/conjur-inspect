@@ -39,6 +39,18 @@ func (ch *ConjurHealth) Run(runContext *check.RunContext) []check.Result {
 		return []check.Result{}
 	}
 
+	// Check if the container runtime is available
+	runtimeKey := strings.ToLower(ch.Provider.Name())
+	if !IsRuntimeAvailable(runContext, runtimeKey) {
+		if runContext.VerboseErrors {
+			return check.ErrorResult(
+				ch,
+				fmt.Errorf("container runtime not available"),
+			)
+		}
+		return []check.Result{}
+	}
+
 	container := ch.Provider.Container(runContext.ContainerID)
 	stdout, stderr, err := container.Exec(
 		"curl", "-k", "https://localhost/health",

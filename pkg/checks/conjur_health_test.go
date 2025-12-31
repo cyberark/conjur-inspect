@@ -99,7 +99,7 @@ func TestConjurHealthRun_ExecError(t *testing.T) {
 		ExecResponses: map[string]test.ExecResponse{
 			"curl -k https://localhost/health": test.ExecResponse{
 				Stderr: strings.NewReader("test stderr"),
-				Error: errors.New("test error"),
+				Error:  errors.New("test error"),
 			},
 		},
 	}

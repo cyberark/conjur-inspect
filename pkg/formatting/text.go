@@ -30,8 +30,16 @@ func (text *Text) Write(
 	maybeWriter.WriteString(formattedHeader)
 	maybeWriter.WriteString("\n\n")
 
+	// Filter out sections with no results
+	nonEmptySections := []report.ResultSection{}
+	for _, section := range result.Sections {
+		if len(section.Results) > 0 {
+			nonEmptySections = append(nonEmptySections, section)
+		}
+	}
+
 	// Write each report section
-	for sectionIndex, section := range result.Sections {
+	for sectionIndex, section := range nonEmptySections {
 		formattedTitle := text.FormatStrategy.Bold(titleHeader(section.Title))
 		maybeWriter.WriteString(formattedTitle)
 		maybeWriter.WriteString("\n")
@@ -46,7 +54,7 @@ func (text *Text) Write(
 		}
 
 		// Extra space between sections (but not extra space at the end)
-		if sectionIndex < len(result.Sections)-1 {
+		if sectionIndex < len(nonEmptySections)-1 {
 			maybeWriter.WriteString("\n")
 		}
 	}

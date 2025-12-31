@@ -55,12 +55,22 @@ func (sr *StandardReport) Run(config report.RunConfig) report.Result {
 		Sections: make([]report.ResultSection, len(sr.sections)),
 	}
 
+	// archiveResult stores all results for archiving, including suppressed errors
+	archiveResult := report.Result{
+		Version:  version.FullVersionName,
+		Sections: make([]report.ResultSection, len(sr.sections)),
+	}
+
 	// Initialize the progress indicator
 	progress := newProgress(sr.checkCount(), os.Stderr)
+
+	// Initialize the container runtime availability cache for the entire report run
+	containerRuntimeAvailability := make(map[string]check.RuntimeAvailability)
 
 	for i, section := range sr.sections {
 
 		sectionResults := []check.Result{}
+		archivedSectionResults := []check.Result{}
 
 		for _, currentCheck := range section.Checks {
 			// Update text in progress display
@@ -74,16 +84,35 @@ func (sr *StandardReport) Run(config report.RunConfig) report.Result {
 			go func() {
 				resultsChan <- currentCheck.Run(
 					&check.RunContext{
-						ContainerID: config.ContainerID,
-						Since:       config.Since,
-
-						OutputStore: sr.outputStore,
+						ContainerID:                  config.ContainerID,
+						Since:                        config.Since,
+						OutputStore:                  sr.outputStore,
+						ContainerRuntimeAvailability: containerRuntimeAvailability,
+						VerboseErrors:                config.VerboseErrors,
 					},
 				)
 			}() // async
 
 			// Add the results to the report section
-			sectionResults = append(sectionResults, <-resultsChan...)
+			checkResults := <-resultsChan
+			sectionResults = append(sectionResults, checkResults...)
+
+			// For the archive, always run with VerboseErrors=true to get all errors
+			resultsChan = make(chan []check.Result)
+			go func() {
+				resultsChan <- currentCheck.Run(
+					&check.RunContext{
+						ContainerID:                  config.ContainerID,
+						Since:                        config.Since,
+						OutputStore:                  sr.outputStore,
+						ContainerRuntimeAvailability: containerRuntimeAvailability,
+						VerboseErrors:                true,
+					},
+				)
+			}() // async
+
+			archivedCheckResults := <-resultsChan
+			archivedSectionResults = append(archivedSectionResults, archivedCheckResults...)
 
 			// Increment progress
 			progress.Add(1)
@@ -93,12 +122,17 @@ func (sr *StandardReport) Run(config report.RunConfig) report.Result {
 			Title:   section.Title,
 			Results: sectionResults,
 		}
+
+		archiveResult.Sections[i] = report.ResultSection{
+			Title:   section.Title,
+			Results: archivedSectionResults,
+		}
 	}
 
 	progress.Finish()
 
-	// Write the report result to the output archive
-	err := sr.archiveReport(&result)
+	// Write the unfiltered report result to the output archive
+	err := sr.archiveReport(&archiveResult)
 	if err != nil {
 		log.Error("Failed to archive report: %s", err)
 	}
