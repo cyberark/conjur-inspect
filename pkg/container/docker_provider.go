@@ -13,6 +13,7 @@ import (
 
 // Function variable for dependency injection
 var executeDockerInfoFunc = executeDockerInfo
+var executeDockerNetworkInspectFunc = executeDockerNetworkInspect
 
 // DockerProvider is a concrete implementation of the
 // ContainerProvider interface for Docker
@@ -69,6 +70,11 @@ func (*DockerProvider) Container(containerID string) Container {
 	return &DockerContainer{ContainerID: containerID}
 }
 
+// NetworkInspect returns the JSON output of all Docker networks
+func (*DockerProvider) NetworkInspect() (io.Reader, error) {
+	return executeDockerNetworkInspectFunc()
+}
+
 func executeDockerInfo() (stdout, stderr io.Reader, err error) {
 	return shell.NewCommandWrapper(
 		"docker",
@@ -77,4 +83,50 @@ func executeDockerInfo() (stdout, stderr io.Reader, err error) {
 		"--format",
 		"{{json .}}",
 	).Run()
+}
+
+func executeDockerNetworkInspect() (io.Reader, error) {
+	// First, get the list of network IDs
+	stdout, stderr, err := shell.NewCommandWrapper(
+		"docker",
+		"network",
+		"ls",
+		"-q",
+	).Run()
+
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to list Docker networks: %w (%s)",
+			err,
+			strings.TrimSpace(shell.ReadOrDefault(stderr, "N/A")),
+		)
+	}
+
+	// Read the network IDs
+	networkIDsBytes, err := io.ReadAll(stdout)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read Docker network IDs: %w", err)
+	}
+
+	networkIDs := strings.TrimSpace(string(networkIDsBytes))
+
+	// If there are no networks, return empty JSON array
+	if networkIDs == "" {
+		return strings.NewReader("[]"), nil
+	}
+
+	// Split network IDs and inspect them all at once
+	ids := strings.Fields(networkIDs)
+	args := append([]string{"network", "inspect"}, ids...)
+
+	stdout, stderr, err = shell.NewCommandWrapper("docker", args...).Run()
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to inspect Docker networks: %w (%s)",
+			err,
+			strings.TrimSpace(shell.ReadOrDefault(stderr, "N/A")),
+		)
+	}
+
+	return stdout, nil
 }

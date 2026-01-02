@@ -21,6 +21,9 @@ type ContainerProvider struct {
 	InfoRawData io.Reader
 	InfoResults []check.Result
 
+	NetworkInspectError  error
+	NetworkInspectResult io.Reader
+
 	ExecResponses       map[string]ExecResponse
 	ExecAsUserResponses map[string]ExecResponse
 
@@ -82,6 +85,15 @@ func (cp *ContainerProvider) Container(
 		LogsOutput: cp.LogsOutput,
 		LogsError:  cp.LogsError,
 	}
+}
+
+// NetworkInspect returns the mock network inspect output
+func (cp *ContainerProvider) NetworkInspect() (io.Reader, error) {
+	if cp.NetworkInspectError != nil {
+		return nil, cp.NetworkInspectError
+	}
+
+	return cp.NetworkInspectResult, nil
 }
 
 // ExecResponse allows for mocking responses to multiple exec calls against a

@@ -27,6 +27,7 @@ type mockExecResult struct {
 
 func (m *mockContainerProvider) Name() string                                   { return "MockProvider" }
 func (m *mockContainerProvider) Info() (container.ContainerProviderInfo, error) { return nil, nil }
+func (m *mockContainerProvider) NetworkInspect() (io.Reader, error)            { return nil, nil }
 func (m *mockContainerProvider) Container(id string) container.Container {
 	return &mockContainer{
 		execMap:     m.execMap,

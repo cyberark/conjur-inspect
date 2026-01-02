@@ -74,6 +74,27 @@ func defaultReportSections() []report.Section {
 				&checks.Host{},
 				&checks.CommandHistory{},
 				&checks.HostEtcHosts{},
+
+				// Check container runtime availability before runtime checks to
+				// cache the results.
+				&checks.ContainerAvailability{},
+
+				// Runtime
+				&checks.ContainerRuntime{
+					Provider: &container.DockerProvider{},
+				},
+				&checks.ContainerRuntime{
+					Provider: &container.PodmanProvider{},
+				},
+
+				// Network
+				&checks.ContainerNetworkInspect{
+					Provider: &container.DockerProvider{},
+				},
+				&checks.ContainerNetworkInspect{
+					Provider: &container.PodmanProvider{},
+				},
+
 			},
 		},
 		{
@@ -85,17 +106,6 @@ func defaultReportSections() []report.Section {
 		{
 			Title: "Container",
 			Checks: []check.Check{
-				// Check container runtime availability first to cache the results
-				&checks.ContainerAvailability{},
-
-				// Runtime
-				&checks.ContainerRuntime{
-					Provider: &container.DockerProvider{},
-				},
-				&checks.ContainerRuntime{
-					Provider: &container.PodmanProvider{},
-				},
-
 				// Container inspect
 				&checks.ContainerInspect{
 					Provider: &container.DockerProvider{},
