@@ -15,6 +15,7 @@ type ContainerProvider interface {
 	Name() string
 	Info() (ContainerProviderInfo, error)
 	Container(containerID string) Container
+	NetworkInspect() (io.Reader, error)
 }
 
 // Container is an interface for a container instance

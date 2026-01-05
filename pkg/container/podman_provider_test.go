@@ -117,3 +117,65 @@ func TestPodmanProviderContainer(t *testing.T) {
 	// Check the container
 	assert.Equal(t, containerID, container.ID())
 }
+
+func TestPodmanProviderNetworkInspect(t *testing.T) {
+	rawOutput := `[{"Name":"podman","Id":"xyz789"},{"Name":"bridge","Id":"uvw012"}]`
+
+	// Mock dependencies
+	oldFunc := executePodmanNetworkInspectFunc
+	executePodmanNetworkInspectFunc = func() (io.Reader, error) {
+		return strings.NewReader(rawOutput), nil
+	}
+	defer func() {
+		executePodmanNetworkInspectFunc = oldFunc
+	}()
+
+	podman := &PodmanProvider{}
+	result, err := podman.NetworkInspect()
+
+	assert.NoError(t, err)
+
+	resultBytes, err := io.ReadAll(result)
+	assert.NoError(t, err)
+	assert.Equal(t, rawOutput, string(resultBytes))
+}
+
+func TestPodmanProviderNetworkInspectEmpty(t *testing.T) {
+	rawOutput := `[]`
+
+	// Mock dependencies
+	oldFunc := executePodmanNetworkInspectFunc
+	executePodmanNetworkInspectFunc = func() (io.Reader, error) {
+		return strings.NewReader(rawOutput), nil
+	}
+	defer func() {
+		executePodmanNetworkInspectFunc = oldFunc
+	}()
+
+	podman := &PodmanProvider{}
+	result, err := podman.NetworkInspect()
+
+	assert.NoError(t, err)
+
+	resultBytes, err := io.ReadAll(result)
+	assert.NoError(t, err)
+	assert.Equal(t, rawOutput, string(resultBytes))
+}
+
+func TestPodmanProviderNetworkInspectError(t *testing.T) {
+	// Mock dependencies
+	oldFunc := executePodmanNetworkInspectFunc
+	executePodmanNetworkInspectFunc = func() (io.Reader, error) {
+		return nil, errors.New("network inspect failed")
+	}
+	defer func() {
+		executePodmanNetworkInspectFunc = oldFunc
+	}()
+
+	podman := &PodmanProvider{}
+	result, err := podman.NetworkInspect()
+
+	assert.Nil(t, result)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "network inspect failed")
+}

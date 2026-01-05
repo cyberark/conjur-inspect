@@ -128,3 +128,65 @@ func TestDockerProviderContainer(t *testing.T) {
 	// Check the container
 	assert.Equal(t, containerID, container.ID())
 }
+
+func TestDockerProviderNetworkInspect(t *testing.T) {
+	rawOutput := `[{"Name":"bridge","Id":"abc123"},{"Name":"host","Id":"def456"}]`
+
+	// Mock dependencies
+	oldFunc := executeDockerNetworkInspectFunc
+	executeDockerNetworkInspectFunc = func() (io.Reader, error) {
+		return strings.NewReader(rawOutput), nil
+	}
+	defer func() {
+		executeDockerNetworkInspectFunc = oldFunc
+	}()
+
+	docker := &DockerProvider{}
+	result, err := docker.NetworkInspect()
+
+	assert.NoError(t, err)
+
+	resultBytes, err := io.ReadAll(result)
+	assert.NoError(t, err)
+	assert.Equal(t, rawOutput, string(resultBytes))
+}
+
+func TestDockerProviderNetworkInspectEmpty(t *testing.T) {
+	rawOutput := `[]`
+
+	// Mock dependencies
+	oldFunc := executeDockerNetworkInspectFunc
+	executeDockerNetworkInspectFunc = func() (io.Reader, error) {
+		return strings.NewReader(rawOutput), nil
+	}
+	defer func() {
+		executeDockerNetworkInspectFunc = oldFunc
+	}()
+
+	docker := &DockerProvider{}
+	result, err := docker.NetworkInspect()
+
+	assert.NoError(t, err)
+
+	resultBytes, err := io.ReadAll(result)
+	assert.NoError(t, err)
+	assert.Equal(t, rawOutput, string(resultBytes))
+}
+
+func TestDockerProviderNetworkInspectError(t *testing.T) {
+	// Mock dependencies
+	oldFunc := executeDockerNetworkInspectFunc
+	executeDockerNetworkInspectFunc = func() (io.Reader, error) {
+		return nil, errors.New("network inspect failed")
+	}
+	defer func() {
+		executeDockerNetworkInspectFunc = oldFunc
+	}()
+
+	docker := &DockerProvider{}
+	result, err := docker.NetworkInspect()
+
+	assert.Nil(t, result)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "network inspect failed")
+}
